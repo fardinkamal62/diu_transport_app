@@ -32,10 +32,32 @@ const vehicleSchema = new mongoose.Schema({
 	},
 });
 
+const currentLocationSchema = new mongoose.Schema({
+	createdAt: {
+		type: String,
+		default: (): string => moment().tz('Asia/Dhaka').format(),
+	},
+	vehicleId: {
+		type: mongoose.Schema.Types.ObjectId,
+		ref: 'Vehicle',
+		required: true,
+	},
+	latitude: {
+		type: Number,
+		required: true,
+	},
+	longitude: {
+		type: Number,
+		required: true,
+	},
+});
+
 const Vehicle = mongoose.model('Vehicle', vehicleSchema);
+const CurrentLocation = mongoose.model('CurrentLocation', currentLocationSchema);
 
 const schemas = {
 	Vehicle,
+	CurrentLocation,
 }
 
 export default schemas;

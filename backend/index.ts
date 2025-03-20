@@ -15,6 +15,7 @@ import indexRoute from './routes/index'
 import mongo from './db';
 import errorHandler from './middlewares/error-handler';
 import validators from './validators';
+import api from './apis';
 
 const app = express();
 
@@ -52,6 +53,15 @@ io.on('connection', (socket) => {
 			console.error(colors.red('Invalid location data received'));
 			return;
 		}
+
+		try {
+			void api.locationUpdate(msg.vehicleId, msg.latitude, msg.longitude)	// Update location in database
+			// Using void to ignore the promise
+		} catch (e) {
+			console.error(colors.red('Failed to update location'), e);
+			return;
+		}
+
 		socket.broadcast.emit('location', msg);	// Broadcast message to all connected users except the sender
 		// Everyone will receive the location update
 	});
