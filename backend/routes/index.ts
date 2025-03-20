@@ -12,6 +12,15 @@ router.get('/api/v1/ping', function (_: express.Request, res: express.Response) 
 	controllers.ping(res);
 });
 
+router.get('/api/v1/vehicles', async function (_: express.Request, res: express.Response) {
+	try {
+		const result = await controllers.getVehiclesLocation(res);
+		res.status(200).json({ success: true, data: result });
+	} catch (error) {
+		res.status(400).json({ success: false, error: (error as Error).message || 'Failed to get vehicles location' });
+	}
+});
+
 
 const indexRoutes = {
 	router,

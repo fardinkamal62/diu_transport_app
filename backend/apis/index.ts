@@ -4,6 +4,8 @@ import colors from 'colors';
 import { NotFound, BadRequest } from 'http-errors';
 
 import schemas from '../schemas/index';
+import cache from '../cache';
+
 const Vehicle = schemas.Vehicle;
 const CurrentLocation = schemas.CurrentLocation;
 
@@ -41,5 +43,15 @@ const locationUpdate = async (vehicleId: string, latitude: number, longitude: nu
 	}
 };
 
-const api = { journeyToggle, locationUpdate };
+const getVehiclesLocation = async (): Promise<object> => {
+	try {
+		const cachedData = await cache.getAllData();
+		return cachedData.map((data: any) => data.value);
+	} catch (e: any) {
+		console.error(colors.red('Failed to get vehicles location'), e);
+		throw new Error(e.message);
+	}
+};
+
+const api = { journeyToggle, locationUpdate, getVehiclesLocation };
 export default api;
