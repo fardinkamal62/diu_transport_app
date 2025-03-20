@@ -14,6 +14,7 @@ require('dotenv').config({ path: '.env' });
 import indexRoute from './routes/index'
 import mongo from './db';
 import errorHandler from './middlewares/error-handler';
+import validators from './validators';
 
 const app = express();
 
@@ -44,9 +45,15 @@ const PORT = (process.env.port != null) || 3000;
 // Socket.io server
 io.on('connection', (socket) => {
 	// On location update
+	// Drivers will send their location on this channel
 	socket.on('location', (msg) => {
-		console.log(colors.green(`Message: ${msg}`));
+		const isValidLocation = validators.coOrdinateSchema.validate(msg);
+		if (isValidLocation.error) {
+			console.error(colors.red('Invalid location data received'));
+			return;
+		}
 		socket.broadcast.emit('location', msg);	// Broadcast message to all connected users except the sender
+		// Everyone will receive the location update
 	});
 });
 
