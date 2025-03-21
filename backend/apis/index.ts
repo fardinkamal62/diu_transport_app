@@ -54,10 +54,17 @@ const getVehiclesLocation = async (): Promise<vehicleLocation[]> => {
 		const cachedData = await cache.getAllData();
 		if (cachedData.length === 0) return [];
 
-		return cachedData.map((data: any) => data.value);
+		return cachedData.map((data) => {
+			const value = data.value;
+			return {
+				vehicleId: value.vehicleId,
+				latitude: Number(value.latitude),
+				longitude: Number(value.longitude)
+			};
+		});
 	} catch (e: any) {
 		console.error(colors.red('Failed to get vehicles location'), e);
-		throw new Error(e.message);
+		throw e;
 	}
 };
 

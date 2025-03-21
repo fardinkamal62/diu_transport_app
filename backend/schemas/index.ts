@@ -55,13 +55,12 @@ const currentLocationSchema = new mongoose.Schema({
 		max: 180,
 	},
 });
+// Add index for faster queries with vehicleId
+currentLocationSchema.index({ vehicleId: 1 });
 
 const Vehicle = mongoose.model('Vehicle', vehicleSchema);
 
 const CurrentLocation = mongoose.model('CurrentLocation', currentLocationSchema);
-
-// Add index for faster queries with vehicleId
-currentLocationSchema.index({ vehicleId: 1 });
 
 const schemas = {
 	Vehicle,

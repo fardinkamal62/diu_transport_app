@@ -42,7 +42,7 @@ app.use((_req: any, _res: any, next: (_arg0: any) => void) => {
 app.use(errorHandler);
 
 // Start the server
-const PORT = process.env.port || 3000;
+const PORT = process.env.PORT || 3000;
 
 // Socket.io server
 io.on('connection', async (socket) => {
