@@ -43,9 +43,17 @@ const locationUpdate = async (vehicleId: string, latitude: number, longitude: nu
 	}
 };
 
-const getVehiclesLocation = async (): Promise<object> => {
+interface vehicleLocation {
+	vehicleId: string;
+	latitude: number;
+	longitude: number;
+}
+
+const getVehiclesLocation = async (): Promise<vehicleLocation[]> => {
 	try {
 		const cachedData = await cache.getAllData();
+		if (cachedData.length === 0) return [];
+
 		return cachedData.map((data: any) => data.value);
 	} catch (e: any) {
 		console.error(colors.red('Failed to get vehicles location'), e);
