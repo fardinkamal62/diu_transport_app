@@ -39,6 +39,12 @@ class _SymbolMapState extends State<SymbolMap> {
       }
       return;
     }
+    // Error handling for socket connection
+    widget.socket.on('connect_error', (error) {
+      if (kDebugMode) {
+        print('Socket connection error: $error');
+      }
+    });
     widget.socket.on('location', (data) {
       try {
         String vehicleId = data['vehicleId'].toString();
@@ -55,6 +61,16 @@ class _SymbolMapState extends State<SymbolMap> {
         }
       }
     });
+  }
+
+  @override
+  void dispose() {
+    // Clean up socket listeners
+    widget.socket.off('location');
+    widget.socket.off('connect_error');
+    // Clean up map controller
+    mController?.onSymbolTapped.remove(_onSymbolTapped);
+    super.dispose();
   }
 
   void _updateMarkers() {
@@ -109,7 +125,21 @@ class _SymbolMapState extends State<SymbolMap> {
 
   // Adds a network image to the currently displayed style
   Future<void> addImageFromUrl(String name, Uri uri) async {
-    var response = await http.get(uri);
-    return mController!.addImage(name, response.bodyBytes);
+    try {
+      var response = await http.get(uri);
+      if (response.statusCode == 200) {
+        return mController!.addImage(name, response.bodyBytes);
+      } else {
+        if (kDebugMode) {
+          print('Failed to load image: HTTP ${response.statusCode}');
+        }
+        // Use a fallback image or show an error
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        print('Error loading image: $e');
+      }
+      // Use a fallback image or show an error
+    }
   }
 }

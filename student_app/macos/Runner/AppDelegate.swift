@@ -7,6 +7,11 @@ class AppDelegate: FlutterAppDelegate {
     return true
   }
 
+  override func applicationDidFinishLaunching(_ notification: Notification) {
+    GeneratedPluginRegistrant.register(with: self)
+    super.applicationDidFinishLaunching(notification)
+  }
+
   override func applicationSupportsSecureRestorableState(_ app: NSApplication) -> Bool {
     return true
   }

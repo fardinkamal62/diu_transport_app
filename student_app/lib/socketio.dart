@@ -32,6 +32,12 @@ socketio() {
     }
   });
 
+  socket.onError((error) {
+    if (kDebugMode) {
+      print('Error connecting to socket.io server: $error');
+    }
+  });
+
   socket.onclose((reason) {
     if (kDebugMode) {
       print('Disconnected from socket.io server');

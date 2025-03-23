@@ -17,16 +17,47 @@ class MyHttpOverrides extends HttpOverrides {
 
 Future main() async {
   WidgetsFlutterBinding.ensureInitialized(); // Ensure Flutter binding is initialized
-  HttpOverrides.global = MyHttpOverrides();
+  // Only use this in development builds
+  if (const bool.fromEnvironment('dart.vm.product') == false) {
+    HttpOverrides.global = MyHttpOverrides();
+  }
 
+  bool envLoaded = false;
   try {
     await dotenv.load(fileName: "assets/.env");
+    envLoaded = true;
   } catch (e) {
     if (kDebugMode) {
       print('Error loading .env file: $e');
     }
   }
+
+  // Validate required environment variables
+  if (envLoaded) {
+    final requiredEnvVars = ['API_KEY', 'SOCKET_URL'];
+    final missingEnvVars = requiredEnvVars.where((v) => dotenv.env[v] == null).toList();
+
+    if (missingEnvVars.isNotEmpty) {
+      if (kDebugMode) {
+        print('Missing required environment variables: ${missingEnvVars.join(', ')}');
+      }
+    }
+  }
+
   var socket = socketio.socketio();
+
+  // Handle socket connection status
+  socket.on('connect', (_) {
+    if (kDebugMode) {
+      print('Socket connected');
+    }
+  });
+
+  socket.on('connect_error', (error) {
+    if (kDebugMode) {
+      print('Socket connection error: $error');
+    }
+  });
 
   runApp(MyApp(socket: socket));
 }
