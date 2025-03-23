@@ -41,6 +41,10 @@ Future main() async {
       if (kDebugMode) {
         print('Missing required environment variables: ${missingEnvVars.join(', ')}');
       }
+      // In production, fail fast if required env vars are missing
+      if (const bool.fromEnvironment('dart.vm.product') == true) {
+        throw Exception('Missing required environment variables: ${missingEnvVars.join(', ')}');
+      }
     }
   }
 
