@@ -2,7 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:socket_io_client/socket_io_client.dart' as io;
 
-socketio() {
+io.Socket socketio() {
   if (kDebugMode) {
     print("Connecting to socket.io server");
   }
@@ -13,7 +13,7 @@ socketio() {
     if (kDebugMode) {
       print('Error: SOCKET_URL is not set in the .env file');
     }
-    return null;
+    throw Exception('SOCKET_URL is not configured in the environment variables');
   }
   // Dart client
   io.Socket socket = io.io(

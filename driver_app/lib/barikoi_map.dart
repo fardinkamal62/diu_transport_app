@@ -21,6 +21,7 @@ class _SymbolMapState extends State<SymbolMap> {
     zoom: 16,
   );
   MapLibreMapController? mController;
+  Timer? _locationTimer;
 
   static const styleId = 'barikoi-dark-mode';
   static final apiKey = dotenv.env['API_KEY'] ?? '';
@@ -67,7 +68,7 @@ class _SymbolMapState extends State<SymbolMap> {
 
     // Add listener to vehicleIdController
     // Emit data every 5 seconds
-    Timer.periodic(Duration(seconds: 5), (timer) {
+    _locationTimer = Timer.periodic(Duration(seconds: 5), (timer) {
       String vehicleId = vehicleIdController.text;
       if (vehicleId.isNotEmpty && mController != null) {
         LatLng? currentLocation = mController!.cameraPosition?.target;
@@ -85,6 +86,8 @@ class _SymbolMapState extends State<SymbolMap> {
     // Clean up socket listeners
     widget.socket.off('location');
     widget.socket.off('connect_error');
+    // Cancel location timer
+    _locationTimer?.cancel();
     // Clean up map controller
     mController?.onSymbolTapped.remove(_onSymbolTapped);
     vehicleIdController.dispose();
