@@ -1,4 +1,7 @@
 import 'dart:io';
+import 'package:diu_transport_student_app/screen/auth/forget_pass_screen.dart';
+import 'package:diu_transport_student_app/screen/auth/login_screen.dart';
+import 'package:diu_transport_student_app/screen/auth/signup_screen.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
@@ -75,10 +78,16 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'DIU Transport Student App',
+        initialRoute: '/login',
+        routes: {
+          '/login': (context) => LoginScreen(),
+          '/signup': (context) => SignUpScreen(),
+          '/forgot-password': (context) => ForgotPasswordScreen(),
+        },
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
       ),
-      home: SymbolMap(socket: socket),
+      // home: SymbolMap(socket: socket),
     );
   }
 }
