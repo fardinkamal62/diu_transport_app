@@ -4,10 +4,13 @@ import colors from 'colors';
 import { NotFound, BadRequest } from 'http-errors';
 
 import schemas from '../schemas/index';
+import vehicleSchema from '../schemas/vehicle';
+import userSchema from '../schemas/user';
 import cache from '../cache';
 
-const Vehicle = schemas.Vehicle;
+const Vehicle = vehicleSchema.Vehicle;
 const CurrentLocation = schemas.CurrentLocation;
+const User = userSchema.User;
 
 const journeyToggle = async (req: express.Request): Promise<object> => {
 	try {
@@ -68,5 +71,42 @@ const getVehiclesLocation = async (): Promise<vehicleLocation[]> => {
 	}
 };
 
-const api = { journeyToggle, locationUpdate, getVehiclesLocation };
+const getVehicles = async (): Promise<object[]> => {
+	try {
+		const vehicles = await Vehicle.find({}).select('name vehicleRegistrationNumber status type');
+		if (vehicles.length === 0) return [];
+
+		return vehicles.map((vehicle) => {
+			return {
+				vehicleRegistrationNumber: vehicle.vehicleRegistrationNumber,
+				name: vehicle.name,
+				status: vehicle.status,
+				type: vehicle.type,
+			};
+		});
+	} catch (e: any) {
+		console.error(colors.red('Failed to get vehicles data'), e);
+		throw e;
+	}
+};
+
+const getDrivers = async (): Promise<object[]> => {
+	try {
+		const driver = await User.find({}).select('name picture phoneNumber');
+		if (driver.length === 0) return [];
+
+		return driver.map((driver) => {
+			return {
+				name: driver.name,
+				picture: driver.picture,
+				phoneNumber: driver.phoneNumber,
+			};
+		});
+	} catch (e: any) {
+		console.error(colors.red('Failed to get drivers data'), e);
+		throw e;
+	}
+};
+
+const api = { journeyToggle, locationUpdate, getVehiclesLocation, getVehicles, getDrivers };
 export default api;

@@ -8,13 +8,15 @@ import cors from 'cors';
 import 'express-async-errors';
 import * as process from 'node:process';
 import * as http from 'http';
+import { Server } from 'socket.io';
+
 import indexRoute from './routes/index'
 import mongo from './db';
 import errorHandler from './middlewares/error-handler';
 import validators from './validators';
 import api from './apis';
 import cache from './cache';
-import { Server } from 'socket.io';
+import adminRoutes from './routes/admin';
 
 require('dotenv').config({ path: '.env' });
 
@@ -32,6 +34,7 @@ app.use(bodyParser.json());
 
 // Router
 app.use('/', indexRoute.router);
+app.use('/api/v1/admin', adminRoutes.router);
 
 // Handle 404 errors
 app.use((_req: any, _res: any, next: (_arg0: any) => void) => {
