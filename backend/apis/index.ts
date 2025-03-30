@@ -92,7 +92,7 @@ const getVehicles = async (): Promise<object[]> => {
 
 const getDrivers = async (): Promise<object[]> => {
 	try {
-		const driver = await User.find({}).select('name picture phoneNumber');
+		const driver = await User.find({ groups: 'driver' }).select('name picture phoneNumber');
 		if (driver.length === 0) return [];
 
 		return driver.map((driver) => {
