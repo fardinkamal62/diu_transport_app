@@ -78,6 +78,7 @@ const getVehicles = async (): Promise<object[]> => {
 
 		return vehicles.map((vehicle) => {
 			return {
+				id: vehicle._id,
 				vehicleRegistrationNumber: vehicle.vehicleRegistrationNumber,
 				name: vehicle.name,
 				status: vehicle.status,
@@ -97,6 +98,7 @@ const getDrivers = async (): Promise<object[]> => {
 
 		return driver.map((driver) => {
 			return {
+				id: driver._id,
 				name: driver.name,
 				picture: driver.picture,
 				phoneNumber: driver.phoneNumber,

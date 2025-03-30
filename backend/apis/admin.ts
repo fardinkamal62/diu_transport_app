@@ -98,10 +98,123 @@ const addDriver = async (req: express.Request): Promise<object> => {
 	}
 };
 
+const updateVehicleData = async (req: express.Request): Promise<object> => {
+	const vehicleId = req.params.id as string;
+	const vehicle = await vehicleSchema.Vehicle.findById(vehicleId);
+
+	if (!vehicle) {
+		throw new NotFound('Vehicle not found');
+	}
+
+	const name = req.body.name as string;
+	const type = req.body.type as string;
+	const vehicleRegistrationNumber = req.body.vehicleRegistrationNumber as string;
+	const status = req.body.status as string;
+
+	if (name) {
+		vehicle.name = name;
+	}
+
+	if (type === 'bus' || type === 'microbus') {
+		vehicle.type = type;
+	} else {
+		throw new BadRequest('Invalid vehicle type');
+	}
+
+	if (vehicleRegistrationNumber) {
+		vehicle.vehicleRegistrationNumber = vehicleRegistrationNumber;
+	}
+
+	if (status === 'active' || status === 'inactive') {
+		vehicle.status = status;
+	} else {
+		throw new BadRequest('Invalid vehicle status');
+	}
+
+	try {
+		await vehicle.save();
+		return vehicle;
+	} catch (e) {
+		console.error(colors.red('Failed to update vehicle'), e);
+		throw new InternalServerError('Failed to update vehicle');
+	}
+};
+
+const updateDriverData = async (req: express.Request): Promise<object> => {
+	const driverId = req.params.id as string;
+	const driver = await userSchema.User.findById(driverId);
+
+	if (!driver) {
+		throw new NotFound('Driver not found');
+	}
+
+	const name = req.body.name as string;
+	const phoneNumber = req.body.phoneNumber as string;
+	const password = req.body.password as string;
+
+	if (name) {
+		driver.name = name;
+	}
+
+	if (phoneNumber) {
+		driver.phoneNumber = phoneNumber;
+	}
+
+	if (password) {
+		driver.password = password;
+	}
+
+	try {
+		await driver.save();
+		return driver;
+	} catch (e) {
+		console.error(colors.red('Failed to update driver'), e);
+		throw new InternalServerError('Failed to update driver');
+	}
+};
+
+const deleteVehicle = async (req: express.Request): Promise<object> => {
+	const vehicleId = req.params.id as string;
+	const vehicle = await vehicleSchema.Vehicle.findById(vehicleId);
+
+	if (!vehicle) {
+		throw new NotFound('Vehicle not found');
+	}
+
+	try {
+		await vehicleSchema.Vehicle.deleteOne({ _id: vehicleId });
+		return { message: 'Vehicle deleted successfully' };
+	} catch (e) {
+		console.error(colors.red('Failed to delete vehicle'), e);
+		throw new InternalServerError('Failed to delete vehicle');
+	}
+};
+
+const deleteDriver = async (req: express.Request): Promise<object> => {
+	const driverId = req.params.id as string;
+	const driver = await userSchema.User.findById(driverId);
+
+	if (!driver) {
+		throw new NotFound('Driver not found');
+	}
+
+	try {
+		await userSchema.User.deleteOne({ _id: driverId });
+		return { message: 'Driver deleted successfully' };
+	} catch (e) {
+		console.error(colors.red('Failed to delete driver'), e);
+		throw new InternalServerError('Failed to delete driver');
+	}
+};
+
 const adminApi = {
 	login,
 	addVehicle,
 	addDriver,
+	updateVehicleData,
+	updateDriverData,
+	deleteVehicle,
+	deleteDriver,
 };
 
 export default adminApi;

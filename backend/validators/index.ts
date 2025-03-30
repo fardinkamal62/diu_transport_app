@@ -25,6 +25,7 @@ const addVehicleSchema = Joi.object({
 	name: Joi.string().min(2).max(100).required(),
 	type: Joi.string().valid('bus', 'microbus').required(),
 	vehicleRegistrationNumber: Joi.string().min(2).max(100).required(),
+	status: Joi.string().valid('active', 'inactive').default('inactive'),
 });
 
 const addDriverSchema = Joi.object({

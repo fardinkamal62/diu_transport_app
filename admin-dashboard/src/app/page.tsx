@@ -33,6 +33,9 @@ import BarikoiMap from "@/components/BarikoiMap";
 function Home() {
     const [open, setOpen] = useState(false);
     const [popupType, setPopupType] = useState('');
+
+    const [vehicleId, setVehicleId] = useState('');
+    const [driverId, setDriverId] = useState('');
     const [vehicleName, setVehicleName] = useState('');
     const [driverName, setDriverName] = useState('');
     const [vehicleType, setVehicleType] = useState('bus');
@@ -42,6 +45,9 @@ function Home() {
 
     const [vehicles, setVehicles] = useState([]);
     const [drivers, setDrivers] = useState([]);
+    const [vehicleStatus, setVehicleStatus] = useState('inactive');
+
+    const [isEdit, setIsEdit] = useState(false);
 
     const [snackbarQueue, setSnackbarQueue] = useState<{ message: string, severity: 'success' | 'error' }[]>([]);
     const [currentSnackbar, setCurrentSnackbar] = useState<{ message: string, severity: 'success' | 'error' } | null>(null);
@@ -86,6 +92,12 @@ function Home() {
 
     const handleClose = () => {
         setOpen(false);
+        setVehicleName('');
+        setDriverName('');
+        setVehicleType('bus');
+        setVehicleRegistrationNumber('');
+        setDriverPhoneNumber('');
+        setDriverPassword('');
     };
 
     const fetchVehicles = () => {
@@ -140,18 +152,24 @@ function Home() {
         const data = popupType === 'vehicle' ? {
             name: vehicleName,
             type: vehicleType,
-            vehicleRegistrationNumber: vehicleRegistrationNumber
+            vehicleRegistrationNumber: vehicleRegistrationNumber,
+            status: vehicleStatus
         } : {
             name: driverName,
             phoneNumber: driverPhoneNumber,
             password: driverPassword
         };
 
-        const endpoint = popupType === 'vehicle' ? '/api/v1/admin/add-vehicle' : '/api/v1/admin/add-driver';
+        let endpoint = '';
+        if (isEdit) {
+            endpoint = popupType === 'vehicle' ? `/api/v1/admin/update-vehicle/${vehicleId}` : `/api/v1/admin/update-driver/${driverId}`;
+        } else {
+            endpoint = popupType === 'vehicle' ? '/api/v1/admin/add-vehicle' : '/api/v1/admin/add-driver';
+        }
         const token = localStorage.getItem('token');
 
         setApiCallLoading(true);
-        axios.post(url + endpoint, data, {
+        axios[isEdit ? 'put' : 'post'](url + endpoint, data, {
             headers: {
                 Authorization: `Bearer ${token}`,
             }
@@ -175,6 +193,47 @@ function Home() {
                 setApiCallLoading(false);
                 setApiCallError(true);
                 showSnackbar('Error saving data: ' + error.message, 'error');
+            });
+    };
+
+    const handleEdit = (type: string, data: any) => {
+        setPopupType(type);
+        setIsEdit(true);
+        if (type === 'vehicle') {
+            setVehicleName(data.name);
+            setVehicleType(data.type);
+            setVehicleRegistrationNumber(data.vehicleRegistrationNumber);
+            setVehicleStatus(data.status);
+            setVehicleId(data.id);
+        } else {
+            setDriverName(data.name);
+            setDriverPhoneNumber(data.phoneNumber);
+            setDriverPassword(data.password);
+            setDriverId(data.id);
+        }
+        setOpen(true);
+    };
+
+    const handleDelete = (type: string, id: string) => {
+        const endpoint = type === 'vehicle' ? `/api/v1/admin/delete-vehicle/${id}` : `/api/v1/admin/delete-driver/${id}`;
+        const token = localStorage.getItem('token');
+
+        setApiCallLoading(true);
+        axios.delete(url + endpoint, {
+            headers: {
+                Authorization: `Bearer ${token}`,
+            }
+        })
+            .then(() => {
+                setApiCallLoading(false);
+                setApiCallSuccess(true);
+                showSnackbar(`${type === 'vehicle' ? 'Vehicle' : 'Driver'} deleted successfully`, 'success');
+                type === 'vehicle' ? fetchVehicles() : fetchDrivers();
+            })
+            .catch(error => {
+                setApiCallLoading(false);
+                setApiCallError(true);
+                showSnackbar('Error deleting data: ' + error.message, 'error');
             });
     };
 
@@ -206,6 +265,8 @@ function Home() {
                                             primary={vehicle.name}
                                             secondary={`Type: ${vehicle.type}, Registration Number: ${vehicle.vehicleRegistrationNumber}`}
                                         />
+                                        <Button onClick={() => handleEdit('vehicle', vehicle)}>Edit</Button>
+                                        <Button onClick={() => handleDelete('vehicle', vehicle.id)}>Delete</Button>
                                     </ListItem>
                                 ))
                             }
@@ -231,6 +292,8 @@ function Home() {
                                             primary={driver.name}
                                             secondary={`Phone Number: ${driver.phoneNumber}`}
                                         />
+                                        <Button onClick={() => handleEdit('driver', driver)}>Edit</Button>
+                                        <Button onClick={() => handleDelete('driver', driver.id)}>Delete</Button>
                                     </ListItem>
                                 ))
                             }
@@ -251,6 +314,7 @@ function Home() {
                         fullWidth
                         variant="standard"
                         onChange={popupType === 'vehicle' ? (e) => setVehicleName(e.target.value) : (e) => setDriverName(e.target.value)}
+                        value={popupType === 'vehicle' ? vehicleName : driverName}
                     />
                     {popupType === 'vehicle' ? (
                         <>
@@ -260,6 +324,7 @@ function Home() {
                                 defaultValue="bus"
                                 name="radio-buttons-group"
                                 onChange={(e) => setVehicleType(e.target.value)}
+                                value={vehicleType}
                             >
                                 <FormControlLabel value="bus" control={<Radio/>} label="Bus"/>
                                 <FormControlLabel value="microbus" control={<Radio/>} label="Microbus"/>
@@ -270,7 +335,19 @@ function Home() {
                                 fullWidth
                                 variant="standard"
                                 onChange={(e) => setVehicleRegistrationNumber(e.target.value)}
+                                value={vehicleRegistrationNumber}
                             />
+                            <FormLabel id="demo-radio-buttons-group-label">Vehicle Status</FormLabel>
+                            <RadioGroup
+                                aria-labelledby="demo-radio-buttons-group-label"
+                                defaultValue="inactive"
+                                name="radio-buttons-group"
+                                onChange={(e) => setVehicleStatus(e.target.value)}
+                                value={vehicleStatus}
+                            >
+                                <FormControlLabel value="active" control={<Radio/>} label="Active"/>
+                                <FormControlLabel value="inactive" control={<Radio/>} label="Inactive"/>
+                            </RadioGroup>
                         </>
                     ) : (
                         <>
@@ -280,6 +357,7 @@ function Home() {
                                 fullWidth
                                 variant="standard"
                                 onChange={(e) => setDriverPhoneNumber(e.target.value)}
+                                value={driverPhoneNumber}
                             />
                             <TextField
                                 margin="dense"
@@ -288,6 +366,7 @@ function Home() {
                                 variant="standard"
                                 type="password"
                                 onChange={(e) => setDriverPassword(e.target.value)}
+                                value={driverPassword}
                             />
                         </>
                     )}
@@ -325,3 +404,4 @@ function Home() {
 }
 
 export default withAdminAuth(Home);
+
