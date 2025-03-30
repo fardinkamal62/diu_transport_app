@@ -23,6 +23,7 @@ import {
 } from '@mui/material';
 import DirectionsBusIcon from '@mui/icons-material/DirectionsBus';
 import Man3Icon from '@mui/icons-material/Man3';
+import RefreshIcon from '@mui/icons-material/Refresh';
 import axios from "axios";
 import Snackbar, { SnackbarCloseReason } from '@mui/material/Snackbar';
 import MuiAlert, { AlertProps } from '@mui/material/Alert';
@@ -250,9 +251,12 @@ function Home() {
             <Grid container spacing={2} justifyContent="center" className='mt-10'>
                 <Grid item xs={12} md={6}>
                     <Box className="p-4 border rounded shadow">
-                        <Typography variant="h5" gutterBottom>
-                            Vehicles
-                        </Typography>
+                        <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
+                            <Typography variant="h5" gutterBottom>Vehicles</Typography>
+                            <Button onClick={() => fetchVehicles()}>
+                                <RefreshIcon />
+                            </Button>
+                        </Box>
                         <List dense={false}>
                             {
                                 vehicles.map((vehicle: object, index: number) => (
@@ -278,9 +282,12 @@ function Home() {
                 </Grid>
                 <Grid item xs={12} md={6}>
                     <Box className="p-4 border rounded shadow">
-                        <Typography variant="h5" gutterBottom>
-                            Drivers
-                        </Typography>
+                        <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
+                            <Typography variant="h5" gutterBottom>Drivers</Typography>
+                            <Button onClick={() => fetchDrivers()}>
+                                <RefreshIcon />
+                            </Button>
+                        </Box>
                         <List dense={false}>
                             {
                                 drivers.map((driver: object, index: number) => (
@@ -404,4 +411,3 @@ function Home() {
 }
 
 export default withAdminAuth(Home);
-
