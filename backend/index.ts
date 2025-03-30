@@ -8,6 +8,7 @@ import 'express-async-errors';
 import * as process from 'node:process';
 import * as http from 'http';
 import { Server } from 'socket.io';
+import morgan from 'morgan';
 
 import indexRoute from './routes/index'
 import mongo from './db';
@@ -22,6 +23,9 @@ import logger from './utils/logger';
 require('dotenv').config({ path: '.env' });
 
 const app = express();
+
+// Morgan middleware for logging
+app.use(morgan(':date[iso] :method :url :status :response-time ms'));
 
 // Create socket.io server
 const server = http.createServer(app);
