@@ -54,7 +54,7 @@ const userSchema = new mongoose.Schema({
 		type: String,
 		default:(): string => moment().tz('Asia/Dhaka').format(),
 	}
-});
+}, { autoIndex: false });
 
 userSchema.path('email').validate(function(value: string) {
 	return this.phoneNumber || value;
@@ -71,3 +71,4 @@ const schemas = {
 }
 
 export default schemas;
+

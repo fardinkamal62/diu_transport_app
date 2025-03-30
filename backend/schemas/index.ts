@@ -24,7 +24,7 @@ const currentLocationSchema = new mongoose.Schema({
 		min: -180,
 		max: 180,
 	},
-});
+}, { autoIndex: false });
 
 // Add index for faster queries with vehicleId
 currentLocationSchema.index({ vehicleId: 1 });
@@ -36,3 +36,4 @@ const schemas = {
 }
 
 export default schemas;
+

@@ -34,7 +34,7 @@ const vehicleSchema = new mongoose.Schema({
 		type: Boolean,
 		default: false,
 	},
-});
+}, { autoIndex: false });
 
 const Vehicle = mongoose.model('Vehicle', vehicleSchema);
 
@@ -43,3 +43,4 @@ const schemas = {
 }
 
 export default schemas;
+
