@@ -24,6 +24,9 @@ import {
 import DirectionsBusIcon from '@mui/icons-material/DirectionsBus';
 import Man3Icon from '@mui/icons-material/Man3';
 import axios from "axios";
+import Snackbar, { SnackbarCloseReason } from '@mui/material/Snackbar';
+import MuiAlert, { AlertProps } from '@mui/material/Alert';
+import React from "react";
 
 import BarikoiMap from "@/components/BarikoiMap";
 
@@ -40,6 +43,40 @@ function Home() {
     const [vehicles, setVehicles] = useState([]);
     const [drivers, setDrivers] = useState([]);
 
+    const [snackbarQueue, setSnackbarQueue] = useState<{ message: string, severity: 'success' | 'error' }[]>([]);
+    const [currentSnackbar, setCurrentSnackbar] = useState<{ message: string, severity: 'success' | 'error' } | null>(null);
+
+    const handleSnackbarClose = (event?: React.SyntheticEvent | Event, reason?: SnackbarCloseReason) => {
+        if (reason === 'clickaway') {
+            return;
+        }
+        setCurrentSnackbar(null);
+        setSnackbarQueue(prevQueue => prevQueue.slice(1));
+    };
+
+    useEffect(() => {
+        if (!currentSnackbar && snackbarQueue.length > 0) {
+            setCurrentSnackbar(snackbarQueue[0]);
+        }
+    }, [snackbarQueue, currentSnackbar]);
+
+    const showSnackbar = (message: string, severity: 'success' | 'error') => {
+        setSnackbarQueue(prevQueue => [...prevQueue, { message, severity }]);
+    };
+
+    const Alert = React.forwardRef<HTMLDivElement, AlertProps>(function Alert(
+        props,
+        ref,
+    ) {
+        return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
+    });
+
+    const [apiCallSuccess, setApiCallSuccess] = useState(false);
+    const [apiCallError, setApiCallError] = useState(false);
+    const [apiCallErrorMessage, setApiCallErrorMessage] = useState('');
+    const [apiCallSuccessMessage, setApiCallSuccessMessage] = useState('');
+    const [apiCallLoading, setApiCallLoading] = useState(false);
+
     const url = process.env.API_URL || 'http://localhost:3000';
 
     const handleClickOpen = (type: string) => {
@@ -51,8 +88,53 @@ function Home() {
         setOpen(false);
     };
 
+    const fetchVehicles = () => {
+        const endpoint = '/api/v1/vehicles';
+        const token = localStorage.getItem('token');
+
+        setApiCallLoading(true);
+        axios.get(url + endpoint, {
+            headers: {
+                Authorization: `Bearer ${token}`,
+            }
+        })
+            .then(response => {
+                setVehicles(response.data.data);
+                setApiCallLoading(false);
+                setApiCallSuccess(true);
+            })
+            .catch(error => {
+                setApiCallLoading(false);
+                setApiCallError(true);
+                showSnackbar('Error fetching vehicle data: ' + error.message, 'error');
+                console.error('Error saving vehicles data:', error);
+            });
+    }
+
+    const fetchDrivers = () => {
+        const endpoint = '/api/v1/drivers';
+        const token = localStorage.getItem('token');
+
+        setApiCallLoading(true);
+        axios.get(url + endpoint, {
+            headers: {
+                Authorization: `Bearer ${token}`,
+            }
+        })
+            .then(response => {
+                setDrivers(response.data.data);
+                setApiCallLoading(false);
+                setApiCallSuccess(true);
+            })
+            .catch(error => {
+                setApiCallLoading(false);
+                setApiCallError(true);
+                showSnackbar('Error fetching drivers data: ' + error.message, 'error');
+                console.error('Error saving drivers data:', error);
+            });
+    }
+
     const handleSave = () => {
-        // Handle save logic here
         handleClose();
 
         const data = popupType === 'vehicle' ? {
@@ -68,54 +150,33 @@ function Home() {
         const endpoint = popupType === 'vehicle' ? '/api/v1/admin/add-vehicle' : '/api/v1/admin/add-driver';
         const token = localStorage.getItem('token');
 
+        setApiCallLoading(true);
         axios.post(url + endpoint, data, {
             headers: {
                 Authorization: `Bearer ${token}`,
             }
         })
-            .then(response => {
-                console.log('Data saved successfully:', response.data);
+            .then(() => {
+                setApiCallLoading(false);
+                setApiCallSuccess(true);
+                showSnackbar(`${popupType === 'vehicle' ? 'Vehicle' : 'Driver'} data saved successfully`, 'success');
+                setApiCallSuccessMessage(`${popupType === 'vehicle' ? 'Vehicle' : 'Driver'} data saved successfully`);
+                setApiCallError(false);
+                setApiCallErrorMessage('');
+                setVehicleName('');
+                setDriverName('');
+                setVehicleType('bus');
+                setVehicleRegistrationNumber('');
+                setDriverPhoneNumber('');
+                setDriverPassword('');
+                popupType === 'vehicle' ? fetchVehicles() : fetchDrivers();
             })
             .catch(error => {
-                console.error('Error saving data:', error);
+                setApiCallLoading(false);
+                setApiCallError(true);
+                showSnackbar('Error saving data: ' + error.message, 'error');
             });
     };
-
-    const fetchVehicles = () => {
-        const endpoint = '/api/v1/vehicles';
-        const token = localStorage.getItem('token');
-
-        axios.get(url + endpoint, {
-            headers: {
-                Authorization: `Bearer ${token}`,
-            }
-        })
-            .then(response => {
-                console.log('Data saved successfully:', response.data);
-                setVehicles(response.data.data);
-            })
-            .catch(error => {
-                console.error('Error saving data:', error);
-            });
-    }
-
-    const fetchDrivers = () => {
-        const endpoint = '/api/v1/drivers';
-        const token = localStorage.getItem('token');
-
-        axios.get(url + endpoint, {
-            headers: {
-                Authorization: `Bearer ${token}`,
-            }
-        })
-            .then(response => {
-                console.log('Data saved successfully:', response.data);
-                setDrivers(response.data.data);
-            })
-            .catch(error => {
-                console.error('Error saving data:', error);
-            });
-    }
 
     useEffect(() => {
         fetchVehicles();
@@ -130,7 +191,7 @@ function Home() {
             <Grid container spacing={2} justifyContent="center" className='mt-10'>
                 <Grid item xs={12} md={6}>
                     <Box className="p-4 border rounded shadow">
-                        <Typography variant="h6" gutterBottom>
+                        <Typography variant="h5" gutterBottom>
                             Vehicles
                         </Typography>
                         <List dense={false}>
@@ -156,7 +217,7 @@ function Home() {
                 </Grid>
                 <Grid item xs={12} md={6}>
                     <Box className="p-4 border rounded shadow">
-                        <Typography variant="h6" gutterBottom>
+                        <Typography variant="h5" gutterBottom>
                             Drivers
                         </Typography>
                         <List dense={false}>
@@ -252,6 +313,13 @@ function Home() {
                     <BarikoiMap/>
                 </div>
             </div>
+            {
+                currentSnackbar && <Snackbar open={!!currentSnackbar} autoHideDuration={5000} onClose={handleSnackbarClose}>
+                    <Alert onClose={handleSnackbarClose} severity={currentSnackbar.severity} sx={{ width: '100%' }}>
+                        {currentSnackbar.message}
+                    </Alert>
+                </Snackbar>
+            }
         </div>
     );
 }
