@@ -2,7 +2,6 @@
 
 import express from 'express';
 import createError from 'http-errors';
-import colors from 'colors';
 import bodyParser from 'body-parser';
 import cors from 'cors';
 import 'express-async-errors';
@@ -17,6 +16,8 @@ import validators from './validators';
 import api from './apis';
 import cache from './cache';
 import adminRoutes from './routes/admin';
+
+import logger from './utils/logger';
 
 require('dotenv').config({ path: '.env' });
 
@@ -54,7 +55,7 @@ io.on('connection', async (socket) => {
 	socket.on('location', async (msg) => {
 		const isValidLocation = validators.coOrdinateSchema.validate(msg);
 		if (isValidLocation.error) {
-			console.error(colors.red('Invalid location data received'));
+			logger.error('Invalid location data received');
 			socket.emit('error', { message: 'Invalid location data' });
 			return;
 		}
@@ -65,7 +66,7 @@ io.on('connection', async (socket) => {
 				void cache.cacheData(msg.vehicleId, msg),	// Cache the location data
 			])
 		} catch (e) {
-			console.error(colors.red('Failed to update location'), e);
+			logger.error('Failed to update location', e);
 			socket.emit('error', { message: 'Failed to update location' });
 			return;
 		}
@@ -76,11 +77,11 @@ io.on('connection', async (socket) => {
 });
 
 server.listen(PORT, () => {
-	console.log(colors.yellow('Starting Backend...'));
-	console.log(colors.yellow('Connecting to database...'));
+	logger.warn('Starting Backend...');
+	logger.warn('Connecting to database...');
 
 	if (process.env.env == null || process.env.mongo_uri == null || process.env.mongo_dev_uri == null) {
-		console.error(colors.red('Environment not found'));
+		logger.error('Environment not found');
 		process.exit(1);
 	}
 
@@ -94,10 +95,10 @@ server.listen(PORT, () => {
 				: process.env.mongo_uri as string;
 
 			await mongo.init(mongoUri);
-			console.log(colors.green(`Server started on port ${PORT}`));
-			console.log(colors.blue(`Socket.io server started on port ${PORT}`));
+			logger.info(`Server started on port ${PORT}`);
+			logger.info(`Socket.io server started on port ${PORT}`);
 		} catch (error) {
-			console.log(colors.red('Error occurred, server can\'t start\n'), error);
+			logger.error('Error occurred, server can\'t start\n', error);
 			process.exit(1);
 		}
 	})();

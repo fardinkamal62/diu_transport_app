@@ -1,5 +1,7 @@
 import { Request, Response, NextFunction, ErrorRequestHandler } from 'express';
 
+import logger from '../utils/logger';
+
 interface AppError extends Error {
 	status?: number;
 	code?: string;

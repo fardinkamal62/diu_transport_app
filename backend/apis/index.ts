@@ -1,5 +1,4 @@
 import express from 'express';
-import colors from 'colors';
 
 import { NotFound, BadRequest } from 'http-errors';
 
@@ -7,6 +6,8 @@ import schemas from '../schemas/index';
 import vehicleSchema from '../schemas/vehicle';
 import userSchema from '../schemas/user';
 import cache from '../cache';
+
+import logger from '../utils/logger';
 
 const Vehicle = vehicleSchema.Vehicle;
 const CurrentLocation = schemas.CurrentLocation;
@@ -32,7 +33,7 @@ const journeyToggle = async (req: express.Request): Promise<object> => {
 			message: 'Vehicle status updated',
 		}
 	} catch (e: any) {
-		console.error(colors.red('Failed to toggle status'), e);
+		logger.error(('Failed to toggle status'), e);
 		throw new Error(e.message);
 	}
 };
@@ -41,7 +42,7 @@ const locationUpdate = async (vehicleId: string, latitude: number, longitude: nu
 	try {
 		await CurrentLocation.create({ vehicleId, latitude, longitude });
 	} catch (e: any) {
-		console.error(colors.red('Failed to update location'), e);
+		logger.error(('Failed to update location'), e);
 		throw new Error(e.message)
 	}
 };
@@ -66,7 +67,7 @@ const getVehiclesLocation = async (): Promise<vehicleLocation[]> => {
 			};
 		});
 	} catch (e: any) {
-		console.error(colors.red('Failed to get vehicles location'), e);
+		logger.error(('Failed to get vehicles location'), e);
 		throw e;
 	}
 };
@@ -86,7 +87,7 @@ const getVehicles = async (): Promise<object[]> => {
 			};
 		});
 	} catch (e: any) {
-		console.error(colors.red('Failed to get vehicles data'), e);
+		logger.error(('Failed to get vehicles data'), e);
 		throw e;
 	}
 };
@@ -105,7 +106,7 @@ const getDrivers = async (): Promise<object[]> => {
 			};
 		});
 	} catch (e: any) {
-		console.error(colors.red('Failed to get drivers data'), e);
+		logger.error(('Failed to get drivers data'), e);
 		throw e;
 	}
 };

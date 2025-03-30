@@ -1,4 +1,3 @@
-import colors from 'colors';
 import * as jwt from 'jsonwebtoken';
 import { NotFound, Unauthorized, BadRequest, InternalServerError } from 'http-errors';
 import express from 'express';
@@ -7,6 +6,7 @@ import utils from '../utils';
 import userSchema from '../schemas/user';
 import vehicleSchema from '../schemas/vehicle';
 
+import logger from '../utils/logger';
 
 const login = async (req: express.Request): Promise<object> => {
 	const query = {
@@ -44,7 +44,7 @@ const login = async (req: express.Request): Promise<object> => {
 
 		return { token: sign };
 	} catch (e) {
-		console.error(colors.red('Failed to login'), e);
+		logger.error(('Failed to login'), e);
 		throw e;
 	}
 };
@@ -68,7 +68,7 @@ const addVehicle = async (req: express.Request): Promise<object> => {
 		await vehicle.save();
 		return vehicle;
 	} catch (e) {
-		console.error(colors.red('Failed to add vehicle'), e);
+		logger.error(('Failed to add vehicle'), e);
 		throw new InternalServerError('Failed to add vehicle');
 	}
 };
@@ -93,7 +93,7 @@ const addDriver = async (req: express.Request): Promise<object> => {
 		await driver.save();
 		return driver;
 	} catch (e) {
-		console.error(colors.red('Failed to add driver'), e);
+		logger.error(('Failed to add driver'), e);
 		throw new InternalServerError('Failed to add driver');
 	}
 };
@@ -135,7 +135,7 @@ const updateVehicleData = async (req: express.Request): Promise<object> => {
 		await vehicle.save();
 		return vehicle;
 	} catch (e) {
-		console.error(colors.red('Failed to update vehicle'), e);
+		logger.error(('Failed to update vehicle'), e);
 		throw new InternalServerError('Failed to update vehicle');
 	}
 };
@@ -168,7 +168,7 @@ const updateDriverData = async (req: express.Request): Promise<object> => {
 		await driver.save();
 		return driver;
 	} catch (e) {
-		console.error(colors.red('Failed to update driver'), e);
+		logger.error(('Failed to update driver'), e);
 		throw new InternalServerError('Failed to update driver');
 	}
 };
@@ -185,7 +185,7 @@ const deleteVehicle = async (req: express.Request): Promise<object> => {
 		await vehicleSchema.Vehicle.deleteOne({ _id: vehicleId });
 		return { message: 'Vehicle deleted successfully' };
 	} catch (e) {
-		console.error(colors.red('Failed to delete vehicle'), e);
+		logger.error(('Failed to delete vehicle'), e);
 		throw new InternalServerError('Failed to delete vehicle');
 	}
 };
@@ -202,7 +202,7 @@ const deleteDriver = async (req: express.Request): Promise<object> => {
 		await userSchema.User.deleteOne({ _id: driverId });
 		return { message: 'Driver deleted successfully' };
 	} catch (e) {
-		console.error(colors.red('Failed to delete driver'), e);
+		logger.error(('Failed to delete driver'), e);
 		throw new InternalServerError('Failed to delete driver');
 	}
 };
