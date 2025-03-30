@@ -37,11 +37,20 @@ const addDriverSchema = Joi.object({
 		.required(),
 });
 
+const updateDriverSchema = Joi.object({
+	name: Joi.string().min(2).max(100),
+	phoneNumber: Joi.string().min(10).max(15).pattern(/^[0-9]+$/),
+	password: Joi.string()
+		.min(8)
+		.max(100),
+});
+
 const schemas = {
 	coOrdinateSchema,
 	loginSchema,
 	addVehicleSchema,
 	addDriverSchema,
+	updateDriverSchema,
 }
 
 export default schemas;

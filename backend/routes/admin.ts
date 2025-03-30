@@ -44,7 +44,7 @@ router.put('/update-vehicle/:id', middlewares.validateRequest(validators.addVehi
 	}
 });
 
-router.put('/update-driver/:id', middlewares.validateRequest(validators.addDriverSchema), async (req: express.Request, res: express.Response) => {
+router.put('/update-driver/:id', middlewares.validateRequest(validators.updateDriverSchema), async (req: express.Request, res: express.Response) => {
 	try {
 		const result = await controllers.updateDriverData(req);
 		res.status(200).json({ success: true, data: result });
