@@ -107,3 +107,5 @@ server.listen(PORT, () => {
 		}
 	})();
 });
+
+export { app, server, io };

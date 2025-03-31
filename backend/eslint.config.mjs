@@ -1,6 +1,7 @@
 import pluginJs from '@eslint/js';
 import tsPlugin from '@typescript-eslint/eslint-plugin';
 import tsParser from '@typescript-eslint/parser';
+import jestPlugin from 'eslint-plugin-jest';
 
 import globals from 'globals';
 
@@ -15,13 +16,14 @@ export default [
             ecmaVersion: 2022,	// Use ECMAScript 2022
             parser: tsParser,	// Use the TypeScript parser
             sourceType: 'module',
-            globals: {...globals.browser, ...globals.node},	// Add browser globals to the list of known globals so that ESLint doesn't complain about them
+            globals: {...globals.browser, ...globals.node, ...globals.jest},	// Add browser globals to the list of known globals so that ESLint doesn't complain about them
             parserOptions: {
                 project: './tsconfig.json',	// Use the TypeScript project configuration file
             }
         },
         plugins: {
             '@typescript-eslint': tsPlugin, // Use the TypeScript ESLint plugin
+            'jest': jestPlugin, // Enable ESLint rules for Jest
         },
         rules: {
             quotes: ['error', 'single'], // Use single quotes for strings
@@ -38,6 +40,12 @@ export default [
             '@typescript-eslint/explicit-function-return-type': 'error',	// Require explicit return types on functions
             '@typescript-eslint/strict-boolean-expressions': 'error',	// Require strict boolean expressions
             '@typescript-eslint/no-unsafe-assignment': 'error',	// Disallow unsafe assignments
+
+            // Jest rules
+            'jest/no-disabled-tests': 'warn',	// Warn when a test is disabled
+            'jest/no-focused-tests': 'error',	// Disallow focused tests
+            'jest/no-identical-title': 'error',	// Disallow identical test titles
+            'jest/valid-expect': 'error',	//
         },
         settings: {
             'import/resolver': {

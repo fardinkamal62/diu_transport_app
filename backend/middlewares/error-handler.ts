@@ -14,15 +14,16 @@ const errorHandler: ErrorRequestHandler = (
 	res: Response,
 	_next: NextFunction
 ): void => {
-	console.error('Error', {
+	logger.error(JSON.stringify({
 		message: err.message,
-		code: err.code,
-	});
+		status: err.status,
+	}));
 
 	if ((err.status != null) && err.message) {
 		const response: any = {
 			status: 'ERROR',
 			message: err.message,
+			code: err.status || 'UNKNOWN_ERROR',
 		};
 
 		if (err.details) {
