@@ -5,10 +5,13 @@ import createError from 'http-errors';
 import bodyParser from 'body-parser';
 import cors from 'cors';
 import 'express-async-errors';
-import * as process from 'node:process';
 import * as http from 'http';
 import { Server } from 'socket.io';
 import morgan from 'morgan';
+import helmet from 'helmet';
+import compression from 'compression';
+import rateLimit from 'express-rate-limit';
+import { config } from 'dotenv';
 
 import indexRoute from './routes/index'
 import mongo from './db';
@@ -19,13 +22,33 @@ import cache from './cache';
 import adminRoutes from './routes/admin';
 
 import logger from './utils/logger';
+import utils from './utils';
 
-require('dotenv').config({ path: '.env' });
+// Load environment variables
+config({ path: '.env' });
+
+// Validate required environment variables
+const requiredEnvVars = ['PORT', 'NODE_ENV', 'MONGO_URI', 'MONGO_DEV_URI'];
+utils.checkRequiredEnvVars(requiredEnvVars);
 
 const app = express();
 
+// Security middleware
+app.use(helmet());
+
+// Compression middleware
+app.use(compression());
+
 // Morgan middleware for logging
 app.use(morgan(':date[iso] :method :url :status :response-time ms'));
+
+// Rate limiting middleware
+const limiter = rateLimit({
+	windowMs: 15 * 60 * 1000, // 15 minutes
+	max: 100, // limit each IP to 100 requests per windowMs
+	message: 'Too many requests from this IP, please try again later'
+});
+app.use(limiter);
 
 // Create socket.io server
 const server = http.createServer(app);
@@ -80,23 +103,46 @@ io.on('connection', async (socket) => {
 	});
 });
 
+// Graceful shutdown
+const gracefulShutdown = () => {
+	logger.info('Shutting down gracefully...');
+	server.close(() => {
+		logger.info('Closed out remaining connections');
+		process.exit(0);
+	});
+
+	setTimeout(() => {
+		logger.error('Could not close connections in time, forcefully shutting down');
+		process.exit(1);
+	}, 10000);
+};
+
+process.on('SIGTERM', gracefulShutdown);
+process.on('SIGINT', gracefulShutdown);
+process.on('uncaughtException', (error) => {
+	logger.error('Uncaught Exception:', error);
+	gracefulShutdown();
+});
+process.on('unhandledRejection', (error) => {
+	logger.error('Unhandled Rejection:', error);
+	gracefulShutdown();
+});
+process.on('exit', (code) => {
+	logger.info(`Process exited with code: ${code}`);
+});
+
 server.listen(PORT, () => {
 	logger.warn('Starting Backend...');
 	logger.warn('Connecting to database...');
-
-	if (process.env.env == null || process.env.mongo_uri == null || process.env.mongo_dev_uri == null) {
-		logger.error('Environment not found');
-		process.exit(1);
-	}
 
 	// Use an IIFE to use async/await
 	void (async (): Promise<void> => {
 		try {
 			await cache.cacheInit();
 
-			const mongoUri = process.env.env === 'development'
-				? process.env.mongo_dev_uri as string
-				: process.env.mongo_uri as string;
+			const mongoUri = process.env.NODE_ENV === 'development'
+				? process.env.MONGO_DEV_URI as string
+				: process.env.MONGO_URI as string;
 
 			await mongo.init(mongoUri);
 			logger.info(`Server started on port ${PORT}`);
