@@ -15,10 +15,20 @@ const getVehiclesLocation = async (): Promise<object> => {
 	return await api.getVehiclesLocation();
 };
 
+const getVehicles = async (): Promise<object> => {
+	return await api.getVehicles();
+}
+
+const getDrivers = async (): Promise<object> => {
+	return await api.getDrivers();
+};
+
 const controllers = {
 	resetConnection,
 	ping,
 	getVehiclesLocation,
+	getVehicles,
+	getDrivers,
 };
 
 export default controllers;

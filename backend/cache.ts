@@ -1,5 +1,6 @@
 import { createClient } from 'redis';
-import colors from 'colors';
+
+import logger from './utils/logger';
 
 const client = createClient({
 	url: process.env.REDIS_URL || 'redis://localhost:6379',
@@ -9,9 +10,9 @@ const client = createClient({
 });
 
 const cacheInit = async (): Promise<void> => {
-	client.on('error', err => console.error(colors.red('Redis Client Error:'), err));
-	client.on('reconnecting', () => console.log(colors.yellow('Reconnecting to Redis...')));
-	client.on('connect', () => console.log(colors.green('Connected to Redis')));
+	client.on('error', err => logger.error(('Redis Client Error:'), err));
+	client.on('reconnecting', () => logger.warn(('Reconnecting to Redis...')));
+	client.on('connect', () => logger.info(('Connected to Redis')));
 	await client.connect()
 };
 
@@ -25,7 +26,7 @@ const cacheData = async (key: string, data: Record<string, any>): Promise<void> 
 			)
 		);
 	} catch (error) {
-		console.error(colors.red('Redis caching error:'), error);
+		logger.error((`Error caching data for key ${key}:`), error);
 		throw error;
 	}
 };
@@ -34,7 +35,7 @@ const getData = async (key: string): Promise<Record<string, string>> => {
 	try {
 		return await client.hGetAll(key);
 	} catch (error) {
-		console.error(colors.red(`Error retrieving data for key ${key}:`), error);
+		logger.error((`Error getting data for key ${key}:`), error);
 		throw error;
 	}
 };
@@ -47,7 +48,7 @@ const getAllData = async (): Promise<Array<{key: string, value: Record<string, s
 			return { key, value };
 		}));
 	} catch (e) {
-		console.error(colors.red('Failed to get all data'), e);
+		logger.error(('Error getting all data:'), e);
 		throw e;
 	}
 };

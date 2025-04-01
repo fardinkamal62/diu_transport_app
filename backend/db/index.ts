@@ -1,6 +1,7 @@
-import colors from 'colors';
 import mongoose from 'mongoose';
 import * as process from 'node:process';
+
+import logger from '../utils/logger';
 
 const init = async (mongoUri: string) : Promise<void> => {
 	try {
@@ -11,24 +12,24 @@ const init = async (mongoUri: string) : Promise<void> => {
 				maxPoolSize: 50,
 				retryWrites: true,
 			});
-			console.log(colors.green('Connected to MongoDB'));
+			logger.info('MongoDB connected successfully');
 		} else {
-			console.error(colors.red('No URI provided'));
+			logger.error('MongoDB URI is not provided');
 			process.exit(1);
 		}
 	} catch (error) {
-		console.error(colors.red('Failed to connect to MongoDB'), error);
+		logger.error('Failed to connect to MongoDB', error);
 		process.exit(1);
 	}
 };
 
 const close = async (): Promise<void> => {
 	try {
-		console.log(colors.yellow('Closing MongoDB connection...'));
+		logger.warn('Closing MongoDB connection...');
 		await mongoose.connection.close();
-		console.log(colors.green('Closed MongoDB connection'));
+		logger.info('MongoDB connection closed successfully');
 	} catch (error) {
-		console.error(colors.red('Failed to close MongoDB connection:'), error);
+		logger.error('Failed to close MongoDB connection', error);
 		throw error;
 	}
 };

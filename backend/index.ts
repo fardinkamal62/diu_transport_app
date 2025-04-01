@@ -2,23 +2,53 @@
 
 import express from 'express';
 import createError from 'http-errors';
-import colors from 'colors';
 import bodyParser from 'body-parser';
 import cors from 'cors';
 import 'express-async-errors';
-import * as process from 'node:process';
 import * as http from 'http';
+import { Server } from 'socket.io';
+import morgan from 'morgan';
+import helmet from 'helmet';
+import compression from 'compression';
+import rateLimit from 'express-rate-limit';
+import { config } from 'dotenv';
+
 import indexRoute from './routes/index'
 import mongo from './db';
 import errorHandler from './middlewares/error-handler';
 import validators from './validators';
 import api from './apis';
 import cache from './cache';
-import { Server } from 'socket.io';
+import adminRoutes from './routes/admin';
 
-require('dotenv').config({ path: '.env' });
+import logger from './utils/logger';
+import utils from './utils';
+
+// Load environment variables
+config({ path: '.env' });
+
+// Validate required environment variables
+const requiredEnvVars = ['PORT', 'NODE_ENV', 'MONGO_URI', 'MONGO_DEV_URI', 'JWT_SECRET'];
+utils.checkRequiredEnvVars(requiredEnvVars);
 
 const app = express();
+
+// Security middleware
+app.use(helmet());
+
+// Compression middleware
+app.use(compression());
+
+// Morgan middleware for logging
+app.use(morgan(':date[iso] :method :url :status :response-time ms'));
+
+// Rate limiting middleware
+const limiter = rateLimit({
+	windowMs: 15 * 60 * 1000, // 15 minutes
+	max: 100, // limit each IP to 100 requests per windowMs
+	message: 'Too many requests from this IP, please try again later'
+});
+app.use(limiter);
 
 // Create socket.io server
 const server = http.createServer(app);
@@ -32,6 +62,7 @@ app.use(bodyParser.json());
 
 // Router
 app.use('/', indexRoute.router);
+app.use('/api/v1/admin', adminRoutes.router);
 
 // Handle 404 errors
 app.use((_req: any, _res: any, next: (_arg0: any) => void) => {
@@ -51,7 +82,7 @@ io.on('connection', async (socket) => {
 	socket.on('location', async (msg) => {
 		const isValidLocation = validators.coOrdinateSchema.validate(msg);
 		if (isValidLocation.error) {
-			console.error(colors.red('Invalid location data received'));
+			logger.error('Invalid location data received');
 			socket.emit('error', { message: 'Invalid location data' });
 			return;
 		}
@@ -62,7 +93,7 @@ io.on('connection', async (socket) => {
 				void cache.cacheData(msg.vehicleId, msg),	// Cache the location data
 			])
 		} catch (e) {
-			console.error(colors.red('Failed to update location'), e);
+			logger.error('Failed to update location', e);
 			socket.emit('error', { message: 'Failed to update location' });
 			return;
 		}
@@ -72,30 +103,55 @@ io.on('connection', async (socket) => {
 	});
 });
 
-server.listen(PORT, () => {
-	console.log(colors.yellow('Starting Backend...'));
-	console.log(colors.yellow('Connecting to database...'));
+// Graceful shutdown
+const gracefulShutdown = () => {
+	logger.info('Shutting down gracefully...');
+	server.close(() => {
+		logger.info('Closed out remaining connections');
+		process.exit(0);
+	});
 
-	if (process.env.env == null || process.env.mongo_uri == null || process.env.mongo_dev_uri == null) {
-		console.error(colors.red('Environment not found'));
+	setTimeout(() => {
+		logger.error('Could not close connections in time, forcefully shutting down');
 		process.exit(1);
-	}
+	}, 10000);
+};
+
+process.on('SIGTERM', gracefulShutdown);
+process.on('SIGINT', gracefulShutdown);
+process.on('uncaughtException', (error) => {
+	logger.error('Uncaught Exception:', error);
+	gracefulShutdown();
+});
+process.on('unhandledRejection', (error) => {
+	logger.error('Unhandled Rejection:', error);
+	gracefulShutdown();
+});
+process.on('exit', (code) => {
+	logger.info(`Process exited with code: ${code}`);
+});
+
+server.listen(PORT, () => {
+	logger.warn('Starting Backend...');
+	logger.warn('Connecting to database...');
 
 	// Use an IIFE to use async/await
 	void (async (): Promise<void> => {
 		try {
 			await cache.cacheInit();
 
-			const mongoUri = process.env.env === 'development'
-				? process.env.mongo_dev_uri as string
-				: process.env.mongo_uri as string;
+			const mongoUri = process.env.NODE_ENV === 'development'
+				? process.env.MONGO_DEV_URI as string
+				: process.env.MONGO_URI as string;
 
 			await mongo.init(mongoUri);
-			console.log(colors.green(`Server started on port ${PORT}`));
-			console.log(colors.blue(`Socket.io server started on port ${PORT}`));
+			logger.info(`Server started on port ${PORT}`);
+			logger.info(`Socket.io server started on port ${PORT}`);
 		} catch (error) {
-			console.log(colors.red('Error occurred, server can\'t start\n'), error);
+			logger.error('Error occurred, server can\'t start\n', error);
 			process.exit(1);
 		}
 	})();
 });
+
+export { app, server, io };

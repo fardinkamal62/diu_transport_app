@@ -1,13 +1,17 @@
 import express from 'express';
-import colors from 'colors';
 
 import { NotFound, BadRequest } from 'http-errors';
 
 import schemas from '../schemas/index';
+import vehicleSchema from '../schemas/vehicle';
+import userSchema from '../schemas/user';
 import cache from '../cache';
 
-const Vehicle = schemas.Vehicle;
+import logger from '../utils/logger';
+
+const Vehicle = vehicleSchema.Vehicle;
 const CurrentLocation = schemas.CurrentLocation;
+const User = userSchema.User;
 
 const journeyToggle = async (req: express.Request): Promise<object> => {
 	try {
@@ -29,7 +33,7 @@ const journeyToggle = async (req: express.Request): Promise<object> => {
 			message: 'Vehicle status updated',
 		}
 	} catch (e: any) {
-		console.error(colors.red('Failed to toggle status'), e);
+		logger.error(('Failed to toggle status'), e);
 		throw new Error(e.message);
 	}
 };
@@ -38,7 +42,7 @@ const locationUpdate = async (vehicleId: string, latitude: number, longitude: nu
 	try {
 		await CurrentLocation.create({ vehicleId, latitude, longitude });
 	} catch (e: any) {
-		console.error(colors.red('Failed to update location'), e);
+		logger.error(('Failed to update location'), e);
 		throw new Error(e.message)
 	}
 };
@@ -63,10 +67,49 @@ const getVehiclesLocation = async (): Promise<vehicleLocation[]> => {
 			};
 		});
 	} catch (e: any) {
-		console.error(colors.red('Failed to get vehicles location'), e);
+		logger.error(('Failed to get vehicles location'), e);
 		throw e;
 	}
 };
 
-const api = { journeyToggle, locationUpdate, getVehiclesLocation };
+const getVehicles = async (): Promise<object[]> => {
+	try {
+		const vehicles = await Vehicle.find({}).select('name vehicleRegistrationNumber status type');
+		if (vehicles.length === 0) return [];
+
+		return vehicles.map((vehicle) => {
+			return {
+				id: vehicle._id,
+				vehicleRegistrationNumber: vehicle.vehicleRegistrationNumber,
+				name: vehicle.name,
+				status: vehicle.status,
+				type: vehicle.type,
+			};
+		});
+	} catch (e: any) {
+		logger.error(('Failed to get vehicles data'), e);
+		throw e;
+	}
+};
+
+const getDrivers = async (): Promise<object[]> => {
+	try {
+		const driver = await User.find({ groups: 'driver' }).select('name picture phoneNumber');
+		if (driver.length === 0) return [];
+
+		return driver.map((driver) => {
+			return {
+				id: driver._id,
+				name: driver.name,
+				picture: driver.picture,
+				phoneNumber: driver.phoneNumber,
+			};
+		});
+	} catch (e: any) {
+		logger.error(('Failed to get drivers data'), e);
+		throw e;
+	}
+};
+
+const api = { journeyToggle, locationUpdate, getVehiclesLocation, getVehicles, getDrivers };
 export default api;
