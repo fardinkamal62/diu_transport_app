@@ -1,4 +1,11 @@
 import winston from 'winston';
+import fs from 'fs';
+
+// Ensure logs directory exists
+const logDir = 'logs';
+if (!fs.existsSync(logDir)) {
+	fs.mkdirSync(logDir);
+}
 
 const logger = winston.createLogger({
 	transports: [
@@ -11,7 +18,7 @@ const logger = winston.createLogger({
 				winston.format.printf(({ timestamp, level, message }) => {
 					return `${timestamp} ${level}: ${message}`;
 				}),
-			)
+			),
 		}),
 		new winston.transports.File({
 			filename: 'logs/app.log',
@@ -21,8 +28,8 @@ const logger = winston.createLogger({
 				winston.format.printf(({ timestamp, level, message }) => {
 					return `${timestamp} ${level}: ${message}`;
 				}),
-			)
-		})
+			),
+		}),
 	],
 });
 

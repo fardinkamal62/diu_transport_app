@@ -13,7 +13,9 @@ describe('Cache Tests', () => {
 			longitude: Joi.string().required(),
 		});
 		const result = await cache.getData(`vehicle:${testKey}`);
-		expect(schema.validate(result).error).toBeUndefined();
+		expect(schema.validate(testData).error).toBeUndefined();
+
+		expect(result).toEqual(testData);
 	});
 
 	it('should return all cached data', async () => {

@@ -78,8 +78,8 @@ const addDriver = async (req: express.Request): Promise<object> => {
 	const phoneNumber = req.body.phoneNumber as string;
 	const password = req.body.password as string;
 
-	if (!name || !phoneNumber) {
-		throw new BadRequest('Name, phone number and vehicle ID are required');
+	if (!name || !phoneNumber || !password) {
+		throw new BadRequest('Name, phone number and password are required');
 	}
 
 	const driver = new userSchema.User({
@@ -161,7 +161,7 @@ const updateDriverData = async (req: express.Request): Promise<object> => {
 	}
 
 	if (password) {
-		driver.password = password;
+		driver.password = await utils.hashPassword(password);
 	}
 
 	try {

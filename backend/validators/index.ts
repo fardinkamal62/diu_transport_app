@@ -42,7 +42,8 @@ const updateDriverSchema = Joi.object({
 	phoneNumber: Joi.string().min(10).max(15).pattern(/^[0-9]+$/),
 	password: Joi.string()
 		.min(8)
-		.max(100),
+		.max(100)
+		.required(),
 });
 
 const schemas = {

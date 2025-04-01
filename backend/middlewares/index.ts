@@ -36,7 +36,8 @@ const adminAuth = (req: Request, res: Response, next: NextFunction): void => {
 	const token = req.headers.authorization?.split(' ')[1];
 
 	if (!token) {
-		return next(new Unauthorized('No token provided'));
+		next(new Unauthorized('No token provided'));
+		return;
 	}
 
 	try {
@@ -44,7 +45,8 @@ const adminAuth = (req: Request, res: Response, next: NextFunction): void => {
 		const decoded = jwt.verify(token, secret) as { role: string };
 
 		if (decoded.role !== 'admin') {
-			return next(new Unauthorized('User is not an admin'));
+			next(new Unauthorized('User is not an admin'));
+			return;
 		}
 
 		next();

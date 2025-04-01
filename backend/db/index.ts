@@ -12,24 +12,24 @@ const init = async (mongoUri: string) : Promise<void> => {
 				maxPoolSize: 50,
 				retryWrites: true,
 			});
-			logger.info(('MongoDB connected successfully'));
+			logger.info('MongoDB connected successfully');
 		} else {
-			logger.error(('MongoDB URI is not provided'));
+			logger.error('MongoDB URI is not provided');
 			process.exit(1);
 		}
 	} catch (error) {
-		logger.error(('Failed to connect to MongoDB'), error);
+		logger.error('Failed to connect to MongoDB', error);
 		process.exit(1);
 	}
 };
 
 const close = async (): Promise<void> => {
 	try {
-		logger.warn(('Closing MongoDB connection...'));
+		logger.warn('Closing MongoDB connection...');
 		await mongoose.connection.close();
-		logger.info(('MongoDB connection closed successfully'));
+		logger.info('MongoDB connection closed successfully');
 	} catch (error) {
-		logger.error(('Failed to close MongoDB connection'), error);
+		logger.error('Failed to close MongoDB connection', error);
 		throw error;
 	}
 };

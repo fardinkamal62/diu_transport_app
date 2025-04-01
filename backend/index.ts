@@ -28,7 +28,7 @@ import utils from './utils';
 config({ path: '.env' });
 
 // Validate required environment variables
-const requiredEnvVars = ['PORT', 'NODE_ENV', 'MONGO_URI', 'MONGO_DEV_URI'];
+const requiredEnvVars = ['PORT', 'NODE_ENV', 'MONGO_URI', 'MONGO_DEV_URI', 'JWT_SECRET'];
 utils.checkRequiredEnvVars(requiredEnvVars);
 
 const app = express();
