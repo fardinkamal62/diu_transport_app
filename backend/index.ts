@@ -6,7 +6,6 @@ import bodyParser from 'body-parser';
 import cors from 'cors';
 import 'express-async-errors';
 import * as http from 'http';
-import { Server } from 'socket.io';
 import morgan from 'morgan';
 import helmet from 'helmet';
 import compression from 'compression';
@@ -16,10 +15,9 @@ import { config } from 'dotenv';
 import indexRoute from './routes/index'
 import mongo from './db';
 import errorHandler from './middlewares/error-handler';
-import validators from './validators';
-import api from './apis';
 import cache from './cache';
 import adminRoutes from './routes/admin';
+import { initSocket } from './socket';
 
 import logger from './utils/logger';
 import utils from './utils';
@@ -33,6 +31,11 @@ utils.checkRequiredEnvVars(requiredEnvVars);
 
 const app = express();
 
+// Create socket.io server
+const server = http.createServer(app);
+
+const io = initSocket(server);
+
 // Security middleware
 app.use(helmet());
 
@@ -45,15 +48,10 @@ app.use(morgan(':date[iso] :method :url :status :response-time ms'));
 // Rate limiting middleware
 const limiter = rateLimit({
 	windowMs: 15 * 60 * 1000, // 15 minutes
-	max: 100, // limit each IP to 100 requests per windowMs
+	limit: 100, // limit each IP to 100 requests per windowMs
 	message: 'Too many requests from this IP, please try again later'
 });
 app.use(limiter);
-
-// Create socket.io server
-const server = http.createServer(app);
-
-const io = new Server(server);
 
 // Middleware
 app.use(cors());
@@ -72,39 +70,9 @@ app.use((_req: any, _res: any, next: (_arg0: any) => void) => {
 // Error handler middleware
 app.use(errorHandler);
 
-// Start the server
-const PORT = process.env.PORT || 3000;
-
-// Socket.io server
-io.on('connection', async (socket) => {
-	// On location update
-	// Drivers will send their location on this channel
-	socket.on('location', async (msg) => {
-		const isValidLocation = validators.coOrdinateSchema.validate(msg);
-		if (isValidLocation.error) {
-			logger.error('Invalid location data received');
-			socket.emit('error', { message: 'Invalid location data' });
-			return;
-		}
-
-		try {
-			await Promise.all([
-				void api.locationUpdate(msg.vehicleId, msg.latitude, msg.longitude),	// Update location in database
-				void cache.cacheData(msg.vehicleId, msg),	// Cache the location data
-			])
-		} catch (e) {
-			logger.error('Failed to update location', e);
-			socket.emit('error', { message: 'Failed to update location' });
-			return;
-		}
-
-		socket.broadcast.emit('location', msg);	// Broadcast message to all connected users except the sender
-		// Everyone will receive the location update
-	});
-});
 
 // Graceful shutdown
-const gracefulShutdown = () => {
+const gracefulShutdown = ():void => {
 	logger.info('Shutting down gracefully...');
 	server.close(() => {
 		logger.info('Closed out remaining connections');
@@ -131,6 +99,7 @@ process.on('exit', (code) => {
 	logger.info(`Process exited with code: ${code}`);
 });
 
+const PORT = process.env.PORT;
 server.listen(PORT, () => {
 	logger.warn('Starting Backend...');
 	logger.warn('Connecting to database...');
