@@ -78,11 +78,6 @@ function Home() {
         return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
     });
 
-    const [apiCallSuccess, setApiCallSuccess] = useState(false);
-    const [apiCallError, setApiCallError] = useState(false);
-    const [apiCallErrorMessage, setApiCallErrorMessage] = useState('');
-    const [apiCallSuccessMessage, setApiCallSuccessMessage] = useState('');
-    const [apiCallLoading, setApiCallLoading] = useState(false);
 
     const url = process.env.API_URL || 'http://localhost:3000';
 
@@ -99,13 +94,15 @@ function Home() {
         setVehicleRegistrationNumber('');
         setDriverPhoneNumber('');
         setDriverPassword('');
+        setVehicleId('');
+        setDriverId('');
+        setIsEdit(false);
     };
 
     const fetchVehicles = () => {
         const endpoint = '/api/v1/vehicles';
         const token = localStorage.getItem('token');
 
-        setApiCallLoading(true);
         axios.get(url + endpoint, {
             headers: {
                 Authorization: `Bearer ${token}`,
@@ -113,12 +110,8 @@ function Home() {
         })
             .then(response => {
                 setVehicles(response.data.data);
-                setApiCallLoading(false);
-                setApiCallSuccess(true);
             })
             .catch(error => {
-                setApiCallLoading(false);
-                setApiCallError(true);
                 showSnackbar('Error fetching vehicle data: ' + error.message, 'error');
                 console.error('Error saving vehicles data:', error);
             });
@@ -128,7 +121,6 @@ function Home() {
         const endpoint = '/api/v1/drivers';
         const token = localStorage.getItem('token');
 
-        setApiCallLoading(true);
         axios.get(url + endpoint, {
             headers: {
                 Authorization: `Bearer ${token}`,
@@ -136,12 +128,8 @@ function Home() {
         })
             .then(response => {
                 setDrivers(response.data.data);
-                setApiCallLoading(false);
-                setApiCallSuccess(true);
             })
             .catch(error => {
-                setApiCallLoading(false);
-                setApiCallError(true);
                 showSnackbar('Error fetching drivers data: ' + error.message, 'error');
                 console.error('Error saving drivers data:', error);
             });
@@ -169,30 +157,23 @@ function Home() {
         }
         const token = localStorage.getItem('token');
 
-        setApiCallLoading(true);
         axios[isEdit ? 'put' : 'post'](url + endpoint, data, {
             headers: {
                 Authorization: `Bearer ${token}`,
             }
         })
             .then(() => {
-                setApiCallLoading(false);
-                setApiCallSuccess(true);
                 showSnackbar(`${popupType === 'vehicle' ? 'Vehicle' : 'Driver'} data saved successfully`, 'success');
-                setApiCallSuccessMessage(`${popupType === 'vehicle' ? 'Vehicle' : 'Driver'} data saved successfully`);
-                setApiCallError(false);
-                setApiCallErrorMessage('');
                 setVehicleName('');
                 setDriverName('');
                 setVehicleType('bus');
                 setVehicleRegistrationNumber('');
                 setDriverPhoneNumber('');
                 setDriverPassword('');
+                setIsEdit(false);
                 popupType === 'vehicle' ? fetchVehicles() : fetchDrivers();
             })
             .catch(error => {
-                setApiCallLoading(false);
-                setApiCallError(true);
                 showSnackbar('Error saving data: ' + error.message, 'error');
             });
     };
@@ -219,21 +200,16 @@ function Home() {
         const endpoint = type === 'vehicle' ? `/api/v1/admin/delete-vehicle/${id}` : `/api/v1/admin/delete-driver/${id}`;
         const token = localStorage.getItem('token');
 
-        setApiCallLoading(true);
         axios.delete(url + endpoint, {
             headers: {
                 Authorization: `Bearer ${token}`,
             }
         })
             .then(() => {
-                setApiCallLoading(false);
-                setApiCallSuccess(true);
                 showSnackbar(`${type === 'vehicle' ? 'Vehicle' : 'Driver'} deleted successfully`, 'success');
                 type === 'vehicle' ? fetchVehicles() : fetchDrivers();
             })
             .catch(error => {
-                setApiCallLoading(false);
-                setApiCallError(true);
                 showSnackbar('Error deleting data: ' + error.message, 'error');
             });
     };
