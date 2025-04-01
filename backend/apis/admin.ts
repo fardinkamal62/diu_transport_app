@@ -1,6 +1,7 @@
 import * as jwt from 'jsonwebtoken';
 import { NotFound, Unauthorized, BadRequest, InternalServerError } from 'http-errors';
 import express from 'express';
+import moment from 'moment-timezone';
 
 import utils from '../utils';
 import userSchema from '../schemas/user';
@@ -188,7 +189,8 @@ const deleteVehicle = async (req: express.Request): Promise<object> => {
 	}
 
 	try {
-		await vehicleSchema.Vehicle.deleteOne({ _id: vehicleId });
+		vehicle.deletedAt = moment().tz('Asia/Dhaka').format();
+		await vehicle.save();
 		return { message: 'Vehicle deleted successfully' };
 	} catch (e) {
 		logger.error(('Failed to delete vehicle'), e);
@@ -205,7 +207,8 @@ const deleteDriver = async (req: express.Request): Promise<object> => {
 	}
 
 	try {
-		await userSchema.User.deleteOne({ _id: driverId });
+		driver.deletedAt = moment().tz('Asia/Dhaka').format();
+		await driver.save();
 		return { message: 'Driver deleted successfully' };
 	} catch (e) {
 		logger.error(('Failed to delete driver'), e);
@@ -224,3 +227,4 @@ const adminApi = {
 };
 
 export default adminApi;
+

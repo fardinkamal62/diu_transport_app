@@ -25,6 +25,10 @@ const vehicleSchema = new mongoose.Schema({
 		type: String,
 		default: (): string => moment().tz('Asia/Dhaka').format()
 	},
+	deletedAt: {
+		type: String,
+		default: null,
+	},
 	status: {
 		type: String,
 		enum: ['active', 'inactive'],
