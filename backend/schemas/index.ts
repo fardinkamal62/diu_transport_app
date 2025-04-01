@@ -1,11 +1,10 @@
 import mongoose from 'mongoose';
-import moment from 'moment-timezone';
 
 
 const currentLocationSchema = new mongoose.Schema({
 	createdAt: {
-		type: String,
-		default: (): string => moment().tz('Asia/Dhaka').format(),
+		type: Date,
+		default: (): Date => new Date(),
 	},
 	vehicleId: {
 		type: mongoose.Schema.Types.ObjectId,

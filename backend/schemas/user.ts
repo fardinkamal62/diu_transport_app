@@ -1,5 +1,4 @@
 import mongoose from 'mongoose';
-import moment from 'moment-timezone';
 
 
 const userSchema = new mongoose.Schema({
@@ -47,15 +46,15 @@ const userSchema = new mongoose.Schema({
 		default: [],
 	},
 	createdAt: {
-		type: String,
-		default:(): string => moment().tz('Asia/Dhaka').format(),
+		type: Date,
+		default: ():Date => new Date(),
 	},
 	updatedAt: {
-		type: String,
-		default:(): string => moment().tz('Asia/Dhaka').format(),
+		type: Date,
+		default: ():Date => new Date(),
 	},
 	deletedAt: {
-		type: String,
+		type: Date,
 		default: null,
 	}
 }, { autoIndex: false });

@@ -1,7 +1,6 @@
 import * as jwt from 'jsonwebtoken';
 import { NotFound, Unauthorized, BadRequest, InternalServerError } from 'http-errors';
 import express from 'express';
-import moment from 'moment-timezone';
 
 import utils from '../utils';
 import userSchema from '../schemas/user';
@@ -138,6 +137,8 @@ const updateVehicleData = async (req: express.Request): Promise<object> => {
 		throw new BadRequest('Invalid vehicle status');
 	}
 
+	vehicle.updatedAt = new Date();
+
 	try {
 		await vehicle.save();
 		return vehicle;
@@ -171,6 +172,8 @@ const updateDriverData = async (req: express.Request): Promise<object> => {
 		driver.password = await utils.hashPassword(password);
 	}
 
+	driver.updatedAt = new Date();
+
 	try {
 		await driver.save();
 		return driver;
@@ -189,7 +192,7 @@ const deleteVehicle = async (req: express.Request): Promise<object> => {
 	}
 
 	try {
-		vehicle.deletedAt = moment().tz('Asia/Dhaka').format();
+		vehicle.deletedAt = new Date();
 		await vehicle.save();
 		return { message: 'Vehicle deleted successfully' };
 	} catch (e) {
@@ -207,7 +210,7 @@ const deleteDriver = async (req: express.Request): Promise<object> => {
 	}
 
 	try {
-		driver.deletedAt = moment().tz('Asia/Dhaka').format();
+		driver.deletedAt = new Date();
 		await driver.save();
 		return { message: 'Driver deleted successfully' };
 	} catch (e) {

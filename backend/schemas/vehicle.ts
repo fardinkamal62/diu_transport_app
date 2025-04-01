@@ -1,5 +1,4 @@
 import mongoose from 'mongoose';
-import moment from 'moment-timezone';
 
 
 const vehicleSchema = new mongoose.Schema({
@@ -18,15 +17,15 @@ const vehicleSchema = new mongoose.Schema({
 		enum: ['bus', 'microbus'],
 	},
 	createdAt: {
-		type: String,
-		default: (): string => moment().tz('Asia/Dhaka').format(),
+		type: Date,
+		default: () => new Date(),
 	},
 	updatedAt: {
-		type: String,
-		default: (): string => moment().tz('Asia/Dhaka').format()
+		type: Date,
+		default: () => new Date(),
 	},
 	deletedAt: {
-		type: String,
+		type: Date,
 		default: null,
 	},
 	status: {
