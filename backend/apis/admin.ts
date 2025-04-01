@@ -9,9 +9,15 @@ import vehicleSchema from '../schemas/vehicle';
 import logger from '../utils/logger';
 
 const login = async (req: express.Request): Promise<object> => {
-	const query = {
-		'username': req.body.username as string,
-	};
+	const query: any = {};
+
+	if (req.body.username) {
+		query.username = req.body.username as string;
+	}
+
+	if (req.body.email) {
+		query.email = req.body.email as string;
+	}
 
 	try {
 		const user = await userSchema.User.findOne(query);
@@ -85,7 +91,7 @@ const addDriver = async (req: express.Request): Promise<object> => {
 	const driver = new userSchema.User({
 		name,
 		phoneNumber,
-		password: password,
+		password: await utils.hashPassword(password),
 		groups: ['driver'],
 	});
 
