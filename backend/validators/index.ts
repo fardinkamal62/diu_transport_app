@@ -26,6 +26,8 @@ const addVehicleSchema = Joi.object({
 	type: Joi.string().valid('bus', 'microbus').required(),
 	vehicleRegistrationNumber: Joi.string().min(2).max(100).required(),
 	status: Joi.string().valid('active', 'inactive').default('inactive'),
+	reservedSeats: Joi.number().min(0).default(0),
+	capacity: Joi.number().min(1).max(100).required(),
 });
 
 const addDriverSchema = Joi.object({
@@ -35,6 +37,8 @@ const addDriverSchema = Joi.object({
 		.min(8)
 		.max(100)
 		.required(),
+	status: Joi.string().valid('active', 'inactive').default('inactive'),
+	preferredVehicle: Joi.array().items(Joi.string().valid('bus', 'microbus')).required(),
 });
 
 const updateDriverSchema = Joi.object({
@@ -42,8 +46,9 @@ const updateDriverSchema = Joi.object({
 	phoneNumber: Joi.string().min(10).max(15).pattern(/^[0-9]+$/),
 	password: Joi.string()
 		.min(8)
-		.max(100)
-		.required(),
+		.max(100),
+	status: Joi.string().valid('active', 'inactive'),
+	preferredVehicle: Joi.array().items(Joi.string().valid('bus', 'microbus')),
 });
 
 const schemas = {

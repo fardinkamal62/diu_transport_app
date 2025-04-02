@@ -74,7 +74,7 @@ const getVehiclesLocation = async (): Promise<vehicleLocation[]> => {
 
 const getVehicles = async (): Promise<object[]> => {
 	try {
-		const vehicles = await Vehicle.find({}).select('name vehicleRegistrationNumber status type');
+		const vehicles = await Vehicle.find({}).select('name vehicleRegistrationNumber status type capacity reservedSeats');
 		if (vehicles.length === 0) return [];
 
 		return vehicles.map((vehicle) => {
@@ -84,6 +84,8 @@ const getVehicles = async (): Promise<object[]> => {
 				name: vehicle.name,
 				status: vehicle.status,
 				type: vehicle.type,
+				capacity: vehicle.capacity,
+				reservedSeats: vehicle.reservedSeats,
 			};
 		});
 	} catch (e: any) {
@@ -94,7 +96,7 @@ const getVehicles = async (): Promise<object[]> => {
 
 const getDrivers = async (): Promise<object[]> => {
 	try {
-		const driver = await User.find({ groups: 'driver' }).select('name picture phoneNumber');
+		const driver = await User.find({ groups: 'driver' }).select('name picture phoneNumber status preferredVehicle');
 		if (driver.length === 0) return [];
 
 		return driver.map((driver) => {
@@ -103,6 +105,8 @@ const getDrivers = async (): Promise<object[]> => {
 				name: driver.name,
 				picture: driver.picture,
 				phoneNumber: driver.phoneNumber,
+				status: driver.status,
+				preferredVehicle: driver.preferredVehicle,
 			};
 		});
 	} catch (e: any) {

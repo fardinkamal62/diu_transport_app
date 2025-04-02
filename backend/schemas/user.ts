@@ -56,6 +56,16 @@ const userSchema = new mongoose.Schema({
 	deletedAt: {
 		type: Date,
 		default: null,
+	},
+	status: {
+		type: String,
+		enum: ['active', 'inactive'],
+		default: 'inactive',
+	},
+	preferredVehicle: {
+		type: [String],
+		enum: ['bus', 'microbus'],
+		required: true,
 	}
 }, { autoIndex: false });
 

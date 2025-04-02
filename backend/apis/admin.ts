@@ -59,15 +59,47 @@ const addVehicle = async (req: express.Request): Promise<object> => {
 	const name = req.body.name as string;
 	const type = req.body.type as string;
 	const vehicleRegistrationNumber = req.body.vehicleRegistrationNumber as string;
+	const status = req.body.status as string;
+	const reservedSeats = req.body.reservedSeats as number;
+
+	const capacity = req.body.capacity as number;
+
+	if (type !== 'bus' && type !== 'microbus') {
+		throw new BadRequest('Invalid vehicle type');
+	}
+	if (capacity < 1) {
+		throw new BadRequest('Capacity must be greater than 0');
+	}
+	if (status !== 'active' && status !== 'inactive') {
+		throw new BadRequest('Invalid vehicle status');
+	}
+	if (isNaN(capacity)) {
+		throw new BadRequest('Capacity must be a number');
+	}
+	if (capacity > 100) {
+		throw new BadRequest('Capacity must be less than or equal to 100');
+	}
+
 
 	if (!name || !type || !vehicleRegistrationNumber) {
 		throw new BadRequest('Name, type and vehicle registration number are required');
+	}
+
+	if (reservedSeats < 0) {
+		throw new BadRequest('Reserved seats must be greater than or equal to 0');
+	}
+
+	if (reservedSeats > capacity) {
+		throw new BadRequest('Reserved seats must be less than or equal to capacity');
 	}
 
 	const vehicle = new vehicleSchema.Vehicle({
 		name,
 		type,
 		vehicleRegistrationNumber,
+		status,
+		reservedSeats,
+		capacity,
 	});
 
 	try {
@@ -83,14 +115,18 @@ const addDriver = async (req: express.Request): Promise<object> => {
 	const name = req.body.name as string;
 	const phoneNumber = req.body.phoneNumber as string;
 	const password = req.body.password as string;
+	const status = req.body.status as string;
+	const preferredVehicle = req.body.preferredVehicle as string[];
 
-	if (!name || !phoneNumber || !password) {
-		throw new BadRequest('Name, phone number and password are required');
+	if (!name || !phoneNumber || !password || !status || preferredVehicle.length === 0) {
+		throw new BadRequest('Name, phone number, password, status and preferred vehicle are required');
 	}
 
 	const driver = new userSchema.User({
 		name,
 		phoneNumber,
+		status,
+		preferredVehicle,
 		password: await utils.hashPassword(password),
 		groups: ['driver'],
 	});
@@ -116,6 +152,8 @@ const updateVehicleData = async (req: express.Request): Promise<object> => {
 	const type = req.body.type as string;
 	const vehicleRegistrationNumber = req.body.vehicleRegistrationNumber as string;
 	const status = req.body.status as string;
+	const reservedSeats = req.body.reservedSeats as number;
+	const capacity = req.body.capacity as number;
 
 	if (name) {
 		vehicle.name = name;
@@ -135,6 +173,28 @@ const updateVehicleData = async (req: express.Request): Promise<object> => {
 		vehicle.status = status;
 	} else {
 		throw new BadRequest('Invalid vehicle status');
+	}
+
+	if (reservedSeats >= 0) {
+		vehicle.reservedSeats = reservedSeats;
+	} else {
+		throw new BadRequest('Reserved seats must be greater than or equal to 0');
+	}
+	if (reservedSeats > capacity) {
+		throw new BadRequest('Reserved seats must be less than or equal to capacity');
+	}
+
+	if (capacity > 0) {
+		vehicle.capacity = capacity;
+	} else {
+		throw new BadRequest('Capacity must be greater than 0');
+	}
+
+	if (capacity > 100) {
+		throw new BadRequest('Capacity must be less than or equal to 100');
+	}
+	if (isNaN(capacity)) {
+		throw new BadRequest('Capacity must be a number');
 	}
 
 	vehicle.updatedAt = new Date();
@@ -159,6 +219,8 @@ const updateDriverData = async (req: express.Request): Promise<object> => {
 	const name = req.body.name as string;
 	const phoneNumber = req.body.phoneNumber as string;
 	const password = req.body.password as string;
+	const status = req.body.status as string;
+	const preferredVehicle = req.body.preferredVehicle as string[];
 
 	if (name) {
 		driver.name = name;
@@ -170,6 +232,16 @@ const updateDriverData = async (req: express.Request): Promise<object> => {
 
 	if (password) {
 		driver.password = await utils.hashPassword(password);
+	}
+
+	if (status === 'active' || status === 'inactive') {
+		driver.status = status;
+	} else {
+		throw new BadRequest('Invalid driver status');
+	}
+
+	if (preferredVehicle.length > 0) {
+		driver.preferredVehicle = preferredVehicle;
 	}
 
 	driver.updatedAt = new Date();

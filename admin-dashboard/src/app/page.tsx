@@ -4,12 +4,12 @@ import {useEffect, useState} from 'react';
 import withAdminAuth from "@/components/withAdmin";
 import {
     Box,
-    Button,
+    Button, Checkbox,
     Dialog,
     DialogActions,
     DialogContent,
     DialogTitle,
-    FormControlLabel,
+    FormControlLabel, FormGroup,
     FormLabel,
     Grid,
     List,
@@ -28,6 +28,8 @@ import axios from "axios";
 import Snackbar, { SnackbarCloseReason } from '@mui/material/Snackbar';
 import MuiAlert, { AlertProps } from '@mui/material/Alert';
 import React from "react";
+import EditIcon from '@mui/icons-material/Edit';
+import DeleteIcon from '@mui/icons-material/Delete';
 
 import BarikoiMap from "@/components/BarikoiMap";
 
@@ -43,6 +45,11 @@ function Home() {
     const [vehicleRegistrationNumber, setVehicleRegistrationNumber] = useState('');
     const [driverPhoneNumber, setDriverPhoneNumber] = useState('');
     const [driverPassword, setDriverPassword] = useState('');
+    const [vehicleCapacity, setVehicleCapacity] = useState(0);
+    const [vehicleReservedSeats, setVehicleReservedSeats] = useState(0);
+
+    const [driverStatus, setDriverStatus] = useState('inactive');
+    const [driverPreferredVehicle, setDriverPreferredVehicle] = useState([]);
 
     const [vehicles, setVehicles] = useState([]);
     const [drivers, setDrivers] = useState([]);
@@ -97,6 +104,11 @@ function Home() {
         setVehicleId('');
         setDriverId('');
         setIsEdit(false);
+        setVehicleStatus('inactive');
+        setDriverStatus('inactive');
+        setVehicleCapacity(0);
+        setVehicleReservedSeats(0);
+        setDriverPreferredVehicle([]);
     };
 
     const fetchVehicles = () => {
@@ -142,11 +154,15 @@ function Home() {
             name: vehicleName,
             type: vehicleType,
             vehicleRegistrationNumber: vehicleRegistrationNumber,
-            status: vehicleStatus
+            status: vehicleStatus,
+            capacity: vehicleCapacity,
+            reservedSeats: vehicleReservedSeats,
         } : {
             name: driverName,
             phoneNumber: driverPhoneNumber,
-            password: driverPassword
+            password: driverPassword,
+            status: driverStatus,
+            preferredVehicle: driverPreferredVehicle,
         };
 
         let endpoint = '';
@@ -171,6 +187,12 @@ function Home() {
                 setDriverPhoneNumber('');
                 setDriverPassword('');
                 setIsEdit(false);
+                setVehicleId('');
+                setDriverId('');
+                setVehicleStatus('inactive');
+                setDriverStatus('inactive');
+                setVehicleCapacity(0);
+                setVehicleReservedSeats(0);
                 popupType === 'vehicle' ? fetchVehicles() : fetchDrivers();
             })
             .catch(error => {
@@ -187,11 +209,15 @@ function Home() {
             setVehicleRegistrationNumber(data.vehicleRegistrationNumber);
             setVehicleStatus(data.status);
             setVehicleId(data.id);
+            setVehicleCapacity(data.capacity);
+            setVehicleReservedSeats(data.reservedSeats);
         } else {
             setDriverName(data.name);
             setDriverPhoneNumber(data.phoneNumber);
             setDriverPassword(data.password);
             setDriverId(data.id);
+            setDriverStatus(data.status);
+            setDriverPreferredVehicle(data.preferredVehicle);
         }
         setOpen(true);
     };
@@ -243,10 +269,14 @@ function Home() {
                                         </ListItemIcon>
                                         <ListItemText
                                             primary={vehicle.name}
-                                            secondary={`Type: ${vehicle.type}, Registration Number: ${vehicle.vehicleRegistrationNumber}`}
+                                            secondary={`Capacity: ${vehicle.capacity}, Reserved Seats: ${vehicle.reservedSeats}`}
                                         />
-                                        <Button onClick={() => handleEdit('vehicle', vehicle)}>Edit</Button>
-                                        <Button onClick={() => handleDelete('vehicle', vehicle.id)}>Delete</Button>
+                                        <Button onClick={() => handleEdit('vehicle', vehicle)}>
+                                            <EditIcon />
+                                        </Button>
+                                        <Button onClick={() => handleDelete('vehicle', vehicle.id)}>
+                                            <DeleteIcon color='error'/>
+                                        </Button>
                                     </ListItem>
                                 ))
                             }
@@ -269,14 +299,18 @@ function Home() {
                                 drivers.map((driver: object, index: number) => (
                                     <ListItem key={index}>
                                         <ListItemIcon>
-                                            <Man3Icon color="primary"/>
+                                            <Man3Icon color={driver.status === 'active' ? 'primary' : 'error'}/>
                                         </ListItemIcon>
                                         <ListItemText
                                             primary={driver.name}
                                             secondary={`Phone Number: ${driver.phoneNumber}`}
                                         />
-                                        <Button onClick={() => handleEdit('driver', driver)}>Edit</Button>
-                                        <Button onClick={() => handleDelete('driver', driver.id)}>Delete</Button>
+                                        <Button onClick={() => handleEdit('driver', driver)}>
+                                            <EditIcon />
+                                        </Button>
+                                        <Button onClick={() => handleDelete('driver', driver.id)}>
+                                            <DeleteIcon color='error'/>
+                                        </Button>
                                     </ListItem>
                                 ))
                             }
@@ -331,6 +365,24 @@ function Home() {
                                 <FormControlLabel value="active" control={<Radio/>} label="Active"/>
                                 <FormControlLabel value="inactive" control={<Radio/>} label="Inactive"/>
                             </RadioGroup>
+                            <TextField
+                                margin="dense"
+                                label="Vehicle Capacity"
+                                fullWidth
+                                variant="standard"
+                                type="number"
+                                onChange={(e) => setVehicleCapacity(Number(e.target.value))}
+                                value={vehicleCapacity}
+                            />
+                            <TextField
+                                margin="dense"
+                                label="Reserved Seats"
+                                fullWidth
+                                variant="standard"
+                                type="number"
+                                onChange={(e) => setVehicleReservedSeats(Number(e.target.value))}
+                                value={vehicleReservedSeats}
+                            />
                         </>
                     ) : (
                         <>
@@ -351,6 +403,40 @@ function Home() {
                                 onChange={(e) => setDriverPassword(e.target.value)}
                                 value={driverPassword}
                             />
+                            <FormLabel id="demo-radio-buttons-group-label">Driver Status</FormLabel>
+                            <RadioGroup
+                                aria-labelledby="demo-radio-buttons-group-label"
+                                defaultValue="inactive"
+                                name="radio-buttons-group"
+                                onChange={(e) => setDriverStatus(e.target.value)}
+                                value={driverStatus}
+                            >
+                                <FormControlLabel value="active" control={<Radio/>} label="Active"/>
+                                <FormControlLabel value="inactive" control={<Radio/>} label="Inactive"/>
+                            </RadioGroup>
+                            <FormLabel id="demo-radio-buttons-group-label">Preferred Vehicle</FormLabel>
+                            <FormGroup>
+                                <FormControlLabel
+                                    control={<Checkbox checked={driverPreferredVehicle.includes('bus')} onChange={(e) => {
+                                        if (e.target.checked) {
+                                            setDriverPreferredVehicle([...driverPreferredVehicle, 'bus']);
+                                        } else {
+                                            setDriverPreferredVehicle(driverPreferredVehicle.filter((vehicle) => vehicle !== 'bus'));
+                                        }
+                                    }} />}
+                                    label="Bus"
+                                />
+                                <FormControlLabel
+                                    control={<Checkbox checked={driverPreferredVehicle.includes('microbus')} onChange={(e) => {
+                                        if (e.target.checked) {
+                                            setDriverPreferredVehicle([...driverPreferredVehicle, 'microbus']);
+                                        } else {
+                                            setDriverPreferredVehicle(driverPreferredVehicle.filter((vehicle) => vehicle !== 'microbus'));
+                                        }
+                                    }} />}
+                                    label="Microbus"
+                                />
+                            </FormGroup>
                         </>
                     )}
                 </DialogContent>

@@ -18,11 +18,11 @@ const vehicleSchema = new mongoose.Schema({
 	},
 	createdAt: {
 		type: Date,
-		default: () => new Date(),
+		default: (): Date => new Date(),
 	},
 	updatedAt: {
 		type: Date,
-		default: () => new Date(),
+		default: (): Date => new Date(),
 	},
 	deletedAt: {
 		type: Date,
@@ -36,6 +36,14 @@ const vehicleSchema = new mongoose.Schema({
 	enRoute: {
 		type: Boolean,
 		default: false,
+	},
+	capacity: {
+		type: Number,
+		required: true,
+	},
+	reservedSeats: {
+		type: Number,
+		default: 0,
 	},
 }, { autoIndex: false });
 
