@@ -22,6 +22,8 @@ import { initSocket } from './socket';
 import logger from './utils/logger';
 import utils from './utils';
 
+import cronJobs from './cron';
+
 // Load environment variables
 config({ path: '.env' });
 
@@ -116,6 +118,9 @@ server.listen(PORT, () => {
 			await mongo.init(mongoUri);
 			logger.info(`Server started on port ${PORT}`);
 			logger.info(`Socket.io server started on port ${PORT}`);
+
+			// Start cron jobs
+			cronJobs();
 		} catch (error) {
 			logger.error('Error occurred, server can\'t start\n', error);
 			process.exit(1);
