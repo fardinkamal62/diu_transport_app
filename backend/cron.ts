@@ -17,14 +17,23 @@ function runRandomAllocation(): void {
 			const [vehicles, drivers, previousTrips] = await Promise.all([
 				vehicleSchema.Vehicle.find({ status: 'active' }),
 				userSchema.User.find({ groups: 'driver' }),
-				tripSchema.find({})
+				// Get previous day's trips
+				tripSchema.find({
+					createdAt: {
+						$gte: new Date(new Date().setDate(new Date().getDate() - 1)),
+						$lt: new Date(),
+					},
+				})
 			]);
 
 			const allocations = randomAllocation(drivers, vehicles, previousTrips);
-			// Log the allocations
-			allocations.forEach(allocation => {
-				logger.info(allocation.message);
-			});
+
+			await tripSchema.insertMany(allocations.map(allocation => ({
+				driverId: allocation.driverId,
+				vehicleId: allocation.vehicleId,
+				status: 'scheduled',
+				message: allocation.message,
+			})));
 		} catch (error) {
 			logger.error('Error during random allocation:', error);
 		}
