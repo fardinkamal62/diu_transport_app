@@ -7,7 +7,7 @@ const coOrdinateSchema = Joi.object({
 	vehicleId: Joi.string().hex().length(24).required(),
 });
 
-const loginSchema = Joi.object({
+const adminLoginSchema = Joi.object({
 	email: Joi.string().max(MAX_EMAIL_LENGTH).email(),
 	username: Joi.string().min(2).max(100),
 	password: Joi.string()
@@ -51,12 +51,18 @@ const updateDriverSchema = Joi.object({
 	preferredVehicle: Joi.array().items(Joi.string().valid('bus', 'microbus')),
 });
 
+const userLoginSchema = Joi.object({
+	email: Joi.string().max(MAX_EMAIL_LENGTH).email(),
+	password: Joi.string().required(),
+});
+
 const schemas = {
 	coOrdinateSchema,
-	loginSchema,
+	adminLoginSchema,
 	addVehicleSchema,
 	addDriverSchema,
 	updateDriverSchema,
+	userLoginSchema,
 }
 
 export default schemas;

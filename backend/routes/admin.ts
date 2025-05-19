@@ -6,7 +6,7 @@ import controllers from '../controllers/admin';
 import middlewares from '../middlewares';
 import validators from '../validators';
 
-router.post('/login', middlewares.validateRequest(validators.loginSchema), async (req: express.Request, res: express.Response) => {
+router.post('/login', middlewares.validateRequest(validators.adminLoginSchema), async (req: express.Request, res: express.Response) => {
 	try {
 		const result = await controllers.login(req);
 		res.status(200).json({ success: true, data: result });

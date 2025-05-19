@@ -18,6 +18,7 @@ import errorHandler from './middlewares/error-handler';
 import cache from './cache';
 import adminRoutes from './routes/admin';
 import { initSocket } from './socket';
+import userRoutes from './routes/user';
 
 import logger from './utils/logger';
 import utils from './utils';
@@ -63,6 +64,7 @@ app.use(bodyParser.json());
 // Router
 app.use('/', indexRoute.router);
 app.use('/api/v1/admin', adminRoutes.router);
+app.use('/api/v1/user', userRoutes.router);
 
 // Handle 404 errors
 app.use((_req: any, _res: any, next: (_arg0: any) => void) => {
