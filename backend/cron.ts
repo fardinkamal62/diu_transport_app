@@ -13,8 +13,8 @@ import calculateHourlyDispatch from './utils/hourlyDispatch';
 
 // Randomly assign vehicles to users every minute
 function runRandomAllocation(): void {
-	logger.info('Starting random allocation cron job...');
 	cron.schedule('0 6 * * *', async () => {
+		logger.info('Starting random allocation cron job...');
 		try {
 			const [vehicles, drivers, previousTrips] = await Promise.all([
 				vehicleSchema.Vehicle.find({ status: 'active' }),
@@ -44,8 +44,8 @@ function runRandomAllocation(): void {
 }
 
 function scheduleHourlyDispatch(): void {
-	logger.info('Starting hourly dispatch cron job...');
 	cron.schedule('55 * * * *', async () => {
+		logger.info('Starting hourly dispatch cron job...');
 		try {
 			const vehicles = await vehicleSchema.Vehicle.find({ status: 'active', enRoute: false });
 			const drivers = await userSchema.User.find({ groups: 'driver', status: 'active' });
