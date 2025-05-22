@@ -62,9 +62,9 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 
 // Router
-app.use('/', indexRoute.router);
 app.use('/api/v1/admin', adminRoutes.router);
 app.use('/api/v1/user', userRoutes.router);
+app.use('/', indexRoute.router);
 
 // Handle 404 errors
 app.use((_req: any, _res: any, next: (_arg0: any) => void) => {

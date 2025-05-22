@@ -59,7 +59,7 @@ const adminAuth = (req: Request, res: Response, next: NextFunction): void => {
 
 // Middleware to check if the user is authenticated
 const userAuth = (req: Request, _res: Response, next: NextFunction): void => {
-	const token = req.headers.authorization?.split(' ')[1];
+	const token = req.headers.authorization;
 
 	if (!token) {
 		next(new Unauthorized('No token provided'));
@@ -78,7 +78,6 @@ const userAuth = (req: Request, _res: Response, next: NextFunction): void => {
 		},
 	};
 
-	delete req.headers['authorization'];
 	const request = https.request(options, (res) => {
 		let data = '';
 		res.on('data', (chunk) => {
@@ -92,7 +91,7 @@ const userAuth = (req: Request, _res: Response, next: NextFunction): void => {
 					(req as any).user = result;
 					next();
 				} else {
-					next(new Unauthorized(result?.message || 'Authentication failed'));
+					next(new Unauthorized(result?.error || 'Authentication failed'));
 				}
 			} catch (e) {
 				next(new Unauthorized('Invalid JSON response'));

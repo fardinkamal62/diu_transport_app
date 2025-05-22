@@ -56,6 +56,15 @@ const userLoginSchema = Joi.object({
 	password: Joi.string().required(),
 });
 
+const addReservationSchema = Joi.object({
+	registrationCode: Joi.string().min(2).max(100).required(),
+	time: Joi.string().required(),
+});
+
+const getReservationSchema = Joi.object({
+	registrationCode: Joi.string().min(2).max(100).required(),
+});
+
 const schemas = {
 	coOrdinateSchema,
 	adminLoginSchema,
@@ -63,6 +72,8 @@ const schemas = {
 	addDriverSchema,
 	updateDriverSchema,
 	userLoginSchema,
+	addReservationSchema,
+	getReservationSchema
 }
 
 export default schemas;

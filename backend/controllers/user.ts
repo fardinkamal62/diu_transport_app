@@ -1,6 +1,8 @@
 import { Request } from 'express';
 import https from 'https';
 
+import api from '../apis/user';
+
 const login = async (req: Request): Promise<object> => {
 	const email = req.body.email as string;
 	const password = req.body.password as string;
@@ -46,4 +48,12 @@ const login = async (req: Request): Promise<object> => {
 	});
 };
 
-export default { login };
+const addReservation = async (req: Request): Promise<object> => {
+	return await api.addReservation(req);
+};
+
+const getReservations = async (req: Request): Promise<object> => {
+	return await api.getReservations(req);
+};
+
+export default { login, addReservation, getReservations };
