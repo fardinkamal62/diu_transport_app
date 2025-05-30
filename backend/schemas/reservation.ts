@@ -10,6 +10,11 @@ const reservationSchema = new mongoose.Schema({
 		type: Date,
 		required: true,
 	},
+	location: {
+		type: String,
+		required: true,
+		enum: ['campus', 'notunbazar', 'sayeednagar']
+	},
 	createdAt: {
 		type: Date,
 		default: ():Date => new Date(),

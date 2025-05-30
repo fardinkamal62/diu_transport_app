@@ -59,6 +59,7 @@ const userLoginSchema = Joi.object({
 const addReservationSchema = Joi.object({
 	registrationCode: Joi.string().min(2).max(100).required(),
 	time: Joi.string().required(),
+	location: Joi.string().valid('campus', 'notunbazar', 'sayeednagar').required(),
 });
 
 const getReservationSchema = Joi.object({
