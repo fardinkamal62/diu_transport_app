@@ -1,87 +1,170 @@
 import 'package:flutter/material.dart';
-import '../../const/color_palet.dart';
-import '../../widgets/custom_text_field.dart';
+import 'package:diu_transport_student_app/theme/transit_theme.dart';
+import 'package:diu_transport_student_app/widgets/custom_text_field.dart';
 
 class SignUpScreen extends StatefulWidget {
+  const SignUpScreen({super.key});
+
   @override
-  _SignUpScreenState createState() => _SignUpScreenState();
+  State<SignUpScreen> createState() => _SignUpScreenState();
 }
 
-class _SignUpScreenState extends State<SignUpScreen> {
+class _SignUpScreenState extends State<SignUpScreen> with SingleTickerProviderStateMixin {
   final TextEditingController nameController = TextEditingController();
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
-  final TextEditingController studentIDController = TextEditingController();
-  bool isAccepted = false;
+  final TextEditingController confirmPasswordController = TextEditingController();
+
+  late AnimationController _animationController;
+  late Animation<double> _fadeAnimation;
+  late Animation<Offset> _slideAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+    _animationController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1200),
+    );
+
+    _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(parent: _animationController, curve: Curves.easeIn),
+    );
+
+    _slideAnimation = Tween<Offset>(begin: const Offset(0, 0.2), end: Offset.zero).animate(
+      CurvedAnimation(parent: _animationController, curve: Curves.easeOutCubic),
+    );
+
+    _animationController.forward();
+  }
+
+  @override
+  void dispose() {
+    _animationController.dispose();
+    nameController.dispose();
+    emailController.dispose();
+    passwordController.dispose();
+    confirmPasswordController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        backgroundColor: AppColors.primary,
-        title: Text('Sign Up', style: TextStyle(color: Colors.white)),
-        elevation: 0,
-        iconTheme: IconThemeData(color: Colors.white),
-      ),
-      body: Container(
-        color: AppColors.primary,
-        child: SingleChildScrollView(
-          scrollDirection: Axis.vertical,
-          child: Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                SizedBox(height: 80),
-                Center(child: Image.asset('assets/img/bus_booking.png', height: 150)),
-                SizedBox(height: 20),
-                Center(
-                  child: Text(
-                    'Create an Account',
-                    style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: AppColors.textColor),
-                  ),
-                ),
-                SizedBox(height: 20),
-                CustomTextField(label: 'Full Name', icon: Icons.person, controller: nameController),
-                CustomTextField(label: 'Student ID', icon: Icons.badge_rounded, controller: studentIDController),
-                CustomTextField(label: 'Email', icon: Icons.email, controller: emailController),
-                CustomTextField(label: 'Password', icon: Icons.lock, isPassword: true, controller: passwordController),
+    final ThemeData theme = Theme.of(context);
 
-                Row(
+    return Scaffold(
+      backgroundColor: diuBackgroundColor,
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(24.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            SizedBox(height: MediaQuery.of(context).size.height * 0.08),
+
+            FadeTransition(
+              opacity: _fadeAnimation,
+              child: SlideTransition(
+                position: _slideAnimation,
+                child: Column(
                   children: [
-                    Checkbox(
-                      value: isAccepted,
-                      onChanged: (value) {
-                        setState(() => isAccepted = value!);
-                      },
-                      activeColor: AppColors.secondary,
+                    CircleAvatar(
+                      radius: 50,
+                      backgroundColor: theme.colorScheme.primary,
+                      child: Icon(Icons.person_add, size: 60, color: theme.colorScheme.onPrimary),
                     ),
-                    Expanded(
-                      child: Text('I accept the Privacy Policy & Terms'),
+                    const SizedBox(height: 20),
+                    Text(
+                      'Create Your Account',
+                      style: theme.textTheme.headlineSmall!.copyWith(
+                        color: theme.colorScheme.primary,
+                        fontWeight: FontWeight.bold,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      'Join DIU Transport for seamless rides',
+                      style: theme.textTheme.bodyMedium!.copyWith(
+                        color: theme.colorScheme.onSurface.withOpacity(0.7),
+                      ),
+                      textAlign: TextAlign.center,
                     ),
                   ],
                 ),
+              ),
+            ),
 
-                SizedBox(
-                  width: double.infinity,
-                  height: 50,
-                  child: ElevatedButton(
-                    onPressed: isAccepted ? () {} : null,
-                    style: ElevatedButton.styleFrom(backgroundColor: AppColors.buttonBg),
-                    child: Text('Sign Up', style: TextStyle(color: Colors.white, fontSize: 18)),
+            const SizedBox(height: 40),
+
+            CustomTextField(
+              label: 'Full Name',
+              icon: Icons.person,
+              controller: nameController,
+              hintText: 'Your full name',
+            ),
+            CustomTextField(
+              label: 'Email',
+              icon: Icons.email,
+              controller: emailController,
+              hintText: 'e.g., student@diu.edu.bd',
+            ),
+            CustomTextField(
+              label: 'Password',
+              icon: Icons.lock,
+              isPassword: true,
+              controller: passwordController,
+              hintText: 'Create a strong password',
+            ),
+            CustomTextField(
+              label: 'Confirm Password',
+              icon: Icons.lock_reset,
+              isPassword: true,
+              controller: confirmPasswordController,
+              hintText: 'Re-enter your password',
+            ),
+
+            const SizedBox(height: 30),
+            SizedBox(
+              width: double.infinity,
+              height: 50,
+              child: ElevatedButton(
+                onPressed: () {
+                  // TODO: Implement sign-up logic
+                  print('Sign Up Attempt for ${emailController.text}');
+                },
+                child: Text(
+                  'Sign Up',
+                  style: theme.textTheme.labelLarge!.copyWith(
+                    color: theme.colorScheme.onPrimary,
                   ),
                 ),
-                SizedBox(
-                  width: double.infinity,
-                  height: 50,
-                  child: TextButton(
-                    onPressed: () => Navigator.pop(context),
-                    child: Text('Already have an account? Login', style: TextStyle(color: AppColors.secondary)),
-                  ),
-                )
-              ],
+              ),
             ),
-          ),
+
+            const SizedBox(height: 20),
+            Center(
+              child: TextButton(
+                onPressed: () => Navigator.pop(context), // Go back to login
+                child: RichText(
+                  text: TextSpan(
+                    text: 'Already have an account? ',
+                    style: theme.textTheme.bodyMedium!.copyWith(
+                      color: theme.colorScheme.onSurface,
+                    ),
+                    children: [
+                      TextSpan(
+                        text: 'Login',
+                        style: theme.textTheme.bodyMedium!.copyWith(
+                          color: theme.colorScheme.primary,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ],
         ),
       ),
     );

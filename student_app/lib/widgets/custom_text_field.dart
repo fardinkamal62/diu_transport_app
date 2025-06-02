@@ -1,46 +1,76 @@
 import 'package:flutter/material.dart';
-import '../const/color_palet.dart';
 
-class CustomTextField extends StatelessWidget {
+class CustomTextField extends StatefulWidget {
   final String label;
   final IconData icon;
   final bool isPassword;
   final TextEditingController controller;
+  final String? hintText;
 
-  CustomTextField({
+  const CustomTextField({
+    super.key,
     required this.label,
     required this.icon,
     this.isPassword = false,
     required this.controller,
+    this.hintText,
   });
 
   @override
+  State<CustomTextField> createState() => _CustomTextFieldState();
+}
+
+class _CustomTextFieldState extends State<CustomTextField> {
+  late FocusNode _focusNode;
+
+  @override
+  void initState() {
+    super.initState();
+    _focusNode = FocusNode();
+    _focusNode.addListener(_onFocusChange);
+  }
+
+  @override
+  void dispose() {
+    _focusNode.removeListener(_onFocusChange);
+    _focusNode.dispose();
+    super.dispose();
+  }
+
+  void _onFocusChange() {
+    setState(() {
+      _borderColor = _focusNode.hasFocus
+          ? Theme.of(context).colorScheme.primary
+          : Colors.transparent;
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final ThemeData theme = Theme.of(context);
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          label,
-          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: AppColors.textColor),
-        ),
-        SizedBox(height: 8),
-        TextField(
-          controller: controller,
-          obscureText: isPassword,
-          decoration: InputDecoration(
-            prefixIcon: Icon(icon, color: AppColors.secondary),
-            filled: true,
-            fillColor: AppColors.inputFieldBg,
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(10),
-              borderSide: BorderSide(color: AppColors.inputFieldBorder),
-            ),
-            hintText: "Enter your $label",
-            hintStyle: TextStyle(color: Colors.grey.shade400),
+          widget.label,
+          style: theme.textTheme.labelMedium!.copyWith(
+            color: theme.colorScheme.primary,
+            fontWeight: FontWeight.bold,
           ),
-          style: TextStyle(color: AppColors.textColor),
         ),
-        SizedBox(height: 16),
+        const SizedBox(height: 8),
+        TextField(
+          controller: widget.controller,
+          obscureText: widget.isPassword,
+          focusNode: _focusNode, // Assign focus node
+          decoration: InputDecoration(
+            prefixIcon: Icon(widget.icon, color: theme.colorScheme.primary),
+            hintText: widget.hintText ?? "Enter your ${widget.label}",
+          ),
+          style: theme.textTheme.bodyMedium,
+        ),
+        const SizedBox(height: 16),
       ],
     );
   }
