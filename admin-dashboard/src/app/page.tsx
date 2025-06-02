@@ -117,7 +117,7 @@ function Home() {
 
         axios.get(url + endpoint, {
             headers: {
-                Authorization: `Bearer ${token}`,
+                Authorization: token,
             }
         })
             .then(response => {
@@ -135,7 +135,7 @@ function Home() {
 
         axios.get(url + endpoint, {
             headers: {
-                Authorization: `Bearer ${token}`,
+                Authorization: token,
             }
         })
             .then(response => {
@@ -175,7 +175,7 @@ function Home() {
 
         axios[isEdit ? 'put' : 'post'](url + endpoint, data, {
             headers: {
-                Authorization: `Bearer ${token}`,
+                Authorization: token,
             }
         })
             .then(() => {
@@ -228,7 +228,7 @@ function Home() {
 
         axios.delete(url + endpoint, {
             headers: {
-                Authorization: `Bearer ${token}`,
+                Authorization: token,
             }
         })
             .then(() => {
