@@ -209,9 +209,9 @@ final ThemeData transitTheme = ThemeData(
   ),
   bottomNavigationBarTheme: const BottomNavigationBarThemeData(
     backgroundColor: diuPrimaryGreen,
-    selectedItemColor: diuAccentRed,
-    unselectedItemColor: diuOnPrimaryColor,
-    selectedLabelStyle: TextStyle(fontWeight: FontWeight.bold),
+    selectedItemColor: diuOnPrimaryColor,
+    unselectedItemColor: diuLightGreen,
+    selectedLabelStyle: TextStyle(fontWeight: FontWeight.bold , fontSize: 14.0),
     unselectedLabelStyle: TextStyle(fontWeight: FontWeight.normal),
     type: BottomNavigationBarType.fixed,
     elevation: 8.0,

@@ -126,8 +126,7 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
               height: 50,
               child: ElevatedButton(
                 onPressed: () {
-                  // Implement login logic here
-                  print('Login Attempt for ${emailController.text}');
+                  Navigator.pushNamed(context, '/home-screen');
                 },
                 child: Text(
                   'Login',

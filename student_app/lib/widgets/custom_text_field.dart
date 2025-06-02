@@ -22,6 +22,7 @@ class CustomTextField extends StatefulWidget {
 
 class _CustomTextFieldState extends State<CustomTextField> {
   late FocusNode _focusNode;
+  Color _borderColor = Colors.transparent;
 
   @override
   void initState() {

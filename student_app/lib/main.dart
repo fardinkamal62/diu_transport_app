@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:diu_transport_student_app/screen/auth/forget_pass_screen.dart';
 import 'package:diu_transport_student_app/screen/auth/login_screen.dart';
 import 'package:diu_transport_student_app/screen/auth/signup_screen.dart';
+import 'package:diu_transport_student_app/screen/home_screen.dart';
 import 'package:diu_transport_student_app/theme/transit_theme.dart'; // Correct import
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -91,10 +92,11 @@ class MyApp extends StatelessWidget {
         '/login': (context) => const LoginScreen(), // Added const
         '/signup': (context) => const SignUpScreen(), // Added const
         '/forgot-password': (context) => const ForgotPasswordScreen(),
-        '/map': (context) => SymbolMap(socket: socket), // Example route for your map
+        '/home-screen': (context) => const HomeScreen(),
+        '/map': (context) => SymbolMap(socket: socket),
       },
-      theme: transitTheme, // Apply your custom theme here
-      debugShowCheckedModeBanner: false, // Often useful to remove debug banner
+      theme: transitTheme,
+      debugShowCheckedModeBanner: false,
     );
   }
 }
