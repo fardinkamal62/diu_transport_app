@@ -4,6 +4,7 @@ import 'package:diu_transport_student_app/screen/auth/login_screen.dart';
 import 'package:diu_transport_student_app/screen/auth/signup_screen.dart';
 import 'package:diu_transport_student_app/screen/home_screen.dart';
 import 'package:diu_transport_student_app/theme/transit_theme.dart';
+import 'package:diu_transport_student_app/vehicle_list.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
@@ -79,12 +80,13 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
 
       title: 'DIU Transport Student App',
-      initialRoute: '/login',
+      initialRoute: '/vehicle-list',
       routes: {
-        '/login': (context) => const LoginScreen(), // Added const
+        '/login': (context) => const LoginScreen(),
         '/signup': (context) => const SignUpScreen(), // Added const
         '/forgot-password': (context) => const ForgotPasswordScreen(),
         '/home-screen': (context) => const HomeScreen(),
+        '/vehicle-list': (context) => const VehicleList(),
         '/map': (context) => SymbolMap(
           socket: socketio.socketio(),
         ), // Added const
