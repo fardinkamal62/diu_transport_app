@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../const/vehicle_list.dart';
 import '../widgets/vehicle_details_widget.dart';
 
 class VehicleList extends StatelessWidget {
@@ -12,28 +13,19 @@ class VehicleList extends StatelessWidget {
         backgroundColor: Colors.green,
         title: Text("Vehicle of List"),
       ),
+
       backgroundColor: Colors.white,
-      body: SingleChildScrollView(
-        child: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: [
-              VehicleDetailsWidget(
-                vehicleName: "Bus",
-                vehicleNumber: "DIU-1234",
-                vehicleCapacity: "50",
-                vehicleImage: "assets/img/bus.png",
-              ),
-              VehicleDetailsWidget(
-                vehicleName: "Car",
-                vehicleNumber: "DIU-5678",
-                vehicleCapacity: "5",
-                vehicleImage: "assets/img/car.png",
-              ),
-            ],
-          ),
-        ),
+      body: ListView.builder(
+        itemCount: vehicleList.length,
+        itemBuilder: (context, index) {
+          final vehicle = vehicleList[index];
+          return VehicleDetailsWidget(
+            vehicleName: vehicle['name'],
+            vehicleNumber: vehicle['number'],
+            vehicleCapacity: vehicle['capacity'],
+            vehicleImage: vehicle['image'],
+          );
+        },
       ),
     );
   }

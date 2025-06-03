@@ -1,7 +1,5 @@
-// lib/widgets/vehicle_details_widget.dart
-
 import 'package:flutter/material.dart';
-import '../theme/transit_theme.dart'; // Ensure this path is correct
+import '../theme/transit_theme.dart';
 
 class VehicleDetailsWidget extends StatefulWidget {
   final String vehicleName;
@@ -30,7 +28,7 @@ class _VehicleDetailsWidgetState extends State<VehicleDetailsWidget> with Single
     super.initState();
     _controller = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 300), // Quick animation for tap feedback
+      duration: const Duration(milliseconds: 300),
     );
     _scaleAnimation = Tween<double>(begin: 1.0, end: 0.98).animate(
       CurvedAnimation(parent: _controller, curve: Curves.easeOut),
@@ -57,15 +55,14 @@ class _VehicleDetailsWidgetState extends State<VehicleDetailsWidget> with Single
 
   @override
   Widget build(BuildContext context) {
-    final ThemeData theme = Theme.of(context); // Access the entire theme
+    final ThemeData theme = Theme.of(context);
     final TextTheme textTheme = theme.textTheme;
 
-    return GestureDetector( // Added GestureDetector for tap animation
+    return GestureDetector(
       onTapDown: _onTapDown,
       onTapUp: _onTapUp,
       onTapCancel: _onTapCancel,
       onTap: () {
-        // Implement what happens when the card is tapped (e.g., navigate to detail screen)
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('${widget.vehicleName} tapped!'),
@@ -74,36 +71,33 @@ class _VehicleDetailsWidgetState extends State<VehicleDetailsWidget> with Single
           ),
         );
       },
-      child: ScaleTransition( // Apply scale animation on tap
+      child: ScaleTransition(
         scale: _scaleAnimation,
         child: Container(
-          margin: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0), // Consistent padding
-          // Use theme's CardTheme for base styling, then override specifics
+          margin: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
           decoration: BoxDecoration(
-            color: theme.colorScheme.surface, // Use surface color from theme
-            borderRadius: BorderRadius.circular(16.0), // More rounded corners
+            color: theme.colorScheme.surface,
+            borderRadius: BorderRadius.circular(16.0),
             boxShadow: [
               BoxShadow(
-                color: theme.colorScheme.shadow.withOpacity(0.2), // Softer shadow from theme
-                blurRadius: 15, // Increased blur for softer look
+                color: theme.colorScheme.shadow.withOpacity(0.2),
+                blurRadius: 15,
                 spreadRadius: 2,
-                offset: const Offset(0, 8), // More vertical offset
+                offset: const Offset(0, 8),
               ),
             ],
           ),
-          child: IntrinsicHeight( // Ensure row children take up necessary height
+          child: IntrinsicHeight(
             child: Row(
-              crossAxisAlignment: CrossAxisAlignment.stretch, // Stretch children to fill height
+              crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                // Vehicle Image Section - Left Side
                 Container(
-                  width: 120, // Fixed width for the image container
+                  width: 120,
                   decoration: BoxDecoration(
                     borderRadius: const BorderRadius.only(
                       topLeft: Radius.circular(16.0),
                       bottomLeft: Radius.circular(16.0),
                     ),
-                    // Optional: Add a subtle gradient behind the image
                     gradient: LinearGradient(
                       colors: [
                         theme.colorScheme.primaryContainer.withOpacity(0.6),
@@ -115,31 +109,26 @@ class _VehicleDetailsWidgetState extends State<VehicleDetailsWidget> with Single
                   ),
                   padding: const EdgeInsets.all(8.0),
                   child: ClipRRect(
-                    borderRadius: BorderRadius.circular(12.0), // Rounded image corners
+                    borderRadius: BorderRadius.circular(12.0),
                     child: Image.asset(
                       widget.vehicleImage,
-                      fit: BoxFit.cover,
-                      // You might want to add a placeholder or error builder
-                      // errorBuilder: (context, error, stackTrace) => Icon(Icons.broken_image),
-                    ),
+                      fit: BoxFit.cover, ),
                   ),
                 ),
-
-                // Flexible Text Section - Right Side
                 Expanded(
                   child: Padding(
                     padding: const EdgeInsets.all(16.0),
                     child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center, // Center content vertically
+                      mainAxisAlignment: MainAxisAlignment.center,
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
                           widget.vehicleName,
-                          style: textTheme.headlineSmall!.copyWith( // Prominent name with headlineSmall
-                            color: theme.colorScheme.primary, // Primary color for name
+                          style: textTheme.headlineSmall!.copyWith(
+                            color: theme.colorScheme.primary,
                             fontWeight: FontWeight.bold,
                           ),
-                          maxLines: 1, // Prevent overflow
+                          maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                         ),
                         const SizedBox(height: 4.0),
@@ -153,13 +142,13 @@ class _VehicleDetailsWidgetState extends State<VehicleDetailsWidget> with Single
                         Container(
                           padding: const EdgeInsets.symmetric(vertical: 6.0, horizontal: 12.0),
                           decoration: BoxDecoration(
-                            color: diuLightGreen,// Lighter, themed background
-                            borderRadius: BorderRadius.circular(20.0), // Pill shape for capacity
+                            color: diuLightGreen,
+                            borderRadius: BorderRadius.circular(20.0),
                           ),
                           child: Text(
                             'Capacity: ${widget.vehicleCapacity}',
-                            style: textTheme.labelMedium!.copyWith( // Use labelMedium
-                              color: diuOnPrimaryColor, // Text on surface color
+                            style: textTheme.labelMedium!.copyWith(
+                              color: diuOnPrimaryColor,
                               fontWeight: FontWeight.bold,
                             ),
                           ),
