@@ -41,15 +41,20 @@ Future main() async {
   // Validate required environment variables
   if (envLoaded) {
     final requiredEnvVars = ['API_KEY', 'SOCKET_URL'];
-    final missingEnvVars = requiredEnvVars.where((v) => dotenv.env[v] == null).toList();
+    final missingEnvVars =
+        requiredEnvVars.where((v) => dotenv.env[v] == null).toList();
 
     if (missingEnvVars.isNotEmpty) {
       if (kDebugMode) {
-        print('Missing required environment variables: ${missingEnvVars.join(', ')}');
+        print(
+          'Missing required environment variables: ${missingEnvVars.join(', ')}',
+        );
       }
       // In production, fail fast if required env vars are missing
       if (const bool.fromEnvironment('dart.vm.product') == true) {
-        throw Exception('Missing required environment variables: ${missingEnvVars.join(', ')}');
+        throw Exception(
+          'Missing required environment variables: ${missingEnvVars.join(', ')}',
+        );
       }
     }
   }
@@ -78,18 +83,16 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-
       title: 'DIU Transport Student App',
-      initialRoute: '/vehicle-list',
+      initialRoute: '/login',
       routes: {
         '/login': (context) => const LoginScreen(),
         '/signup': (context) => const SignUpScreen(), // Added const
         '/forgot-password': (context) => const ForgotPasswordScreen(),
         '/home-screen': (context) => const HomeScreen(),
         '/vehicle-list': (context) => const VehicleList(),
-        '/map': (context) => SymbolMap(
-          socket: socketio.socketio(),
-        ), // Added const
+        '/map':
+            (context) => SymbolMap(socket: socketio.socketio()), // Added const
       },
       theme: transitTheme,
       debugShowCheckedModeBanner: false,
