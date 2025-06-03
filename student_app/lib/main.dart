@@ -5,8 +5,9 @@ import 'package:diu_transport_student_app/screen/auth/signup_screen.dart';
 import 'package:diu_transport_student_app/screen/home_screen.dart';
 import 'package:diu_transport_student_app/theme/transit_theme.dart'; // Correct import
 import 'package:flutter/foundation.dart';
+import 'package:diu_transport_student_app/vehicle_list.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
+
 
 // No need for 'package:diu_transport_student_app/const/color_palet.dart'; anymore as all colors are in theme.
 
@@ -79,13 +80,12 @@ Future main() async {
 }
 
 class MyApp extends StatelessWidget {
-  final dynamic socket;
-
-  const MyApp({super.key, required this.socket});
+  const MyApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+
       title: 'DIU Transport Student App',
       initialRoute: '/login',
       routes: {
