@@ -3,16 +3,13 @@ import 'package:diu_transport_student_app/screen/auth/forget_pass_screen.dart';
 import 'package:diu_transport_student_app/screen/auth/login_screen.dart';
 import 'package:diu_transport_student_app/screen/auth/signup_screen.dart';
 import 'package:diu_transport_student_app/screen/home_screen.dart';
-import 'package:diu_transport_student_app/theme/transit_theme.dart'; // Correct import
+import 'package:diu_transport_student_app/theme/transit_theme.dart';
 import 'package:flutter/foundation.dart';
-import 'package:diu_transport_student_app/vehicle_list.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
-
-// No need for 'package:diu_transport_student_app/const/color_palet.dart'; anymore as all colors are in theme.
-
-import 'package:diu_transport_student_app/barikoi_map.dart'; // Keep if you're using this
-import 'package:diu_transport_student_app/socketio.dart' as socketio; // Keep if you're using this
+import 'package:diu_transport_student_app/barikoi_map.dart';
+import 'package:diu_transport_student_app/socketio.dart' as socketio;
 
 class MyHttpOverrides extends HttpOverrides {
   @override
@@ -24,7 +21,8 @@ class MyHttpOverrides extends HttpOverrides {
 }
 
 Future main() async {
-  WidgetsFlutterBinding.ensureInitialized();
+  WidgetsFlutterBinding.ensureInitialized(); // Ensure Flutter binding is initialized
+  // Only use this in development builds
   if (const bool.fromEnvironment('dart.vm.product') == false) {
     HttpOverrides.global = MyHttpOverrides();
   }
@@ -39,6 +37,7 @@ Future main() async {
     }
   }
 
+  // Validate required environment variables
   if (envLoaded) {
     final requiredEnvVars = ['API_KEY', 'SOCKET_URL'];
     final missingEnvVars = requiredEnvVars.where((v) => dotenv.env[v] == null).toList();
@@ -47,36 +46,29 @@ Future main() async {
       if (kDebugMode) {
         print('Missing required environment variables: ${missingEnvVars.join(', ')}');
       }
+      // In production, fail fast if required env vars are missing
       if (const bool.fromEnvironment('dart.vm.product') == true) {
         throw Exception('Missing required environment variables: ${missingEnvVars.join(', ')}');
       }
     }
   }
 
-  // Ensure socketio.socketio() is correctly defined and available
-  // Assuming 'socketio.dart' correctly provides a 'socketio' function/class
-  var socket;
-  try {
-    socket = socketio.socketio();
-    socket.on('connect', (_) {
-      if (kDebugMode) {
-        print('Socket connected');
-      }
-    });
-    socket.on('connect_error', (error) {
-      if (kDebugMode) {
-        print('Socket connection error: $error');
-      }
-    });
-  } catch (e) {
+  var socket = socketio.socketio();
+
+  // Handle socket connection status
+  socket.on('connect', (_) {
     if (kDebugMode) {
-      print('Failed to initialize socket: $e');
+      print('Socket connected');
     }
-    // Optionally handle error or provide a default socket object
-  }
+  });
 
+  socket.on('connect_error', (error) {
+    if (kDebugMode) {
+      print('Socket connection error: $error');
+    }
+  });
 
-  runApp(MyApp(socket: socket));
+  runApp(MyApp());
 }
 
 class MyApp extends StatelessWidget {
@@ -93,7 +85,9 @@ class MyApp extends StatelessWidget {
         '/signup': (context) => const SignUpScreen(), // Added const
         '/forgot-password': (context) => const ForgotPasswordScreen(),
         '/home-screen': (context) => const HomeScreen(),
-        '/map': (context) => SymbolMap(socket: socket),
+        '/map': (context) => SymbolMap(
+          socket: socketio.socketio(),
+        ), // Added const
       },
       theme: transitTheme,
       debugShowCheckedModeBanner: false,
