@@ -20,6 +20,11 @@ const tripSchema = new mongoose.Schema({
 		ref: 'User',
 		required: true,
 	},
+	scheduleId: {
+		type: mongoose.Schema.Types.ObjectId,
+		ref: 'Schedule',
+		required: true,
+	},
 	status: {
 		type: String,
 		enum: ['scheduled', 'in-progress', 'completed', 'cancelled'],

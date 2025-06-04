@@ -7,6 +7,8 @@ import logger from '../utils/logger';
 const addReservation = async(req: express.Request): Promise<object> => {
 	const registrationCode = req.body.registrationCode as string;
 	const timeStr = req.body.time as string;
+	const location = req.body.location as string;
+	const userType = req.body.userType as string;
 
 	const [hours, minutes] = timeStr.split(':').map(Number);
 	const now = new Date();
@@ -20,20 +22,27 @@ const addReservation = async(req: express.Request): Promise<object> => {
 		0
 	);
 
+	if (reservationTime < now) {
+		throw new BadRequest('Cannot make reservations in the past');
+	}
+
 	// Return if entry already exists
 	const existingReservation = await reservationSchema.VehicleReservation.findOne({ registrationCode, time: reservationTime });
 	if (existingReservation) {
 		throw new BadRequest('Reservation already exists');
 	}
 
-	const oneHourLater = new Date(now.getTime() + 60 * 60 * 1000);
-	if (reservationTime > oneHourLater) {
-		throw new BadRequest('Reservation time must be within one hour');
+	const twoHoursLater = new Date(now.getTime() + 2 * 60 * 60 * 1000);
+	if (reservationTime < twoHoursLater) {
+		throw new BadRequest('Reservation time must be within two hours');
 	}
 
 	const reservation = new reservationSchema.VehicleReservation({
 		registrationCode,
 		time: reservationTime,
+		location,
+		userType,
+		status: 'scheduled',
 	})
 
 	try {

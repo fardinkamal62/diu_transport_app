@@ -13,7 +13,7 @@ router.get('/ping', function (_: express.Request, res: express.Response) {
 	controllers.ping(res);
 });
 
-router.use(middlewares.userAuth);
+router.use(middlewares.isAuthenticated);
 router.get('/api/v1/vehicle-location', async function (_: express.Request, res: express.Response) {
 	try {
 		const result = await controllers.getVehiclesLocation();

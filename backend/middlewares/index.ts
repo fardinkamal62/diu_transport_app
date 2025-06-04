@@ -35,7 +35,7 @@ const validateRequest = (schema: Schema): RequestHandler => {
  * Middleware to check if the user is an admin
  */
 const adminAuth = (req: Request, res: Response, next: NextFunction): void => {
-	const token = req.headers.authorization?.split(' ')[1];
+	const token = req.headers.authorization;
 
 	if (!token) {
 		next(new Unauthorized('No token provided'));
@@ -107,10 +107,74 @@ const userAuth = (req: Request, _res: Response, next: NextFunction): void => {
 	request.end();
 };
 
+const isAuthenticated = (req: Request, res: Response, next: NextFunction): void => {
+	const token = req.headers.authorization;
+
+	if (!token) {
+		next(new Unauthorized('No token provided'));
+		return;
+	}
+
+	// First try to verify as admin using JWT
+	try {
+		const secret: string = process.env.JWT_SECRET as string;
+		const decoded = jwt.verify(token, secret) as { role: string };
+    
+		// If successful, mark as admin
+		(req as any).authType = 'admin';
+		(req as any).user = decoded;
+		return next();
+	} catch (error) {
+		// Not an admin token, continue to user authentication
+	}
+
+	// Try authenticating as user through external API
+	const options = {
+		hostname: 'api.diu.ac',
+		port: 443,
+		path: `/student/profile?token=${token}`,
+		method: 'GET',
+		headers: {
+			'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:138.0) Gecko/20100101 Firefox/138.0',
+			'Referer': 'https://students.diu.ac/',
+			'Content-Type': 'application/json',
+		},
+	};
+
+	const request = https.request(options, (res) => {
+		let data = '';
+		res.on('data', (chunk) => {
+			data += chunk;
+		});
+		res.on('end', () => {
+			try {
+				const result = JSON.parse(data);
+				if (res.statusCode && res.statusCode >= 200 && res.statusCode < 300) {
+					// Mark as user
+					(req as any).authType = 'user';
+					(req as any).user = result;
+					next();
+				} else {
+					next(new Unauthorized(result?.error || 'Authentication failed'));
+				}
+			} catch (e) {
+				next(new Unauthorized('Invalid JSON response'));
+			}
+		});
+	});
+
+	request.on('error', (e) => {
+		next(new Unauthorized(e.message));
+	});
+
+	request.end();
+};
+
 const middlewares = {
 	validateRequest,
 	adminAuth,
 	userAuth,
+	isAuthenticated
 };
 
 export default middlewares;

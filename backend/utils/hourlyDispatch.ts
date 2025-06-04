@@ -1,115 +1,207 @@
 import { ObjectId } from 'mongodb';
 
-interface demandForecast {
-    hour: Date,
-    students: number,
-    teachers: number
+interface DemandForecast {
+	arrivalTime: Date;  // When passengers need to arrive at campus
+	students: number;
+	teachers: number;
 }
 
-interface dispatches {
-    type: string,
-    count: number,
-    dispatchTime: Date,
-    returnTime: Date,
-    notes?: string,
-	vehicles: ObjectId[],
+interface VehicleDispatch {
+	type: 'bus' | 'microbus';
+	dispatchTime: Date;
+	pickupTime: Date;    // When vehicle arrives at Notunbazar
+	returnTime: Date;    // When vehicle returns to campus
+	notes: string;
+	vehicleId: ObjectId;
+	passengers: {
+		students: number;
+		teachers: number;
+	};
 }
 
-export default function calculateHourlyDispatch(currentTime: Date, demandForecast: demandForecast, availableDrivers: any[], availableVehicles: any[]): object {
+interface RemainingPassengers {
+	students: number;
+	teachers: number;
+}
+
+interface DispatchResult {
+	availableResources: {
+		buses: number;
+		microbuses: number;
+		busDrivers: number;
+		microbusDrivers: number;
+	};
+	requirements: {
+		teachers: number;
+		students: number;
+		busesNeeded: number;
+		microbusesNeeded: number;
+	};
+	dispatches: VehicleDispatch[];
+	warnings: string[];
+	campusReturnTime: Date;
+	remainingPassengers: RemainingPassengers;
+}
+
+export default function calculateDispatchSchedule(
+	demand: DemandForecast,
+	availableDrivers: any[],
+	availableVehicles: any[]
+): DispatchResult {
 	// Constants
-	const BUS_TRAVEL_TIME = 40; // minutes to pickup point
-	const MICROBUS_TRAVEL_TIME = 20; // minutes to pickup point
-	const WAITING_TIME = 10; // minutes at pickup point
-	const BUS_CAPACITY = 40;
-	const MICROBUS_CAPACITY = 11;
+	const BUS_TRAVEL_TIME = 40;
+	const MICROBUS_TRAVEL_TIME = 20;
+	const WAITING_TIME = 10;
+	const MIN_BUS_UTILIZATION = 0.5; // At least 50% of bus capacity should be used
 
-	// Filter available resources
-	const activeBuses = availableVehicles.filter(v => v.type === 'bus');
+	const warnings: string[] = [];
+	const remainingPassengers: RemainingPassengers = {
+		students: 0,
+		teachers: 0
+	};
 
-	const activeMicrobuses = availableVehicles.filter(v => v.type === 'microbus');
+	// Filter and sort vehicles by capacity (descending)
+	const availableBuses = availableVehicles
+		.filter(v => v.type === 'bus' && v.status === 'active')
+		.sort((a, b) => (b.capacity || 40) - (a.capacity || 40)); // Default to 40 if capacity not specified
 
-	const availableBusDrivers = availableDrivers.filter(d => d.status !== 'inactive');
+	const availableMicrobuses = availableVehicles
+		.filter(v => v.type === 'microbus' && v.status === 'active')
+		.sort((a, b) => (b.capacity || 10) - (a.capacity || 10)); // Default to 10 if capacity not specified
 
-	const availableMicrobusDrivers = availableDrivers.filter(d => d.status !== 'inactive');
-
-	const pickupTime = new Date(currentTime);
-
-	// Calculate required vehicles
-	const teachers = demandForecast.teachers || 0;
-	const students = demandForecast.students || 0;
-
-	// Teachers must go in microbuses (priority)
-	const microbusesForTeachers = Math.ceil(teachers / MICROBUS_CAPACITY);
-	const remainingMicrobuses = Math.max(0, activeMicrobuses.length - microbusesForTeachers);
-
-	// Allocate remaining microbuses to students
-	const studentsInMicrobuses = Math.min(
-		students,
-		remainingMicrobuses * MICROBUS_CAPACITY
+	// Filter drivers
+	const availableBusDrivers = availableDrivers.filter(d =>
+		d.status !== 'inactive' && (d.preferredVehicle?.includes('bus') || !d.preferredVehicle)
 	);
-	const remainingStudents = Math.max(0, students - studentsInMicrobuses);
 
-	// Allocate buses to remaining students
-	const busesNeeded = Math.ceil(remainingStudents / BUS_CAPACITY);
+	const availableMicrobusDrivers = availableDrivers.filter(d =>
+		d.status !== 'inactive' && (d.preferredVehicle?.includes('microbus') || !d.preferredVehicle)
+	);
 
-	// Calculate dispatch times
-	const busDispatchTime = new Date(pickupTime);
-	busDispatchTime.setMinutes(busDispatchTime.getMinutes() - BUS_TRAVEL_TIME);
+	let remainingStudents =  demand.students || 0;
+	let remainingTeachers =  demand.teachers || 0;
+	const dispatches: VehicleDispatch[] = [];
 
-	const microbusDispatchTime = new Date(pickupTime);
-	microbusDispatchTime.setMinutes(microbusDispatchTime.getMinutes() - MICROBUS_TRAVEL_TIME);
+	// Helper function to create trip times
+	const createTripTimes = (arrivalTime: Date, isBus: boolean) => {
+		const travelTime = isBus ? BUS_TRAVEL_TIME : MICROBUS_TRAVEL_TIME;
+		const pickupTime = new Date(arrivalTime);
+		pickupTime.setMinutes(pickupTime.getMinutes() - travelTime);
 
-	// Calculate return times
-	const busReturnTime = new Date(pickupTime);
-	busReturnTime.setMinutes(busReturnTime.getMinutes() + WAITING_TIME + BUS_TRAVEL_TIME);
+		return {
+			dispatchTime: new Date(pickupTime.getTime() - (travelTime * 60000) - (WAITING_TIME * 60000)),
+			pickupTime,
+			returnTime: new Date(pickupTime.getTime() + (travelTime * 60000) + (WAITING_TIME * 60000))
+		};
+	};
 
-	const microbusReturnTime = new Date(pickupTime);
-	microbusReturnTime.setMinutes(microbusReturnTime.getMinutes() + WAITING_TIME + MICROBUS_TRAVEL_TIME);
+	// 1. Allocate buses for students if needed (same as before)
+	const studentDispatches: VehicleDispatch[] = [];
+	let busIndex = 0;
+	let microbusIndex = 0;
 
+	while (remainingStudents > 0 && busIndex < availableBuses.length) {
+		const bus = availableBuses[busIndex];
+		const busCapacity = bus.capacity || 40;
 
-	const dispatches = [] as dispatches[];
+		// Check if we should use this bus
+		if (remainingStudents >= busCapacity || remainingStudents >= busCapacity * MIN_BUS_UTILIZATION) {
+			const passengers = Math.min(remainingStudents, busCapacity);
+			const times = createTripTimes(demand.arrivalTime, true);
 
-	// Schedule bus dispatches if needed
-	if (busesNeeded > 0) {
-		dispatches.push({
-			type: 'bus',
-			count: Math.min(busesNeeded, activeBuses.length, availableBusDrivers.length),
-			dispatchTime: busDispatchTime,
-			returnTime: busReturnTime,
-			vehicles: activeBuses.slice(0, Math.min(busesNeeded, activeBuses.length, availableBusDrivers.length)).map(m => new ObjectId(m._id)),
-			notes: busesNeeded > activeBuses.length ? `Shortage of ${busesNeeded - activeBuses.length} buses` :
-				busesNeeded > availableBusDrivers.length ? `Shortage of ${busesNeeded - availableBusDrivers.length} bus drivers` : undefined
-		});
+			studentDispatches.push({
+				type: 'bus',
+				...times,
+				vehicleId: new ObjectId(bus._id),
+				passengers: {
+					students: passengers,
+					teachers: 0
+				},
+				notes: ''
+			});
+
+			remainingStudents -= passengers;
+			busIndex++;
+			continue;
+		}
+		break; // If not enough students for a bus, stop allocating buses
 	}
 
-	// Schedule microbus dispatches
-	const totalMicrobusesNeeded = microbusesForTeachers + Math.ceil(studentsInMicrobuses / MICROBUS_CAPACITY);
-	if (totalMicrobusesNeeded > 0) {
-		dispatches.push({
+	// 2. Allocate microbuses for teachers, fill remaining seats with students
+	const microbusDispatches: VehicleDispatch[] = [];
+	while ((remainingTeachers > 0 || remainingStudents > 0) && microbusIndex < availableMicrobuses.length) {
+		const microbus = availableMicrobuses[microbusIndex];
+		const microbusCapacity = microbus.capacity || 10;
+
+		// Assign as many teachers as possible
+		const teachersInThisMicrobus = Math.min(remainingTeachers, microbusCapacity);
+		let seatsLeft = microbusCapacity - teachersInThisMicrobus;
+
+		// Fill remaining seats with students
+		const studentsInThisMicrobus = Math.min(remainingStudents, seatsLeft);
+
+		const times = createTripTimes(demand.arrivalTime, false);
+
+		microbusDispatches.push({
 			type: 'microbus',
-			count: Math.min(totalMicrobusesNeeded, activeMicrobuses.length, availableMicrobusDrivers.length),
-			dispatchTime: microbusDispatchTime,
-			returnTime: microbusReturnTime,
-			vehicles: activeMicrobuses.slice(0, Math.min(totalMicrobusesNeeded, activeMicrobuses.length, availableMicrobusDrivers.length)).map(m => new ObjectId(m._id)),
-			notes: totalMicrobusesNeeded > activeMicrobuses.length ? `Shortage of ${totalMicrobusesNeeded - activeMicrobuses.length} microbuses` :
-				totalMicrobusesNeeded > availableMicrobusDrivers.length ? `Shortage of ${totalMicrobusesNeeded - availableMicrobusDrivers.length} microbus drivers` : undefined
+			...times,
+			vehicleId: new ObjectId(microbus._id),
+			passengers: {
+				students: studentsInThisMicrobus,
+				teachers: teachersInThisMicrobus
+			},
+			notes: ''
 		});
+
+		remainingTeachers -= teachersInThisMicrobus;
+		remainingStudents -= studentsInThisMicrobus;
+		microbusIndex++;
+	}
+
+	// Combine all dispatches
+	dispatches.push(...studentDispatches, ...microbusDispatches);
+
+	// Handle remaining passengers
+	if (remainingStudents > 0) {
+		warnings.push(`Could not transport ${remainingStudents} students`);
+		remainingPassengers.students = remainingStudents;
+	}
+	if (remainingTeachers > 0) {
+		warnings.push(`Could not transport ${remainingTeachers} teachers`);
+		remainingPassengers.teachers = remainingTeachers;
+	}
+
+	// Check driver availability
+	const usedBusDrivers = dispatches
+		.filter(d => d.type === 'bus')
+		.reduce((sum) => sum + 1, 0);
+	const usedMicrobusDrivers = dispatches
+		.filter(d => d.type === 'microbus')
+		.reduce((sum) => sum + 1, 0);
+
+	if (usedBusDrivers > availableBusDrivers.length) {
+		warnings.push(`Insufficient bus drivers: Need ${usedBusDrivers}, have ${availableBusDrivers.length}`);
+	}
+	if (usedMicrobusDrivers > availableMicrobusDrivers.length) {
+		warnings.push(`Insufficient microbus drivers: Need ${usedMicrobusDrivers}, have ${availableMicrobusDrivers.length}`);
 	}
 
 	return {
 		availableResources: {
-			buses: activeBuses.length,
-			microbuses: activeMicrobuses.length,
+			buses: availableBuses.length,
+			microbuses: availableMicrobuses.length,
 			busDrivers: availableBusDrivers.length,
 			microbusDrivers: availableMicrobusDrivers.length
 		},
-		pickupTime: pickupTime,
 		requirements: {
-			teachers,
-			students,
-			busesNeeded,
-			microbusesNeeded: microbusesForTeachers + Math.ceil(studentsInMicrobuses / MICROBUS_CAPACITY)
+			teachers: demand.teachers || 0,
+			students: demand.students || 0,
+			busesNeeded: dispatches.filter(d => d.type === 'bus').length,
+			microbusesNeeded: dispatches.filter(d => d.type === 'microbus').length
 		},
 		dispatches,
+		warnings,
+		campusReturnTime: demand.arrivalTime,
+		remainingPassengers
 	};
 }

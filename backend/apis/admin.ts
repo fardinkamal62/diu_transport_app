@@ -42,7 +42,7 @@ const login = async (req: express.Request): Promise<object> => {
 			throw new Error('Secret not found');
 		}
 
-		const sign: string = jwt.sign({ username: user.phoneNumber, role: 'admin' }, secret, { expiresIn: '1d' });
+		const sign: string = jwt.sign({ username: user.username, role: 'admin' }, secret, { expiresIn: '1d' });
 
 		if (!sign) {
 			throw new InternalServerError('Failed to generate token');

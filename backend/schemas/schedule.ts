@@ -6,7 +6,28 @@ const scheduleSchema = new mongoose.Schema({
 		type: Date,
 		default: ():Date => new Date(),
 	},
-	pickupTime: {
+	availableResources: {
+		_id: false,
+		type: {
+			buses: {
+				type: Number,
+				required: true,
+			},
+			busDrivers: {
+				type: Number,
+				required: true,
+			},
+			microbuses: {
+				type: Number,
+				required: true,
+			},
+			microbusDrivers: {
+				type: Number,
+				required: true,
+			},
+		}
+	},
+	campusReturnTime: {
 		type: Date,
 		required: true,
 	},
@@ -39,10 +60,6 @@ const scheduleSchema = new mongoose.Schema({
 				enum: ['bus', 'microbus'],
 				required: true,
 			},
-			count: {
-				type: Number,
-				required: true,
-			},
 			dispatchTime: {
 				type: Date,
 				required: true,
@@ -51,14 +68,47 @@ const scheduleSchema = new mongoose.Schema({
 				type: Date,
 				required: true,
 			},
-			vehicles: [{
+			pickupTime: {
+				type: Date,
+				required: true,
+			},
+			vehicleId: {
 				type: mongoose.Schema.Types.ObjectId,
 				ref: 'Vehicle',
-			}],
+			},
+			passengers: {
+				type: {
+					students: {
+						type: Number,
+						required: true,
+					},
+					teachers: {
+						type: Number,
+						required: true,
+					},
+				}
+			},
 			notes: {
 				type: String,
+				default: '',
 			}
 		}]
+	},
+	warnings: [{
+		type: String,
+	}],
+	remainingPassengers: {
+		_id: false,
+		type: {
+			students: {
+				type: Number,
+				default: 0,
+			},
+			teachers: {
+				type: Number,
+				default: 0,
+			},
+		}
 	}
 }, { autoIndex: false });
 
