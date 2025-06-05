@@ -3,6 +3,7 @@ import 'package:diu_transport_student_app/screen/auth/forget_pass_screen.dart';
 import 'package:diu_transport_student_app/screen/auth/login_screen.dart';
 import 'package:diu_transport_student_app/screen/auth/signup_screen.dart';
 import 'package:diu_transport_student_app/screen/home_screen.dart';
+import 'package:diu_transport_student_app/screen/reservation_screen.dart';
 import 'package:diu_transport_student_app/theme/transit_theme.dart';
 import 'package:diu_transport_student_app/screen/vehicle_list.dart';
 import 'package:flutter/foundation.dart';
@@ -84,15 +85,16 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'DIU Transport Student App',
-      initialRoute: '/login',
+      initialRoute: '/reservation_screen',
       routes: {
         '/login': (context) => const LoginScreen(),
         '/signup': (context) => const SignUpScreen(), // Added const
         '/forgot-password': (context) => const ForgotPasswordScreen(),
         '/home-screen': (context) => const HomeScreen(),
         '/vehicle-list': (context) => const VehicleList(),
-        '/map':
-            (context) => SymbolMap(socket: socketio.socketio()), // Added const
+        '/map': (context) => SymbolMap(socket: socketio.socketio()),
+        '/reservation_screen':
+            (context) => const ReservationScreen(), // Added const
       },
       theme: transitTheme,
       debugShowCheckedModeBanner: false,

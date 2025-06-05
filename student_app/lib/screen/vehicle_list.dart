@@ -30,4 +30,3 @@ class VehicleList extends StatelessWidget {
     );
   }
 }
-
