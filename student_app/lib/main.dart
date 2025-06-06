@@ -1,4 +1,11 @@
 import 'dart:io';
+import 'package:diu_transport_student_app/screen/auth/forget_pass_screen.dart';
+import 'package:diu_transport_student_app/screen/auth/login_screen.dart';
+import 'package:diu_transport_student_app/screen/auth/signup_screen.dart';
+import 'package:diu_transport_student_app/screen/home_screen.dart';
+import 'package:diu_transport_student_app/screen/reservation_screen.dart';
+import 'package:diu_transport_student_app/theme/transit_theme.dart';
+import 'package:diu_transport_student_app/screen/vehicle_list.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
@@ -35,15 +42,20 @@ Future main() async {
   // Validate required environment variables
   if (envLoaded) {
     final requiredEnvVars = ['API_KEY', 'SOCKET_URL'];
-    final missingEnvVars = requiredEnvVars.where((v) => dotenv.env[v] == null).toList();
+    final missingEnvVars =
+        requiredEnvVars.where((v) => dotenv.env[v] == null).toList();
 
     if (missingEnvVars.isNotEmpty) {
       if (kDebugMode) {
-        print('Missing required environment variables: ${missingEnvVars.join(', ')}');
+        print(
+          'Missing required environment variables: ${missingEnvVars.join(', ')}',
+        );
       }
       // In production, fail fast if required env vars are missing
       if (const bool.fromEnvironment('dart.vm.product') == true) {
-        throw Exception('Missing required environment variables: ${missingEnvVars.join(', ')}');
+        throw Exception(
+          'Missing required environment variables: ${missingEnvVars.join(', ')}',
+        );
       }
     }
   }
@@ -63,22 +75,29 @@ Future main() async {
     }
   });
 
-  runApp(MyApp(socket: socket));
+  runApp(MyApp());
 }
 
 class MyApp extends StatelessWidget {
-  final dynamic socket;
-
-  const MyApp({super.key, required this.socket});
+  const MyApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'DIU Transport Student App',
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-      ),
-      home: SymbolMap(socket: socket),
+      initialRoute: '/reservation_screen',
+      routes: {
+        '/login': (context) => const LoginScreen(),
+        '/signup': (context) => const SignUpScreen(), // Added const
+        '/forgot-password': (context) => const ForgotPasswordScreen(),
+        '/home-screen': (context) => const HomeScreen(),
+        '/vehicle-list': (context) => const VehicleList(),
+        '/map': (context) => SymbolMap(socket: socketio.socketio()),
+        '/reservation_screen':
+            (context) => const ReservationScreen(), // Added const
+      },
+      theme: transitTheme,
+      debugShowCheckedModeBanner: false,
     );
   }
 }
