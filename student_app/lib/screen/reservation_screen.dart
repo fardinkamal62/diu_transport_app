@@ -52,7 +52,7 @@ class ReservationScreen extends StatelessWidget {
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(20),
                               ),
-                              title: Text("Booking"),
+                              title: Text("Booking For 07:30 AM"),
                               content: Text(
                                 "Would you like to select this time to board the bus??",
                               ),
@@ -73,7 +73,7 @@ class ReservationScreen extends StatelessWidget {
                       label: Padding(
                         padding: const EdgeInsets.all(8.0),
                         child: Text(
-                          "07:00 AM",
+                          "07:30 AM",
                           style: TextStyle(color: diuSurfaceColor),
                         ),
                       ),
@@ -97,7 +97,7 @@ class ReservationScreen extends StatelessWidget {
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(20),
                               ),
-                              title: Text("Booking"),
+                              title: Text("Booking For 8:00 AM"),
                               content: Text(
                                 "Would you like to select this time to board the bus??",
                               ),
@@ -142,7 +142,7 @@ class ReservationScreen extends StatelessWidget {
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(20),
                               ),
-                              title: Text("booking"),
+                              title: Text("booking For 09:00 AM"),
                               content: Text(
                                 "Would you like to select this time to board the bus?",
                               ),
@@ -192,7 +192,7 @@ class ReservationScreen extends StatelessWidget {
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(20),
                               ),
-                              title: Text("Booking"),
+                              title: Text("Booking For 10:00 AM"),
                               content: Text(
                                 "Would you like to select this time to board the bus??",
                               ),
@@ -237,7 +237,7 @@ class ReservationScreen extends StatelessWidget {
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(20),
                               ),
-                              title: Text("Booking"),
+                              title: Text("Booking For 11:00 AM"),
                               content: Text(
                                 "Would you like to select this time to board the bus??",
                               ),
@@ -282,7 +282,7 @@ class ReservationScreen extends StatelessWidget {
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(20),
                               ),
-                              title: Text("booking"),
+                              title: Text("booking For 12:00 PM"),
                               content: Text(
                                 "Would you like to select this time to board the bus?",
                               ),
@@ -332,7 +332,7 @@ class ReservationScreen extends StatelessWidget {
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(20),
                               ),
-                              title: Text("Booking"),
+                              title: Text("Booking For 01:00 PM"),
                               content: Text(
                                 "Would you like to select this time to board the bus??",
                               ),
@@ -377,7 +377,7 @@ class ReservationScreen extends StatelessWidget {
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(20),
                               ),
-                              title: Text("Booking"),
+                              title: Text("Booking For 02:00 PM"),
                               content: Text(
                                 "Would you like to select this time to board the bus??",
                               ),
@@ -422,7 +422,7 @@ class ReservationScreen extends StatelessWidget {
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(20),
                               ),
-                              title: Text("booking"),
+                              title: Text("booking For 03:00 PM"),
                               content: Text(
                                 "Would you like to select this time to board the bus?",
                               ),
@@ -472,7 +472,7 @@ class ReservationScreen extends StatelessWidget {
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(20),
                               ),
-                              title: Text("Booking"),
+                              title: Text("Booking For 04:00 PM"),
                               content: Text(
                                 "Would you like to select this time to board the bus??",
                               ),
@@ -517,7 +517,7 @@ class ReservationScreen extends StatelessWidget {
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(20),
                               ),
-                              title: Text("Booking"),
+                              title: Text("Booking For 05:00 AM"),
                               content: Text(
                                 "Would you like to select this time to board the bus??",
                               ),
@@ -538,7 +538,7 @@ class ReservationScreen extends StatelessWidget {
                       label: Padding(
                         padding: const EdgeInsets.all(8.0),
                         child: Text(
-                          "05:00 PM",
+                          "05:00 AM",
                           style: TextStyle(color: diuSurfaceColor),
                         ),
                       ),
@@ -562,7 +562,7 @@ class ReservationScreen extends StatelessWidget {
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(20),
                               ),
-                              title: Text("booking"),
+                              title: Text("booking For 06:00 PM"),
                               content: Text(
                                 "Would you like to select this time to board the bus?",
                               ),
@@ -612,7 +612,7 @@ class ReservationScreen extends StatelessWidget {
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(20),
                               ),
-                              title: Text("Booking"),
+                              title: Text("Booking For 07:00 PM"),
                               content: Text(
                                 "Would you like to select this time to board the bus??",
                               ),
@@ -657,7 +657,7 @@ class ReservationScreen extends StatelessWidget {
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(20),
                               ),
-                              title: Text("Booking"),
+                              title: Text("Booking For 8:00 PM"),
                               content: Text(
                                 "Would you like to select this time to board the bus??",
                               ),
@@ -702,7 +702,7 @@ class ReservationScreen extends StatelessWidget {
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(20),
                               ),
-                              title: Text("booking"),
+                              title: Text("booking For 09:00 PM"),
                               content: Text(
                                 "Would you like to select this time to board the bus?",
                               ),
