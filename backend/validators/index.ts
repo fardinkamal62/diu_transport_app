@@ -52,7 +52,7 @@ const updateDriverSchema = Joi.object({
 });
 
 const userLoginSchema = Joi.object({
-	email: Joi.string().max(MAX_EMAIL_LENGTH).email(),
+	email: Joi.string().max(MAX_EMAIL_LENGTH).email().required(),
 	password: Joi.string().required(),
 });
 
