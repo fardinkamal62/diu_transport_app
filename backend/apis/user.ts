@@ -10,17 +10,8 @@ const addReservation = async(req: express.Request): Promise<object> => {
 	const location = req.body.location as string;
 	const userType = req.body.userType as string;
 
-	const [hours, minutes] = timeStr.split(':').map(Number);
 	const now = new Date();
-	const reservationTime = new Date(
-		now.getFullYear(),
-		now.getMonth(),
-		now.getDate(),
-		hours,
-		minutes,
-		0,
-		0
-	);
+	const reservationTime = new Date(timeStr);
 
 	if (reservationTime < now) {
 		throw new BadRequest('Cannot make reservations in the past');
@@ -32,9 +23,9 @@ const addReservation = async(req: express.Request): Promise<object> => {
 		throw new BadRequest('Reservation already exists');
 	}
 
-	const twoHoursLater = new Date(now.getTime() + 2 * 60 * 60 * 1000);
-	if (reservationTime < twoHoursLater) {
-		throw new BadRequest('Reservation time must be within two hours');
+	const hoursLater = new Date(now.getTime() + 24 * 60 * 60 * 1000);
+	if (reservationTime > hoursLater) {
+		throw new BadRequest('Reservation time must be within 24 hours');
 	}
 
 	const reservation = new reservationSchema.VehicleReservation({
@@ -49,7 +40,7 @@ const addReservation = async(req: express.Request): Promise<object> => {
 		await reservation.save();
 		return reservation;
 	} catch (e) {
-		logger.error(('Failed to add reservation'), e);
+		logger.error('Failed to add reservation', e);
 		throw new InternalServerError('Failed to add reservation');
 	}
 };
