@@ -3,17 +3,23 @@ import 'package:google_fonts/google_fonts.dart';
 
 // --- Color Palette ---
 const Color diuPrimaryGreen = Color(0xFF006A4E); // A deep
-const Color diuAccentRed = Color(0xFFF42A41);   // A strong
-const Color diuLightGreen = Color(0xFF5DB996);  // A lighter, more muted green
-const Color diuBackgroundColor = Color(0xFFFFFBF1); // A very light, warm off-white for main backgrounds
-const Color diuSurfaceColor = Color(0xFFFBF6E9);    // Same as background for cards, dialogs, etc.
+const Color diuAccentRed = Color(0xFFF42A41); // A strong
+const Color diuLightGreen = Color(0xFF5DB996); // A lighter, more muted green
+const Color diuBackgroundColor = Color(
+  0xFFFFFBF1,
+); // A very light, warm off-white for main backgrounds
+const Color diuSurfaceColor = Color(
+  0xFFFBF6E9,
+); // Same as background for cards, dialogs, etc.
 
 // On-color definitions (for text/icons placed on top of primary, secondary, etc.)
-const Color diuOnPrimaryColor = Colors.white;       // Text/icons on primary green
-const Color diuOnSecondaryColor = diuPrimaryGreen; // Text/icons on secondary color (red)
-const Color diuOnSurfaceColor = Colors.black87;     // Dark text/icons on light surface/background
-const Color diuOnErrorColor = Colors.white;         // Text/icons on error color
-const Color diuErrorColor = Colors.red;             // Standard error red
+const Color diuOnPrimaryColor = Colors.white; // Text/icons on primary green
+const Color diuOnSecondaryColor =
+    diuPrimaryGreen; // Text/icons on secondary color (red)
+const Color diuOnSurfaceColor =
+    Colors.black87; // Dark text/icons on light surface/background
+const Color diuOnErrorColor = Colors.white; // Text/icons on error color
+const Color diuErrorColor = Colors.red; // Standard error red
 
 // --- Main Theme Data ---
 final ThemeData transitTheme = ThemeData(
@@ -25,12 +31,10 @@ final ThemeData transitTheme = ThemeData(
     secondaryContainer: Color(0xFFE3F0AF),
     tertiary: diuLightGreen,
     surface: diuSurfaceColor,
-    background: diuBackgroundColor,
     error: diuErrorColor,
     onPrimary: diuOnPrimaryColor,
     onSecondary: diuOnSecondaryColor,
-    onSurface: diuOnSurfaceColor,
-    onBackground: diuOnSurfaceColor, // Added onBackground for completeness
+    onSurface: diuOnSurfaceColor, // Added onBackground for completeness
     onError: diuOnErrorColor,
     outline: diuLightGreen,
     shadow: Colors.black12,
@@ -143,9 +147,7 @@ final ThemeData transitTheme = ThemeData(
     style: ElevatedButton.styleFrom(
       backgroundColor: diuPrimaryGreen,
       foregroundColor: diuOnPrimaryColor,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(8.0),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8.0)),
       padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
       textStyle: GoogleFonts.montserrat(
         fontSize: 16,
@@ -167,9 +169,7 @@ final ThemeData transitTheme = ThemeData(
     style: OutlinedButton.styleFrom(
       foregroundColor: diuPrimaryGreen,
       side: const BorderSide(color: diuPrimaryGreen, width: 1.5),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(8.0),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8.0)),
       padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
       textStyle: GoogleFonts.montserrat(
         fontSize: 16,
@@ -202,7 +202,9 @@ final ThemeData transitTheme = ThemeData(
       borderSide: const BorderSide(color: diuErrorColor, width: 2.0),
     ),
     labelStyle: GoogleFonts.montserrat(color: diuPrimaryGreen),
-    hintStyle: GoogleFonts.montserrat(color: diuOnSurfaceColor.withOpacity(0.6)),
+    hintStyle: GoogleFonts.montserrat(
+      color: diuOnSurfaceColor.withOpacity(0.6),
+    ),
     errorStyle: GoogleFonts.montserrat(color: diuErrorColor, fontSize: 12),
     prefixIconColor: diuPrimaryGreen,
     suffixIconColor: diuPrimaryGreen,
@@ -211,15 +213,12 @@ final ThemeData transitTheme = ThemeData(
     backgroundColor: diuPrimaryGreen,
     selectedItemColor: diuOnPrimaryColor,
     unselectedItemColor: diuLightGreen,
-    selectedLabelStyle: TextStyle(fontWeight: FontWeight.bold , fontSize: 14.0),
+    selectedLabelStyle: TextStyle(fontWeight: FontWeight.bold, fontSize: 14.0),
     unselectedLabelStyle: TextStyle(fontWeight: FontWeight.normal),
     type: BottomNavigationBarType.fixed,
     elevation: 8.0,
   ),
-  iconTheme: const IconThemeData(
-    color: diuPrimaryGreen,
-    size: 24.0,
-  ),
+  iconTheme: const IconThemeData(color: diuPrimaryGreen, size: 24.0),
   dividerTheme: const DividerThemeData(
     color: diuLightGreen,
     thickness: 1.0,
@@ -246,7 +245,10 @@ final ThemeData transitTheme = ThemeData(
     textColor: diuPrimaryGreen,
     collapsedTextColor: diuOnSurfaceColor,
     tilePadding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-    childrenPadding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+    childrenPadding: const EdgeInsets.symmetric(
+      horizontal: 16.0,
+      vertical: 8.0,
+    ),
   ),
   tooltipTheme: TooltipThemeData(
     decoration: BoxDecoration(
