@@ -142,6 +142,57 @@ router.get('/drivers', async function (_: express.Request, res: express.Response
 	}
 });
 
+/**
+ * @openapi
+ * /manual-reservation:
+ *   post:
+ *     summary: Make a manual reservation for a vehicle
+ *     security:
+ *       - ApiKeyAuth: []
+ *     tags:
+ *       - Vehicle & Driver
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               registrationCode:
+ *                 type: string
+ *               time:
+ *                 type: string
+ *                 format: date-time
+ *               location:
+ *                 type: string
+ *                 enum: ['campus', 'notunbazar', 'sayeednagar']
+ *               userType:
+ *                 type: string
+ *                 enum: ['student', 'teacher', 'staff']
+ *               vehicleId:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Manual reservation made successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 data:
+ *                   type: object
+ */
+router.post('/manual-reservation', async function (req: express.Request, res: express.Response) {
+	try {
+		const result = await controllers.manualReservation(req);
+		res.status(200).json({ success: true, data: result });
+	} catch (error) {
+		res.status(500).json({ success: false, error: (error as Error).message || 'Failed to make manual reservation' });
+	}
+});
+
 
 const indexRoutes = {
 	router,

@@ -5,6 +5,9 @@ import { NotFound, BadRequest } from 'http-errors';
 import schemas from '../schemas/index';
 import vehicleSchema from '../schemas/vehicle';
 import userSchema from '../schemas/user';
+import scheduleSchema from '../schemas/schedule';
+import reservationSchema from '../schemas/reservation';
+
 import cache from '../cache';
 
 import logger from '../utils/logger';
@@ -115,5 +118,58 @@ const getDrivers = async (): Promise<object[]> => {
 	}
 };
 
-const api = { journeyToggle, locationUpdate, getVehiclesLocation, getVehicles, getDrivers };
+
+/**
+ * @function manualReservation
+ * @description This function is used to manually reserve a vehicle for a user.
+ * Sometimes the user may not be able to reserve a vehicle through the app or they want to ride a different vehicle
+ * The vehicle's driver can manually reserve seat for that person.
+ * @param req
+ * @returns {Promise<object>} Returns a promise that resolves to an object containing the reservation details.
+ */
+const manualReservation = async (req: express.Request): Promise<object> => {
+	const vehicleId = req.body.vehicleId as string;
+	const registrationCode = req.body.registrationCode as string;
+	const scheduleId = req.body.scheduleId as string;
+	const location = req.body.location as string;
+	const userType = req.body.userType as string;
+
+	if (!vehicleId || !registrationCode || !scheduleId) {
+		throw new BadRequest('Vehicle ID, User ID and Schedule ID are required');
+	}
+
+	try {
+		const vehicle = await Vehicle.findById(vehicleId);
+		if (!vehicle) {
+			throw new NotFound('Vehicle not found');
+		}
+
+		const user = await User.findById(registrationCode);
+		if (!user) {
+			throw new NotFound('User not found');
+		}
+
+		const schedule = await scheduleSchema.findById(scheduleId);
+		if (!schedule) {
+			throw new NotFound('Schedule not found');
+		}
+
+		await reservationSchema.VehicleReservation.create({
+			registrationCode,
+			time: schedule.campusReturnTime,
+			location,
+			userType,
+			vehicleId: vehicle._id,
+			status: 'onboard',
+			message: 'Manually reserved by driver',
+		});
+
+		return { message: 'Reservation successful', vehicleId, registrationCode };
+	} catch (error: any) {
+		logger.error('Failed to manually reserve vehicle', error);
+		throw new Error(error.message);
+	}
+};
+
+const api = { journeyToggle, locationUpdate, getVehiclesLocation, getVehicles, getDrivers, manualReservation };
 export default api;

@@ -1,4 +1,4 @@
-import { Response } from 'express';
+import { Request, Response } from 'express';
 
 import api from '../apis/index';
 
@@ -23,12 +23,17 @@ const getDrivers = async (): Promise<object> => {
 	return await api.getDrivers();
 };
 
+const manualReservation = async (req: Request): Promise<object> => {
+	return await api.manualReservation(req);
+}
+
 const controllers = {
 	resetConnection,
 	ping,
 	getVehiclesLocation,
 	getVehicles,
 	getDrivers,
+	manualReservation
 };
 
 export default controllers;
