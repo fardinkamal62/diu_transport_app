@@ -11,6 +11,7 @@ import helmet from 'helmet';
 import compression from 'compression';
 import rateLimit from 'express-rate-limit';
 import { config } from 'dotenv';
+import swaggerUi from 'swagger-ui-express';
 
 import indexRoute from './routes/index'
 import mongo from './db';
@@ -19,6 +20,7 @@ import cache from './cache';
 import adminRoutes from './routes/admin';
 import { initSocket } from './socket';
 import userRoutes from './routes/user';
+import swaggerSpec from './swagger';
 
 import logger from './utils/logger';
 import utils from './utils';
@@ -60,11 +62,12 @@ app.use(limiter);
 app.use(cors());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 // Router
 app.use('/api/v1/admin', adminRoutes.router);
 app.use('/api/v1/user', userRoutes.router);
-app.use('/', indexRoute.router);
+app.use('/api/v1', indexRoute.router);
 
 // Handle 404 errors
 app.use((_req: any, _res: any, next: (_arg0: any) => void) => {

@@ -2,33 +2,30 @@ import { Schema } from 'joi';
 import { NextFunction, Request, Response, RequestHandler } from 'express';
 import * as jwt from 'jsonwebtoken';
 
-import createError from 'http-errors';
 import { Unauthorized } from 'http-errors';
 
 import https from 'https';
 
-
-interface ValidationError extends createError.HttpError {
-	details?: string[];
-}
 
 /**
  * Validate the request body against a schema
  * @param schema
  */
 const validateRequest = (schema: Schema): RequestHandler => {
-	return (req: Request, _res: Response, next: NextFunction): void => {
+	return (req: Request, res: Response, next: NextFunction): void => {
 		const { error } = schema.validate(req.body, { abortEarly: false });
 
 		if (error) {
-			const validationError: ValidationError = createError(400, 'Validation Error');
-			validationError.details = error.details.map(detail => detail.message);
-			next(validationError);
+			res.status(400).json({
+				success: false,
+				message: 'Validation Error',
+				details: error.details.map(detail => detail.message),
+			});
+			return;
 		}
 
 		next();
 	};
-
 };
 
 /*
@@ -119,7 +116,7 @@ const isAuthenticated = (req: Request, res: Response, next: NextFunction): void 
 	try {
 		const secret: string = process.env.JWT_SECRET as string;
 		const decoded = jwt.verify(token, secret) as { role: string };
-    
+
 		// If successful, mark as admin
 		(req as any).authType = 'admin';
 		(req as any).user = decoded;

@@ -55,8 +55,8 @@ const addReservation = async(req: express.Request): Promise<object> => {
 };
 
 const getReservations = async(req: express.Request): Promise<object> => {
-	const registrationCode = req.body.registrationCode as string;
-	const timeStr = req.body.time as string | undefined;
+	const registrationCode = req.query.registrationCode as string;
+	const timeStr = req.query.time as string | undefined;
 
 	let query: any = { registrationCode };
 
