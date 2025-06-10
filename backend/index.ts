@@ -13,13 +13,13 @@ import rateLimit from 'express-rate-limit';
 import { config } from 'dotenv';
 import swaggerUi from 'swagger-ui-express';
 
-import indexRoute from './routes/index'
+import indexRoute from './routes/v1/index'
 import mongo from './db';
 import errorHandler from './middlewares/error-handler';
 import cache from './cache';
-import adminRoutes from './routes/admin';
+import adminRoutes from './routes/v1/admin';
 import { initSocket } from './socket';
-import userRoutes from './routes/user';
+import userRoutes from './routes/v1/user';
 import swaggerSpec from './swagger';
 
 import logger from './utils/logger';

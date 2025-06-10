@@ -2,9 +2,9 @@ import express from 'express';
 
 const router = express.Router();
 
-import controllers from '../controllers/admin';
-import middlewares from '../middlewares';
-import validators from '../validators';
+import controllers from '../../controllers/admin';
+import middlewares from '../../middlewares';
+import validators from '../../validators';
 
 /**
  * @openapi

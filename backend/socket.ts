@@ -2,7 +2,7 @@ import { Server } from 'socket.io';
 
 import validators from './validators';
 import logger from './utils/logger';
-import api from './apis';
+import api from './api/v1';
 import cache from './cache';
 
 export function initSocket(server: any): Server {

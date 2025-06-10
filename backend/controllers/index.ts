@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 
-import api from '../apis/index';
+import api from '../api/v1/index';
 
 
 const resetConnection = (res: { connection: { end: () => void } }): void => {

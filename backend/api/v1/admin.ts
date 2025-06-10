@@ -2,11 +2,11 @@ import * as jwt from 'jsonwebtoken';
 import { NotFound, Unauthorized, BadRequest, InternalServerError } from 'http-errors';
 import express from 'express';
 
-import utils from '../utils';
-import userSchema from '../schemas/user';
-import vehicleSchema from '../schemas/vehicle';
+import utils from '../../utils';
+import userSchema from '../../schemas/user';
+import vehicleSchema from '../../schemas/vehicle';
 
-import logger from '../utils/logger';
+import logger from '../../utils/logger';
 
 const login = async (req: express.Request): Promise<object> => {
 	const query: any = {};

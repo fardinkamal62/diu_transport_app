@@ -2,15 +2,15 @@ import express from 'express';
 
 import { NotFound, BadRequest } from 'http-errors';
 
-import schemas from '../schemas/index';
-import vehicleSchema from '../schemas/vehicle';
-import userSchema from '../schemas/user';
-import scheduleSchema from '../schemas/schedule';
-import reservationSchema from '../schemas/reservation';
+import schemas from '../../schemas/index';
+import vehicleSchema from '../../schemas/vehicle';
+import userSchema from '../../schemas/user';
+import scheduleSchema from '../../schemas/schedule';
+import reservationSchema from '../../schemas/reservation';
 
-import cache from '../cache';
+import cache from '../../cache';
 
-import logger from '../utils/logger';
+import logger from '../../utils/logger';
 
 const Vehicle = vehicleSchema.Vehicle;
 const CurrentLocation = schemas.CurrentLocation;

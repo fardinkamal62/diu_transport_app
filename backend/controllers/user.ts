@@ -1,7 +1,7 @@
 import { Request } from 'express';
 import https from 'https';
 
-import api from '../apis/user';
+import api from '../api/v1/user';
 
 const login = async (req: Request): Promise<object> => {
 	const email = req.body.email as string;

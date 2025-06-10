@@ -1,8 +1,8 @@
 import express from 'express';
 import { BadRequest, InternalServerError } from 'http-errors';
 
-import reservationSchema from '../schemas/reservation';
-import logger from '../utils/logger';
+import reservationSchema from '../../schemas/reservation';
+import logger from '../../utils/logger';
 
 const addReservation = async(req: express.Request): Promise<object> => {
 	const registrationCode = req.body.registrationCode as string;
