@@ -24,7 +24,7 @@ const options = {
 			}
 		},
 	},
-	apis: ['./routes/*.ts', './controllers/*.ts', './schemas/*.ts'], // Path to the API docs
+	apis: ['./routes/v1/*.ts', './controllers/*.ts', './schemas/*.ts'], // Path to the API docs
 	customSiteTitle: 'DIU Transport API Docs',
 };
 
