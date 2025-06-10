@@ -85,7 +85,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'DIU Transport Student App',
-      initialRoute: '/reservation_screen',
+      initialRoute: '/login',
       routes: {
         '/login': (context) => const LoginScreen(),
         '/signup': (context) => const SignUpScreen(), // Added const
