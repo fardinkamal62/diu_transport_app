@@ -7,7 +7,7 @@ const coOrdinateSchema = Joi.object({
 	vehicleId: Joi.string().hex().length(24).required(),
 });
 
-const loginSchema = Joi.object({
+const adminLoginSchema = Joi.object({
 	email: Joi.string().max(MAX_EMAIL_LENGTH).email(),
 	username: Joi.string().min(2).max(100),
 	password: Joi.string()
@@ -26,6 +26,8 @@ const addVehicleSchema = Joi.object({
 	type: Joi.string().valid('bus', 'microbus').required(),
 	vehicleRegistrationNumber: Joi.string().min(2).max(100).required(),
 	status: Joi.string().valid('active', 'inactive').default('inactive'),
+	reservedSeats: Joi.number().min(0).default(0),
+	capacity: Joi.number().min(1).max(100).required(),
 });
 
 const addDriverSchema = Joi.object({
@@ -35,6 +37,8 @@ const addDriverSchema = Joi.object({
 		.min(8)
 		.max(100)
 		.required(),
+	status: Joi.string().valid('active', 'inactive').default('inactive'),
+	preferredVehicle: Joi.array().items(Joi.string().valid('bus', 'microbus')).required(),
 });
 
 const updateDriverSchema = Joi.object({
@@ -42,16 +46,36 @@ const updateDriverSchema = Joi.object({
 	phoneNumber: Joi.string().min(10).max(15).pattern(/^[0-9]+$/),
 	password: Joi.string()
 		.min(8)
-		.max(100)
-		.required(),
+		.max(100),
+	status: Joi.string().valid('active', 'inactive'),
+	preferredVehicle: Joi.array().items(Joi.string().valid('bus', 'microbus')),
+});
+
+const userLoginSchema = Joi.object({
+	email: Joi.string().max(MAX_EMAIL_LENGTH).email().required(),
+	password: Joi.string().required(),
+});
+
+const addReservationSchema = Joi.object({
+	registrationCode: Joi.string().min(2).max(100).required(),
+	time: Joi.string().required(),
+	location: Joi.string().valid('campus', 'notunbazar', 'sayeednagar').required(),
+	userType: Joi.string().valid('student', 'teacher', 'staff').required(),
+});
+
+const getReservationSchema = Joi.object({
+	registrationCode: Joi.string().min(2).max(100).required(),
 });
 
 const schemas = {
 	coOrdinateSchema,
-	loginSchema,
+	adminLoginSchema,
 	addVehicleSchema,
 	addDriverSchema,
 	updateDriverSchema,
+	userLoginSchema,
+	addReservationSchema,
+	getReservationSchema
 }
 
 export default schemas;

@@ -1,6 +1,6 @@
 import { Request } from 'express';
 
-import api from '../apis/admin';
+import api from '../api/v1/admin';
 
 const login = (req: Request) : Promise<object> => {
 	return api.login(req);

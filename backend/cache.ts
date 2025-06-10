@@ -2,10 +2,23 @@ import { createClient } from 'redis';
 
 import logger from './utils/logger';
 
+const MAX_RETRY_TIME = 5000;
+let totalRetryTime = 0;
+
 const client = createClient({
 	url: process.env.REDIS_URL || 'redis://localhost:6379',
 	socket: {
-		reconnectStrategy: (retries) => Math.min(retries * 50, 3000)
+		reconnectStrategy: (retries) => {
+			const retryDelay = Math.min(retries * 50, 3000);
+			totalRetryTime += retryDelay;
+
+			if (totalRetryTime > MAX_RETRY_TIME) {
+				logger.error('Max retry time exceeded, exiting...');
+				process.exit(1);
+			}
+
+			return retryDelay;
+		}
 	}
 });
 
