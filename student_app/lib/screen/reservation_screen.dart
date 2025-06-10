@@ -1,7 +1,13 @@
 import 'dart:convert';
 import 'package:diu_transport_student_app/theme/transit_theme.dart';
+import 'package:diu_transport_student_app/widgets/loader.dart'; // Import the Loader widget
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'dart:convert';
+import 'package:intl/intl.dart';
 
 class ReservationScreen extends StatefulWidget {
   const ReservationScreen({super.key});
@@ -13,6 +19,7 @@ class ReservationScreen extends StatefulWidget {
 class _ReservationScreenState extends State<ReservationScreen> {
   String? selectedLocation;
   String? selectedTime;
+  bool isLoading = false; // Add loading state
 
   final List<Map<String, String>> locations = [
     {'label': 'Campus', 'value': 'campus'},
@@ -57,25 +64,56 @@ class _ReservationScreenState extends State<ReservationScreen> {
 
   Future<void> _makeReservation(String location, String time) async {
     try {
-      final response = await http.post(
-        Uri.parse('http://localhost:3000/reservation'),
-        headers: {'Content-Type': 'application/json'},
-        body: jsonEncode({'location': location, 'time': time}),
-      );
+      setState(() {
+        isLoading = true; // Show loading overlay
+      });
 
-      if (response.statusCode == 200) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Reservation confirmed successfully!')),
+      final socketUrl = dotenv.env['SOCKET_URL'] ?? '';
+      final prefs = await SharedPreferences.getInstance();
+      final userData = prefs.getString('userData');
+
+      if (userData != null) {
+        final data = json.decode(userData);
+
+        final response = await http.post(
+          Uri.parse('$socketUrl/api/v1/user/reservation'),
+          headers: {'Content-Type': 'application/json','Authorization': '${data['token']}'},
+          body: jsonEncode({
+            'location': location,
+            'time': DateFormat("yyyy-MM-dd").format(DateTime.now()) + 'T' + time + ':00',
+            'registrationCode': data['user']['reg_code'],
+            'userType': 'student',
+          }),
         );
-      } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to confirm reservation.')),
-        );
+
+        if (response.statusCode == 200) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Reservation confirmed successfully!'), backgroundColor: diuPrimaryGreen,),
+          );
+        } else {
+          final errorMsg = jsonDecode(response.body)['error'] ?? 'Failed to confirm reservation.';
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                errorMsg,
+                style: const TextStyle(color: Colors.white),
+              ),
+              backgroundColor: Colors.red,
+            ),
+          );
+          if (kDebugMode) {
+            print('Error: ${response.body}');
+          }
+        }
       }
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Error: $e')),
       );
+    } finally {
+      setState(() {
+        isLoading = false; // Hide loading overlay
+      });
     }
   }
 
@@ -123,135 +161,140 @@ class _ReservationScreenState extends State<ReservationScreen> {
       }
     }
 
-    return Scaffold(
-      appBar: AppBar(title: Text("Reservation")),
-      body: Column(
-        mainAxisAlignment: MainAxisAlignment.start,
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          // Location selection
-          Container(
-            margin: EdgeInsets.all(20),
-            width: 350.0,
-            height: 50.0,
-            decoration: BoxDecoration(
-              color: diuPrimaryGreen,
-              borderRadius: BorderRadius.circular(15.0),
-            ),
-
-            child: Padding(
-              padding: const EdgeInsets.all(15.0),
-              child: Text(
-                "From where do you want to board?",
-                style: TextStyle(color: diuOnPrimaryColor),
-                textAlign: TextAlign.center,
-              ),
-            ),
-          ),
-          Column(
+    return Stack(
+      children: [
+        Scaffold(
+          appBar: AppBar(title: const Text("Reservation")),
+          body: Column(
+            mainAxisAlignment: MainAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: locations.map((loc) {
-                  final isSelected = selectedLocation == loc['value'];
-                  return Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 5.0),
-                    child: Container(
-                      width: 120.0,
-                      height: 80.0,
-                      decoration: BoxDecoration(
-                        color: isSelected
-                            ? diuPrimaryGreen // Darker shade when selected
-                            : diuLightGreen,
-                        borderRadius: BorderRadius.circular(42.0),
-                      ),
-                      child: TextButton.icon(
-                        onPressed: () {
-                          setState(() {
-                            selectedLocation = loc['value'];
-                            selectedTime = null; // Reset time selection
-                          });
-                        },
-                        label: Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: Text(
-                            loc['label']!,
-                            style: TextStyle(color: diuSurfaceColor),
-                          ),
-                        ),
-                        icon: const SizedBox.shrink(),
-                      ),
-                    ),
-                  );
-                }).toList(),
-              ),
-            ],
-          ),
-          if (selectedLocation != null) ...{
-            // Time selection
-            Container(
-              margin: EdgeInsets.all(20),
-              width: 350.0,
-              height: 50.0,
-              decoration: BoxDecoration(
-                color: diuPrimaryGreen,
-                borderRadius: BorderRadius.circular(15.0),
-              ),
+              // Location selection
+              Container(
+                margin: EdgeInsets.all(20),
+                width: 350.0,
+                height: 50.0,
+                decoration: BoxDecoration(
+                  color: diuPrimaryGreen,
+                  borderRadius: BorderRadius.circular(15.0),
+                ),
 
-              child: Padding(
-                padding: const EdgeInsets.all(15.0),
-                child: Text(
-                  selectedLocation == 'campus'
-                      ? "Select the time you want to leave campus"
-                      : "Select the time you want to reach campus",
-                  style: TextStyle(color: diuOnPrimaryColor),
-                  textAlign: TextAlign.center,
+                child: Padding(
+                  padding: const EdgeInsets.all(15.0),
+                  child: Text(
+                    "From where do you want to board?",
+                    style: TextStyle(color: diuOnPrimaryColor),
+                    textAlign: TextAlign.center,
+                  ),
                 ),
               ),
-            ),
-            // Dynamically generate time buttons in rows of 3
-            Column(
-              children: [
-                for (int i = 0; i < timingList.length; i += 3)
+              Column(
+                children: [
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      for (int j = i; j < i + 3 && j < timingList.length; j++)
-                        Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 5.0, vertical: 8.0),
-                          child: Container(
-                            width: 120.0,
-                            height: 80.0,
-                            decoration: BoxDecoration(
-                              color: selectedTime == timingList[j]['value']
-                                  ? diuPrimaryGreen
-                                  : diuLightGreen,
-                              borderRadius: BorderRadius.circular(42.0),
+                    children: locations.map((loc) {
+                      final isSelected = selectedLocation == loc['value'];
+                      return Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 5.0),
+                        child: Container(
+                          width: 120.0,
+                          height: 80.0,
+                          decoration: BoxDecoration(
+                            color: isSelected
+                                ? diuPrimaryGreen // Darker shade when selected
+                                : diuLightGreen,
+                            borderRadius: BorderRadius.circular(42.0),
+                          ),
+                          child: TextButton.icon(
+                            onPressed: () {
+                              setState(() {
+                                selectedLocation = loc['value'];
+                                selectedTime = null; // Reset time selection
+                              });
+                            },
+                            label: Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: Text(
+                                loc['label']!,
+                                style: TextStyle(color: diuSurfaceColor),
+                              ),
                             ),
-                            child: TextButton(
-                              onPressed: () async {
-                                await _showConfirmationDialog(
-                                  timingList[j]['label']!,
-                                  timingList[j]['value']!,
-                                );
-                              },
-                              child: Padding(
-                                padding: const EdgeInsets.all(8.0),
-                                child: Text(
-                                  timingList[j]['label']!,
-                                  style: TextStyle(color: diuSurfaceColor),
+                            icon: const SizedBox.shrink(),
+                          ),
+                        ),
+                      );
+                    }).toList(),
+                  ),
+                ],
+              ),
+              if (selectedLocation != null) ...{
+                // Time selection
+                Container(
+                  margin: EdgeInsets.all(20),
+                  width: 350.0,
+                  height: 50.0,
+                  decoration: BoxDecoration(
+                    color: diuPrimaryGreen,
+                    borderRadius: BorderRadius.circular(15.0),
+                  ),
+
+                  child: Padding(
+                    padding: const EdgeInsets.all(15.0),
+                    child: Text(
+                      selectedLocation == 'campus'
+                          ? "Select the time you want to leave campus"
+                          : "Select the time you want to reach campus",
+                      style: TextStyle(color: diuOnPrimaryColor),
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+                ),
+                // Dynamically generate time buttons in rows of 3
+                Column(
+                  children: [
+                    for (int i = 0; i < timingList.length; i += 3)
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          for (int j = i; j < i + 3 && j < timingList.length; j++)
+                            Padding(
+                              padding: const EdgeInsets.symmetric(horizontal: 5.0, vertical: 8.0),
+                              child: Container(
+                                width: 120.0,
+                                height: 80.0,
+                                decoration: BoxDecoration(
+                                  color: selectedTime == timingList[j]['value']
+                                      ? diuPrimaryGreen
+                                      : diuLightGreen,
+                                  borderRadius: BorderRadius.circular(42.0),
+                                ),
+                                child: TextButton(
+                                  onPressed: () async {
+                                    await _showConfirmationDialog(
+                                      timingList[j]['label']!,
+                                      timingList[j]['value']!,
+                                    );
+                                  },
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(8.0),
+                                    child: Text(
+                                      timingList[j]['label']!,
+                                      style: TextStyle(color: diuSurfaceColor),
+                                    ),
+                                  ),
                                 ),
                               ),
                             ),
-                          ),
-                        ),
-                    ],
-                  ),
-              ],
-            ),
-          },
-        ],
-      ),
+                        ],
+                      ),
+                  ],
+                ),
+              },
+            ],
+          ),
+        ),
+        if (isLoading) const Loader(), // Use the reusable Loader widget
+      ],
     );
   }
 }
