@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:diu_transport_student_app/theme/transit_theme.dart';
 import 'package:diu_transport_student_app/widgets/custom_text_field.dart';
@@ -112,7 +113,9 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> with Single
               child: ElevatedButton(
                 onPressed: () {
                   // Implement send reset link logic
-                  print('Sending reset link to ${emailController.text}');
+                  if (kDebugMode) {
+                    print('Email: ${emailController.text}');
+                  }
                 },
                 child: Text(
                   'Send Reset Link',

@@ -3,7 +3,7 @@ import 'package:diu_transport_student_app/screen/auth/forget_pass_screen.dart';
 import 'package:diu_transport_student_app/screen/auth/login_screen.dart';
 import 'package:diu_transport_student_app/screen/auth/signup_screen.dart';
 import 'package:diu_transport_student_app/screen/home_screen.dart';
-import 'package:diu_transport_student_app/screen/reservation_screen.dart';
+import 'package:diu_transport_student_app/screen/add_reservation_screen.dart';
 import 'package:diu_transport_student_app/theme/transit_theme.dart';
 import 'package:diu_transport_student_app/screen/vehicle_list.dart';
 import 'package:flutter/foundation.dart';
