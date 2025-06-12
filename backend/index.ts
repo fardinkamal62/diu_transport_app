@@ -16,7 +16,7 @@ import swaggerUi from 'swagger-ui-express';
 import indexRoute from './routes/v1/index'
 import mongo from './db';
 import errorHandler from './middlewares/error-handler';
-import cache from './cache';
+import redisDatabase from './db/redis_db';
 import adminRoutes from './routes/v1/admin';
 import { initSocket } from './socket';
 import userRoutes from './routes/v1/user';
@@ -114,7 +114,7 @@ server.listen(PORT, () => {
 	// Use an IIFE to use async/await
 	void (async (): Promise<void> => {
 		try {
-			await cache.cacheInit();
+			await redisDatabase.cacheInit();
 
 			const mongoUri = process.env.NODE_ENV === 'development'
 				? process.env.MONGO_DEV_URI as string

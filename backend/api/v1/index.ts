@@ -2,18 +2,16 @@ import express from 'express';
 
 import { NotFound, BadRequest } from 'http-errors';
 
-import schemas from '../../schemas/index';
 import vehicleSchema from '../../schemas/vehicle';
 import userSchema from '../../schemas/user';
 import scheduleSchema from '../../schemas/schedule';
 import reservationSchema from '../../schemas/reservation';
 
-import cache from '../../cache';
+import cache from '../../db/redis_db';
 
 import logger from '../../utils/logger';
 
 const Vehicle = vehicleSchema.Vehicle;
-const CurrentLocation = schemas.CurrentLocation;
 const User = userSchema.User;
 
 const journeyToggle = async (req: express.Request): Promise<object> => {
@@ -41,15 +39,6 @@ const journeyToggle = async (req: express.Request): Promise<object> => {
 	}
 };
 
-const locationUpdate = async (vehicleId: string, latitude: number, longitude: number): Promise<void> => {
-	try {
-		await CurrentLocation.create({ vehicleId, latitude, longitude });
-	} catch (e: any) {
-		logger.error(('Failed to update location'), e);
-		throw new Error(e.message)
-	}
-};
-
 interface vehicleLocation {
 	vehicleId: string;
 	latitude: number;
@@ -58,7 +47,7 @@ interface vehicleLocation {
 
 const getVehiclesLocation = async (): Promise<vehicleLocation[]> => {
 	try {
-		const cachedData = await cache.getAllData();
+		const cachedData = await cache.getAllData(cache.getcoOrdinateDatabaseClient(), 'vehicle');
 		if (cachedData.length === 0) return [];
 
 		return cachedData.map((data) => {
@@ -171,5 +160,5 @@ const manualReservation = async (req: express.Request): Promise<object> => {
 	}
 };
 
-const api = { journeyToggle, locationUpdate, getVehiclesLocation, getVehicles, getDrivers, manualReservation };
+const api = { journeyToggle, getVehiclesLocation, getVehicles, getDrivers, manualReservation };
 export default api;
