@@ -2,6 +2,8 @@ import { Request } from 'express';
 import https from 'https';
 
 import api from '../api/v1/user';
+import redisDatabase from '../db/redis_db';
+import logger from '../utils/logger';
 
 const login = async (req: Request): Promise<object> => {
 	const email = req.body.email as string;
@@ -30,6 +32,11 @@ const login = async (req: Request): Promise<object> => {
 					const result = JSON.parse(data);
 					if (res.statusCode && res.statusCode >= 200 && res.statusCode < 300) {
 						resolve(result);
+						redisDatabase.cacheData(redisDatabase.getloginCredentialsClient(), result.token, { valid: true }, 60 * 60 * 24 * 30) // Cache for 30 days
+							.then(() => {})
+							.catch((err) => {
+								logger.error('Error caching user credentials:', err);
+							});
 					} else {
 						reject(new Error(result?.message || 'Authentication failed'));
 					}

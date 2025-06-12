@@ -6,6 +6,9 @@ import { Unauthorized } from 'http-errors';
 
 import https from 'https';
 
+import redisDatabase from '../db/redis_db';
+import logger from '../utils/logger';
+
 
 /**
  * Validate the request body against a schema
@@ -63,45 +66,24 @@ const userAuth = (req: Request, _res: Response, next: NextFunction): void => {
 		return;
 	}
 
-	const options = {
-		hostname: 'api.diu.ac',
-		port: 443,
-		path: `/student/profile?token=${token}`,
-		method: 'GET',
-		headers: {
-			'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:138.0) Gecko/20100101 Firefox/138.0',
-			'Referer': 'https://students.diu.ac/',
-			'Content-Type': 'application/json',
-		},
-	};
-
-	const request = https.request(options, (res) => {
-		let data = '';
-		res.on('data', (chunk) => {
-			data += chunk;
-		});
-		res.on('end', () => {
-			try {
-				const result = JSON.parse(data);
-				if (res.statusCode && res.statusCode >= 200 && res.statusCode < 300) {
-					// Optionally attach user info to req object
-					(req as any).user = result;
+	try {
+		const cachedData = redisDatabase.getData(redisDatabase.getloginCredentialsClient(), token);
+		cachedData
+			.then((data) => {
+				if (data.valid) {
 					next();
 				} else {
-					next(new Unauthorized(result?.error || 'Authentication failed'));
+					next(new Unauthorized('Authentication failed'));
 				}
-			} catch (e) {
-				next(new Unauthorized('Invalid JSON response'));
-			}
-		});
-	});
-
-	request.on('error', (e) => {
-		next(new Unauthorized(e.message));
-	});
-
-	// request.write(postData);
-	request.end();
+			})
+			.catch((err) => {
+				logger.error('Error fetching cached data:', err);
+				next(new Unauthorized('Failed to fetch cached data'));
+			});
+	} catch (error) {
+		logger.error('Error during authentication:', error);
+		next(new Unauthorized('Failed to authenticate token'));
+	}
 };
 
 const isAuthenticated = (req: Request, res: Response, next: NextFunction): void => {
@@ -126,45 +108,24 @@ const isAuthenticated = (req: Request, res: Response, next: NextFunction): void 
 	}
 
 	// Try authenticating as user through external API
-	const options = {
-		hostname: 'api.diu.ac',
-		port: 443,
-		path: `/student/profile?token=${token}`,
-		method: 'GET',
-		headers: {
-			'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:138.0) Gecko/20100101 Firefox/138.0',
-			'Referer': 'https://students.diu.ac/',
-			'Content-Type': 'application/json',
-		},
-	};
-
-	const request = https.request(options, (res) => {
-		let data = '';
-		res.on('data', (chunk) => {
-			data += chunk;
-		});
-		res.on('end', () => {
-			try {
-				const result = JSON.parse(data);
-				if (res.statusCode && res.statusCode >= 200 && res.statusCode < 300) {
-					// Mark as user
-					(req as any).authType = 'user';
-					(req as any).user = result;
+	try {
+		const cachedData = redisDatabase.getData(redisDatabase.getloginCredentialsClient(), token);
+		cachedData
+			.then((data) => {
+				if (data.valid) {
 					next();
 				} else {
-					next(new Unauthorized(result?.error || 'Authentication failed'));
+					next(new Unauthorized('Authentication failed'));
 				}
-			} catch (e) {
-				next(new Unauthorized('Invalid JSON response'));
-			}
-		});
-	});
-
-	request.on('error', (e) => {
-		next(new Unauthorized(e.message));
-	});
-
-	request.end();
+			})
+			.catch((err) => {
+				logger.error('Error fetching cached data:', err);
+				next(new Unauthorized('Failed to fetch cached data'));
+			});
+	} catch (error) {
+		logger.error('Error during authentication:', error);
+		next(new Unauthorized('Failed to authenticate token'));
+	}
 };
 
 const middlewares = {
