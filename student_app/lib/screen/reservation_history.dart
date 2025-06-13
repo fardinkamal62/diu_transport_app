@@ -102,7 +102,7 @@ class _ReservationHistoryState extends State<ReservationHistory> {
 
                         return Card(
                           margin: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                          color: isToday && isScheduled ? Colors.green.shade100 : Colors.white, // Highlight condition
+                          color: isToday ? Colors.green.shade100 : Colors.white, // Highlight condition
                           child: ListTile(
                             title: Text(
                               "Location: ${reservation['location'][0].toUpperCase()}${reservation['location'].substring(1)}",

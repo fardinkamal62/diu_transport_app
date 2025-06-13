@@ -126,7 +126,9 @@ class _ReservationScreenState extends State<ReservationScreen> {
       builder: (context) => AlertDialog(
         title: const Text('Confirm Reservation?'),
         content: Text(
-          'Location: $locationLabel\nTime: $timeLabel',
+          'Location: $locationLabel\nTime: $timeLabel${locationLabel == 'Campus' ? '\n\nBus will leave campus at ${timeLabel}\nMicrobus will leave campus at ${timeLabel
+              .substring(0, 3)}20.' : '\n\nBus will be available by ${int.parse(timeLabel.substring(0, 2)) - 1}:20\nMicrobus will be available by ${int.parse(timeLabel
+              .substring(0, 2)) - 1}:40.'}',
         ),
         actions: [
           TextButton(
