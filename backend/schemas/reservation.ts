@@ -40,7 +40,22 @@ const reservationSchema = new mongoose.Schema({
 }, { autoIndex: false });
 
 
-const VehicleReservation = mongoose.model('VehicleReservation', reservationSchema);
+interface VehicleReservationDocument extends mongoose.Document {
+	registrationCode: string;
+	time: Date;
+	location: 'campus' | 'notunbazar' | 'sayeednagar';
+	userType: 'student' | 'teacher' | 'staff';
+	status?: 'scheduled' | 'cancelled' | 'completed' | 'onboard';
+	message?: string;
+	vehicleId?: mongoose.Types.ObjectId;
+	vehicle?: {
+		name: string;
+		registrationNumber: string;
+		type: string;
+	} | null;
+}
+
+const VehicleReservation = mongoose.model<VehicleReservationDocument>('VehicleReservation', reservationSchema);
 
 const schemas = {
 	VehicleReservation

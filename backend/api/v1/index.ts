@@ -124,17 +124,19 @@ const getDrivers = async (): Promise<object[]> => {
  * @description This function is used to manually reserve a vehicle for a user.
  * Sometimes the user may not be able to reserve a vehicle through the app or they want to ride a different vehicle
  * The vehicle's driver can manually reserve seat for that person.
+ * or the driver can update the reservation status of a user when they are onboard.
  * @param req
  * @returns {Promise<object>} Returns a promise that resolves to an object containing the reservation details.
  */
 const manualReservation = async (req: express.Request): Promise<object> => {
 	const vehicleId = req.body.vehicleId as string;
 	const registrationCode = req.body.registrationCode as string;
-	const scheduleId = req.body.scheduleId as string;
-	const location = req.body.location as string;
-	const userType = req.body.userType as string;
+	const scheduleId = req.body.scheduleId as string || null;
+	const location = req.body.location as string || null;
+	const userType = req.body.userType as string || null;
+	const reservationId = req.body.reservationId as string || null;
 
-	if (!vehicleId || !registrationCode || !scheduleId) {
+	if (!vehicleId || !registrationCode || (scheduleId == null)) {
 		throw new BadRequest('Vehicle ID, User ID and Schedule ID are required');
 	}
 
@@ -144,9 +146,14 @@ const manualReservation = async (req: express.Request): Promise<object> => {
 			throw new NotFound('Vehicle not found');
 		}
 
-		const user = await User.findById(registrationCode);
-		if (!user) {
-			throw new NotFound('User not found');
+		if (reservationId != null) {
+			await reservationSchema.VehicleReservation.findByIdAndUpdate(
+				reservationId,
+				{ registrationCode, status: 'onboard', vehicleId: vehicle._id },
+				{ new: true, runValidators: true }
+			)
+
+			return { message: 'Reservation status updated', registrationCode };
 		}
 
 		const schedule = await scheduleSchema.findById(scheduleId);
