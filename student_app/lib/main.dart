@@ -12,6 +12,7 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 import 'package:diu_transport_student_app/barikoi_map.dart';
 import 'package:diu_transport_student_app/socketio.dart' as socketio;
+import 'package:diu_transport_student_app/widgets/loader.dart';
 
 class MyHttpOverrides extends HttpOverrides {
   @override
@@ -62,18 +63,31 @@ Future main() async {
 
   var socket = socketio.socketio();
 
-  // Handle socket connection status
-  socket.on('connect', (_) {
+  bool socketConnected = false;
+
+  // Show a loading screen until the socket connects
+  runApp(MaterialApp(
+    home: const Loader(),
+    debugShowCheckedModeBanner: false,
+  ));
+
+  socket?.on('connect', (_) {
     if (kDebugMode) {
       print('Socket connected');
     }
+    socketConnected = true;
   });
 
-  socket.on('connect_error', (error) {
+  socket?.on('connect_error', (error) {
     if (kDebugMode) {
       print('Socket connection error: $error');
     }
   });
+
+  // Wait for the socket to connect
+  while (!socketConnected) {
+    await Future.delayed(const Duration(milliseconds: 100));
+  }
 
   runApp(MyApp());
 }

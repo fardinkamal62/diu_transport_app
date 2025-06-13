@@ -160,6 +160,9 @@ class _ReservationScreenState extends State<ReservationScreen> {
       }
     }
 
+    // Get the current time
+    final now = DateTime.now();
+
     return Stack(
       children: [
         Scaffold(
@@ -264,21 +267,57 @@ class _ReservationScreenState extends State<ReservationScreen> {
                                 decoration: BoxDecoration(
                                   color: selectedTime == timingList[j]['value']
                                       ? diuPrimaryGreen
-                                      : diuLightGreen,
+                                      : _getButtonColor(timingList[j]['value']!, now),
                                   borderRadius: BorderRadius.circular(42.0),
                                 ),
                                 child: TextButton(
                                   onPressed: () async {
-                                    await _showConfirmationDialog(
-                                      timingList[j]['label']!,
-                                      timingList[j]['value']!,
+                                    final parsedTime = DateFormat("HH:mm").parse(timingList[j]['value']!);
+                                    final fullDateTime = DateTime(
+                                      now.year,
+                                      now.month,
+                                      now.day,
+                                      parsedTime.hour,
+                                      parsedTime.minute,
                                     );
+
+                                    // Disable button if time is in the past or within 2 hours
+                                    if (fullDateTime.isAfter(now.add(const Duration(hours: 2)))) {
+                                      await _showConfirmationDialog(
+                                        timingList[j]['label']!,
+                                        timingList[j]['value']!,
+                                      );
+                                    }
                                   },
+                                  style: ButtonStyle(
+                                    foregroundColor: MaterialStateProperty.resolveWith<Color>(
+                                      (states) {
+                                        final parsedTime = DateFormat("HH:mm").parse(timingList[j]['value']!);
+                                        final fullDateTime = DateTime(
+                                          now.year,
+                                          now.month,
+                                          now.day,
+                                          parsedTime.hour,
+                                          parsedTime.minute,
+                                        );
+
+                                        // Disable button if time is in the past or within 2 hours
+                                        if (fullDateTime.isBefore(now.add(const Duration(hours: 2)))) {
+                                          return Colors.grey.shade600; // Disabled text color
+                                        }
+                                        return diuSurfaceColor; // Enabled text color
+                                      },
+                                    ),
+                                  ),
                                   child: Padding(
                                     padding: const EdgeInsets.all(8.0),
                                     child: Text(
                                       timingList[j]['label']!,
-                                      style: TextStyle(color: diuSurfaceColor),
+                                      style: TextStyle(
+                                        color: selectedTime == timingList[j]['value']
+                                            ? Colors.white
+                                            : diuSurfaceColor,
+                                      ),
                                     ),
                                   ),
                                 ),
@@ -295,5 +334,16 @@ class _ReservationScreenState extends State<ReservationScreen> {
         if (isLoading) const Loader(), // Use the reusable Loader widget
       ],
     );
+  }
+
+  Color _getButtonColor(String timeValue, DateTime now) {
+    final parsedTime = DateFormat("HH:mm").parse(timeValue);
+    final fullDateTime = DateTime(now.year, now.month, now.day, parsedTime.hour, parsedTime.minute);
+
+    // Return disabled color if time is in the past or within 2 hours
+    if (fullDateTime.isBefore(now.add(const Duration(hours: 2)))) {
+      return Colors.grey.shade300; // Disabled button color
+    }
+    return diuLightGreen; // Enabled button color
   }
 }

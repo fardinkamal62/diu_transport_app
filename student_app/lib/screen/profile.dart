@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
 import 'package:flutter/services.dart'; // Import Clipboard functionality
+import 'package:qr_flutter/qr_flutter.dart'; // Import QR code package
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -97,6 +98,18 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 ),
               ],
             ),
+            const SizedBox(height: 20),
+            if (regCode != null)
+              Column(
+                children: [
+                  const SizedBox(height: 10),
+                  QrImageView(
+                    data: regCode!,
+                    version: QrVersions.auto,
+                    size: 150.0,
+                  ),
+                ],
+              ),
             const Spacer(), // Push the logout button to the bottom
             ElevatedButton.icon(
               onPressed: _logout,

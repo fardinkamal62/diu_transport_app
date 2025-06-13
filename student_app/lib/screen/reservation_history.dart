@@ -42,7 +42,7 @@ class _ReservationHistoryState extends State<ReservationHistory> {
         if (response.statusCode == 200) {
           final responseData = json.decode(response.body);
           setState(() {
-            reservations = responseData['data'];
+            reservations = responseData['data']['reservations'];
             isLoading = false;
           });
         } else {
@@ -95,7 +95,7 @@ class _ReservationHistoryState extends State<ReservationHistory> {
                       itemBuilder: (context, index) {
                         final reservation = reservations[index];
                         final reservationDate = DateTime.parse(reservation['time']);
-                        final formattedTime = DateFormat('MMMM dd, yyyy HH:mm').format(reservationDate);
+                        final formattedTime = DateFormat('MMMM dd, yyyy hh:mm a').format(reservationDate.toLocal());
                         final isToday = DateFormat('yyyy-MM-dd').format(reservationDate) ==
                             DateFormat('yyyy-MM-dd').format(DateTime.now());
                         final isScheduled = reservation['status'].toLowerCase() == 'scheduled';
