@@ -79,7 +79,7 @@ class _ReservationScreenState extends State<ReservationScreen> {
           headers: {'Content-Type': 'application/json','Authorization': '${data['token']}'},
           body: jsonEncode({
             'location': location,
-            'time': DateFormat("yyyy-MM-dd").format(DateTime.now()) + 'T' + time + ':00',
+            'time': '${DateFormat("yyyy-MM-dd").format(DateTime.now())}T$time:00',
             'registrationCode': data['user']['reg_code'],
             'userType': 'student',
           }),
@@ -290,7 +290,7 @@ class _ReservationScreenState extends State<ReservationScreen> {
                                     }
                                   },
                                   style: ButtonStyle(
-                                    foregroundColor: MaterialStateProperty.resolveWith<Color>(
+                                    foregroundColor: WidgetStateProperty.resolveWith<Color>(
                                       (states) {
                                         final parsedTime = DateFormat("HH:mm").parse(timingList[j]['value']!);
                                         final fullDateTime = DateTime(
