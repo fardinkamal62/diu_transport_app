@@ -178,5 +178,46 @@ const manualReservation = async (req: express.Request): Promise<object> => {
 	}
 };
 
-const api = { journeyToggle, locationUpdate, getVehiclesLocation, getVehicles, getDrivers, manualReservation };
+const getSchedules = async (req: express.Request): Promise<object[]> => {
+	const now = new Date();
+	now.setHours(6, 0, 0, 0);
+	const timeStr = req.query.time as string || now.toISOString();
+
+	try {
+		const time = new Date(timeStr);
+		const schedules = await scheduleSchema.find({
+			campusReturnTime: { $gte: time },
+		}).select('campusReturnTime requirements dispatches');
+
+		if (schedules.length === 0) {
+			return [];
+		}
+
+		// Loop over schedules and populate vehicle data in dispatches
+		const updatedSchedules = [];
+		for (const schedule of schedules) {
+			const scheduleObj = schedule.toObject(); // Convert Mongoose document to plain object
+			for (const dispatch of scheduleObj.dispatches) {
+				if (dispatch.vehicleId) {
+					const vehicle = await Vehicle.findById(dispatch.vehicleId).select('name vehicleRegistrationNumber type');
+					if (vehicle) {
+						dispatch.vehicle = {
+							name: vehicle.name,
+							vehicleRegistrationNumber: vehicle.vehicleRegistrationNumber,
+							type: vehicle.type,
+						};
+					}
+				}
+			}
+			updatedSchedules.push(scheduleObj);
+		}
+
+		return updatedSchedules;
+	} catch (error: any) {
+		logger.error('Failed to get schedules', error);
+		throw new Error(error.message);
+	}
+};
+
+const api = { journeyToggle, locationUpdate, getVehiclesLocation, getVehicles, getDrivers, manualReservation, getSchedules };
 export default api;

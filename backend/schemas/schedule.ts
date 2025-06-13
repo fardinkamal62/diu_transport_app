@@ -112,8 +112,46 @@ const scheduleSchema = new mongoose.Schema({
 	}
 }, { autoIndex: false });
 
+interface ScheduleDocument extends mongoose.Document {
+	createdAt: Date;
+	availableResources: {
+		buses: number;
+		busDrivers: number;
+		microbuses: number;
+		microbusDrivers: number;
+	};
+	campusReturnTime: Date;
+	requirements: {
+		students: number;
+		teachers: number;
+		busesNeeded: number;
+		microbusesNeeded: number;
+	};
+	dispatches: {
+		type: 'bus' | 'microbus';
+		dispatchTime: Date;
+		returnTime: Date;
+		pickupTime: Date;
+		vehicleId?: mongoose.Types.ObjectId;
+		vehicle?: {
+			name: string;
+			vehicleRegistrationNumber: string;
+			type: 'bus' | 'microbus';
+		};
+		passengers: {
+			students: number;
+			teachers: number;
+		};
+		notes?: string;
+	}[];
+	warnings: string[];
+	remainingPassengers: {
+		students: number;
+		teachers: number;
+	};
+}
 
-const VehicleSchedule = mongoose.model('VehicleSchedule', scheduleSchema);
+const VehicleSchedule = mongoose.model<ScheduleDocument>('VehicleSchedule', scheduleSchema);
 
 
 export default VehicleSchedule;
