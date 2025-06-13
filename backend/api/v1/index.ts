@@ -208,5 +208,5 @@ const getSchedules = async (req: express.Request): Promise<object[]> => {
 	}
 };
 
-const api = { journeyToggle, getVehiclesLocation, getVehicles, getDrivers, manualReservation };
+const api = { journeyToggle, getVehiclesLocation, getVehicles, getDrivers, manualReservation, getSchedules };
 export default api;
