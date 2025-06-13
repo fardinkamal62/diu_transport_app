@@ -7,11 +7,11 @@ socketio() {
     print("Connecting to socket.io server");
   }
 
-  final socketUrl = dotenv.env['SOCKET_URL'] ?? '';
+  final socketUrl = dotenv.env['SERVER_URL'] ?? '';
 
   if (socketUrl.isEmpty) {
     if (kDebugMode) {
-      print('Error: SOCKET_URL is not set in the .env file');
+      print('Error: SERVER_URL is not set in the .env file');
     }
     return null;
   }

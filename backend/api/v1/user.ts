@@ -3,6 +3,7 @@ import { BadRequest, InternalServerError } from 'http-errors';
 
 import reservationSchema from '../../schemas/reservation';
 import logger from '../../utils/logger';
+import vehicleSchema from '../../schemas/vehicle';
 
 const addReservation = async(req: express.Request): Promise<object> => {
 	const registrationCode = req.body.registrationCode as string;
@@ -48,6 +49,8 @@ const addReservation = async(req: express.Request): Promise<object> => {
 const getReservations = async(req: express.Request): Promise<object> => {
 	const registrationCode = req.query.registrationCode as string;
 	const timeStr = req.query.time as string | undefined;
+	const page = parseInt(req.query.page as string, 10) || 1; // Default to page 1
+	const limit = parseInt(req.query.limit as string, 10) || 10; // Default to 10 items per page
 
 	let query: any = { registrationCode };
 
@@ -67,8 +70,36 @@ const getReservations = async(req: express.Request): Promise<object> => {
 	}
 
 	try {
-		const reservations = await reservationSchema.VehicleReservation.find(query);
-		return reservations;
+		const totalReservations = await reservationSchema.VehicleReservation.countDocuments(query);
+		const reservations = await reservationSchema.VehicleReservation.find(query)
+			.sort({ time: -1 })
+			.skip((page - 1) * limit)
+			.limit(limit);
+
+		const enrichedReservations = [];
+		for (const reservation of reservations) {
+			const reservationObj = reservation.toObject(); // Convert to plain object
+			if (reservation.vehicleId) {
+				const vehicle = await vehicleSchema.Vehicle.findById(reservation.vehicleId);
+				if (vehicle) {
+					reservationObj.vehicle = {
+						name: vehicle.name,
+						registrationNumber: vehicle.vehicleRegistrationNumber,
+						type: vehicle.type,
+					};
+				} else {
+					reservationObj.vehicle = null;
+				}
+			}
+			enrichedReservations.push(reservationObj);
+		}
+
+		return {
+			total: totalReservations,
+			page,
+			limit,
+			reservations: enrichedReservations,
+		};
 	} catch (e) {
 		logger.error(('Failed to get reservations'), e);
 		throw new InternalServerError('Failed to get reservations');

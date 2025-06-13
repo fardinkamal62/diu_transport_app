@@ -193,6 +193,51 @@ router.post('/manual-reservation', async function (req: express.Request, res: ex
 	}
 });
 
+/**
+ * @openapi
+ * /schedules:
+ *   get:
+ *     summary: Get all schedules
+ *     security:
+ *       - ApiKeyAuth: []
+ *     tags:
+ *       - Schedule
+ *     responses:
+ *       200:
+ *         description: List of schedules
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       campusReturnTime:
+ *                         type: string
+ *                       requirements:
+ *                         type: object
+ *                         properties:
+ *                           students:
+ *                             type: integer
+ *                           teachers:
+ *                             type: integer
+ *                           busesNeeded:
+ *                             type: integer
+ */
+router.get('/schedules', async function (req: express.Request, res: express.Response) {
+	try {
+		const result = await controllers.getSchedules(req);
+		res.status(200).json({ success: true, data: result });
+	} catch (error) {
+		res.status(500).json({ success: false, error: (error as Error).message || 'Failed to get schedules' });
+	}
+})
+
 
 const indexRoutes = {
 	router,

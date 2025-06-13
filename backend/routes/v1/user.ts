@@ -280,7 +280,7 @@ router.post('/reservation', middlewares.validateRequest(validators.addReservatio
  *                 error:
  *                   type: string
  */
-router.get('/reservation', middlewares.validateRequest(validators.getReservationSchema), async (req: express.Request, res: express.Response) => {
+router.get('/reservation', async (req: express.Request, res: express.Response) => {
 	try {
 		const result = await controllers.getReservations(req);
 		res.status(200).json({ success: true, data: result });

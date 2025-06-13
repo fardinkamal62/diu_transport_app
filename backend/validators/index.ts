@@ -63,10 +63,6 @@ const addReservationSchema = Joi.object({
 	userType: Joi.string().valid('student', 'teacher', 'staff').required(),
 });
 
-const getReservationSchema = Joi.object({
-	registrationCode: Joi.string().min(2).max(100).required(),
-});
-
 const schemas = {
 	coOrdinateSchema,
 	adminLoginSchema,
@@ -75,7 +71,6 @@ const schemas = {
 	updateDriverSchema,
 	userLoginSchema,
 	addReservationSchema,
-	getReservationSchema
 }
 
 export default schemas;

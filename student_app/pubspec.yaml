@@ -17,6 +17,10 @@ dependencies:
   flutter_dotenv: ^5.2.1
   path: ^1.9.1
   google_fonts: ^6.2.1
+  url_launcher: ^6.1.7
+  shared_preferences: ^2.0.13
+  intl: ^0.18.0
+  qr_flutter: ^4.1.0
 
 dev_dependencies:
   flutter_test:
@@ -30,3 +34,4 @@ flutter:
     - assets/img/
     - assets/image/
     - assets/.env
+    - assets/icons/

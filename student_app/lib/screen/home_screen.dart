@@ -1,10 +1,10 @@
-// lib/screens/home_screen.dart
-import 'package:diu_transport_student_app/screen/settings_content.dart';
 import 'package:flutter/material.dart';
-
-import 'home_content.dart'; // Import the settings content
-// You might also want to import the custom_text_field.dart if you're using it here for other purposes
-// import 'package:diu_transport_student_app/widgets/custom_text_field.dart';
+import 'package:diu_transport_student_app/barikoi_map.dart'; // Import the map widget
+import 'package:diu_transport_student_app/socketio.dart';
+import 'package:diu_transport_student_app/screen/add_reservation_screen.dart'; // Import the ReservationScreen
+import 'package:diu_transport_student_app/screen/profile.dart'; // Import the ProfileScreen
+import 'package:diu_transport_student_app/screen/reservation_history.dart'; // Import the ReservationHistory screen
+import 'package:diu_transport_student_app/screen/schedule_list.dart'; // Import the ScheduleList screen
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -16,10 +16,13 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   int _selectedIndex = 0; // State to manage the currently selected tab
 
+  var socket = socketio(); // Initialize your socket connection
   // Define a list of your content widgets corresponding to each tab
-  static final List<Widget> _widgetOptions = <Widget>[
-    HomeContent(),     // Index 0
-    SettingsContent(), // Index 1
+  late final List<Widget> _widgetOptions = <Widget>[
+    SymbolMap(socket: socket), // Show the map in the Home tab
+    ReservationHistory(), // Add ReservationHistory to the widget options
+    ScheduleList(), // Add ScheduleList to the widget options
+    ProfileScreen(), // Add ProfileScreen to the widget options
     // Add more content widgets here for additional tabs
   ];
 
@@ -38,7 +41,10 @@ class _HomeScreenState extends State<HomeScreen> {
       appBar: AppBar(
         title: Text(
           // Dynamically change app bar title based on selected tab
-          _selectedIndex == 0 ? 'Home' : 'Settings',
+          _selectedIndex == 0 ? 'Home' :
+          _selectedIndex == 1 ? 'History' :
+          _selectedIndex == 2 ? 'Schedule' :
+          _selectedIndex == 3 ? 'Profile' : 'Other',
           style: theme.appBarTheme.titleTextStyle, // Use theme's title style
         ),
         centerTitle: theme.appBarTheme.centerTitle, // Use theme's centerTitle property
@@ -50,22 +56,16 @@ class _HomeScreenState extends State<HomeScreen> {
         index: _selectedIndex, // Displays the widget at the current index
         children: _widgetOptions, // The list of all possible content widgets
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          // Action for the button - maybe context-sensitive based on current tab?
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(
-                'Floating Action Button Tapped!',
-                style: TextStyle(color: theme.colorScheme.onPrimary),
-              ),
-              backgroundColor: theme.colorScheme.primary,
-            ),
-          );
-        },
-        // FLOATING ACTION BUTTON STYLE IS ALREADY APPLIED VIA `transitTheme`
-        child: const Icon(Icons.add),
-      ),
+      floatingActionButton: _selectedIndex == 0
+          ? FloatingActionButton(
+              onPressed: () {
+                Navigator.of(context).push(
+                  MaterialPageRoute(builder: (context) => const ReservationScreen()),
+                );
+              },
+              child: const Icon(Icons.add),
+            )
+          : null,
       bottomNavigationBar: BottomNavigationBar(
         // THE BOTTOM NAVIGATION BAR STYLE IS ALREADY APPLIED VIA `transitTheme`
         items: const [
@@ -74,10 +74,17 @@ class _HomeScreenState extends State<HomeScreen> {
             label: 'Home',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.settings),
-            label: 'Settings',
+            icon: Icon(Icons.history),
+            label: 'History', // Add History tab
           ),
-          // Add more BottomNavigationBarItems here if you add more content widgets
+          BottomNavigationBarItem(
+            icon: Icon(Icons.schedule), // Add Schedule tab
+            label: 'Schedule',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.person_2_outlined),
+            label: 'Profile',
+          ),
         ],
         currentIndex: _selectedIndex, // Link to the current selected index state
         onTap: _onItemTapped, // Call our state-updating function

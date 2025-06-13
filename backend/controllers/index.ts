@@ -27,13 +27,18 @@ const manualReservation = async (req: Request): Promise<object> => {
 	return await api.manualReservation(req);
 }
 
+const getSchedules = async (req: Request): Promise<object[]> => {
+	return await api.getSchedules(req);
+}
+
 const controllers = {
 	resetConnection,
 	ping,
 	getVehiclesLocation,
 	getVehicles,
 	getDrivers,
-	manualReservation
+	manualReservation,
+	getSchedules,
 };
 
 export default controllers;
