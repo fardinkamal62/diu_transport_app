@@ -4,6 +4,7 @@ import 'package:diu_transport_student_app/socketio.dart';
 import 'package:diu_transport_student_app/screen/add_reservation_screen.dart'; // Import the ReservationScreen
 import 'package:diu_transport_student_app/screen/profile.dart'; // Import the ProfileScreen
 import 'package:diu_transport_student_app/screen/reservation_history.dart'; // Import the ReservationHistory screen
+import 'package:diu_transport_student_app/screen/schedule_list.dart'; // Import the ScheduleList screen
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -20,6 +21,7 @@ class _HomeScreenState extends State<HomeScreen> {
   late final List<Widget> _widgetOptions = <Widget>[
     SymbolMap(socket: socket), // Show the map in the Home tab
     ReservationHistory(), // Add ReservationHistory to the widget options
+    ScheduleList(), // Add ScheduleList to the widget options
     ProfileScreen(), // Add ProfileScreen to the widget options
     // Add more content widgets here for additional tabs
   ];
@@ -41,7 +43,8 @@ class _HomeScreenState extends State<HomeScreen> {
           // Dynamically change app bar title based on selected tab
           _selectedIndex == 0 ? 'Home' :
           _selectedIndex == 1 ? 'History' :
-          _selectedIndex == 2 ? 'Profile' : 'Other',
+          _selectedIndex == 2 ? 'Schedule' :
+          _selectedIndex == 3 ? 'Profile' : 'Other',
           style: theme.appBarTheme.titleTextStyle, // Use theme's title style
         ),
         centerTitle: theme.appBarTheme.centerTitle, // Use theme's centerTitle property
@@ -73,6 +76,10 @@ class _HomeScreenState extends State<HomeScreen> {
           BottomNavigationBarItem(
             icon: Icon(Icons.history),
             label: 'History', // Add History tab
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.schedule), // Add Schedule tab
+            label: 'Schedule',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.person_2_outlined),
