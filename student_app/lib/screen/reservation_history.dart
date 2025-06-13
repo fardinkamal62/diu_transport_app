@@ -27,7 +27,7 @@ class _ReservationHistoryState extends State<ReservationHistory> {
 
   Future<void> _fetchReservationHistory() async {
     try {
-      final socketUrl = dotenv.env['SOCKET_URL'] ?? '';
+      final socketUrl = dotenv.env['SERVER_URL'] ?? '';
       final prefs = await SharedPreferences.getInstance();
       final userData = prefs.getString('userData');
 

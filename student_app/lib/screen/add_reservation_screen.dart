@@ -67,7 +67,7 @@ class _ReservationScreenState extends State<ReservationScreen> {
         isLoading = true; // Show loading overlay
       });
 
-      final socketUrl = dotenv.env['SOCKET_URL'] ?? '';
+      final socketUrl = dotenv.env['SERVER_URL'] ?? '';
       final prefs = await SharedPreferences.getInstance();
       final userData = prefs.getString('userData');
 

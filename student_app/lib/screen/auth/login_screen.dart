@@ -203,7 +203,7 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                   }
 
                   try {
-                    final socketUrl = dotenv.env['SOCKET_URL'] ?? '';
+                    final socketUrl = dotenv.env['SERVER_URL'] ?? '';
                     if (socketUrl.isEmpty) {
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(content: Text('Server URL not configured')),

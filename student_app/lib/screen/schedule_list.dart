@@ -30,7 +30,7 @@ class _ScheduleListState extends State<ScheduleList> {
     });
 
     try {
-      final socketUrl = dotenv.env['SOCKET_URL'] ?? '';
+      final socketUrl = dotenv.env['SERVER_URL'] ?? '';
       final prefs = await SharedPreferences.getInstance();
       final userData = prefs.getString('userData');
       final data = json.decode(userData!);
