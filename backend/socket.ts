@@ -26,7 +26,7 @@ export function initSocket(server: any): Server {
 				return;
 			}
 
-			socket.broadcast.emit('location', msg);	// Broadcast message to all connected users except the sender
+			io.emit('location', msg);	// Broadcast message to all connected users except the sender
 			// Everyone will receive the location update
 		});
 	});

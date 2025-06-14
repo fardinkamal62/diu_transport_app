@@ -8,8 +8,9 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class SymbolMap extends StatefulWidget {
   final dynamic socket;
+  final Map<String, dynamic>? vehicle;
 
-  const SymbolMap({super.key, required this.socket});
+  const SymbolMap({super.key, required this.socket, this.vehicle});
 
   @override
   State<StatefulWidget> createState() => _SymbolMapState();
@@ -23,7 +24,7 @@ class _SymbolMapState extends State<SymbolMap> {
   MapLibreMapController? mController;
   Timer? _locationTimer;
 
-  static const styleId = 'barikoi-dark-mode';
+  static const styleId = 'osm-liberty';
   static final apiKey = dotenv.env['API_KEY'] ?? '';
   static final mapUrl =
       'https://map.barikoi.com/styles/$styleId/style.json?key=$apiKey';
@@ -54,10 +55,11 @@ class _SymbolMapState extends State<SymbolMap> {
         String vehicleId = data['vehicleId'].toString();
         double latitude = double.parse(data['latitude'].toString());
         double longitude = double.parse(data['longitude'].toString());
+        String vehicleName = data['vehicleName'].toString();
         setState(() {
           LatLng newCoordinate = LatLng(latitude, longitude);
           vehicleLocations[vehicleId] = newCoordinate;
-          _updateMarkers();
+          _updateMarkers(vehicleName);
         });
       } catch (e) {
         if (kDebugMode) {
@@ -69,13 +71,14 @@ class _SymbolMapState extends State<SymbolMap> {
     // Add listener to vehicleIdController
     // Emit data every 5 seconds
     _locationTimer = Timer.periodic(Duration(seconds: 5), (timer) {
-      String vehicleId = vehicleIdController.text;
-      if (vehicleId.isNotEmpty && mController != null) {
+
+      if (widget.vehicle?['vehicleId']!.isNotEmpty && mController != null) {
         LatLng? currentLocation = mController!.cameraPosition?.target;
         widget.socket.emit('location', {
-          'vehicleId': vehicleId,
+          'vehicleId': widget.vehicle?['vehicleId'],
           'latitude': currentLocation?.latitude.toString(),
           'longitude': currentLocation?.longitude.toString(),
+          'vehicleName': widget.vehicle?['vehicleName'],
         });
       }
     });
@@ -94,7 +97,7 @@ class _SymbolMapState extends State<SymbolMap> {
     super.dispose();
   }
 
-  void _updateMarkers() {
+  void _updateMarkers(String vehicleName) {
     if (mController != null) {
       mController!.clearSymbols();
       symbols.clear();
@@ -105,7 +108,7 @@ class _SymbolMapState extends State<SymbolMap> {
           iconSize: 1.5,
           iconAnchor: 'bottom',
           iconHaloColor: '#ffffff',
-          textField: vehicleId,
+          textField: vehicleName,
           textSize: 12.5,
           textOffset: Offset(0, 1.2),
           textAnchor: 'bottom',
@@ -137,7 +140,7 @@ class _SymbolMapState extends State<SymbolMap> {
               },
               onStyleLoadedCallback: () {
                 addImageFromUrl("custom-marker", Uri.parse(iconUrl)).then((value) {
-                  _updateMarkers();
+                  _updateMarkers('');
                 });
               },
             ),

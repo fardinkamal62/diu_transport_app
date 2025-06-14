@@ -48,12 +48,13 @@ class _SymbolMapState extends State<SymbolMap> {
     widget.socket.on('location', (data) {
       try {
         String vehicleId = data['vehicleId'].toString();
+        String vehicleName = data['vehicleName'].toString();
         double latitude = double.parse(data['latitude'].toString());
         double longitude = double.parse(data['longitude'].toString());
         setState(() {
           LatLng newCoordinate = LatLng(latitude, longitude);
           vehicleLocations[vehicleId] = newCoordinate;
-          _updateMarkers();
+          _updateMarkers(vehicleName);
         });
       } catch (e) {
         if (kDebugMode) {
@@ -73,7 +74,7 @@ class _SymbolMapState extends State<SymbolMap> {
     super.dispose();
   }
 
-  void _updateMarkers() {
+  void _updateMarkers(String vehicleName) {
     if (mController != null) {
       mController!.clearSymbols();
       symbols.clear();
@@ -84,7 +85,7 @@ class _SymbolMapState extends State<SymbolMap> {
           iconSize: 1.5,
           iconAnchor: 'bottom',
           iconHaloColor: '#ffffff',
-          textField: vehicleId,
+          textField: vehicleName,
           textSize: 12.5,
           textOffset: Offset(0, 1.2),
           textAnchor: 'bottom',
@@ -112,7 +113,7 @@ class _SymbolMapState extends State<SymbolMap> {
       },
       onStyleLoadedCallback: () {
         addImageFromUrl("custom-marker", Uri.parse(iconUrl)).then((value) {
-          _updateMarkers();
+          _updateMarkers('');
         });
       },
     );

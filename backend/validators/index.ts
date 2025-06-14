@@ -5,6 +5,7 @@ const coOrdinateSchema = Joi.object({
 	latitude: Joi.number().min(-90).max(90).required(),
 	longitude: Joi.number().min(-180).max(180).required(),
 	vehicleId: Joi.string().hex().length(24).required(),
+	vehicleName: Joi.string().min(2).max(100).required(),
 });
 
 const adminLoginSchema = Joi.object({

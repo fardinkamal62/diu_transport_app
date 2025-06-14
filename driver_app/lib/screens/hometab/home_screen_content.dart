@@ -309,7 +309,7 @@ class _HomeScreenContentState extends State<HomeScreenContent> {
           const SizedBox(height: 16),
           // Show the map widget below the shift button
           Expanded(
-            child: SymbolMap(socket: socket),
+            child: SymbolMap(socket: socket, vehicle: allocationVehicle),
           ),
         ],
       ),
