@@ -72,6 +72,10 @@ class _SymbolMapState extends State<SymbolMap> {
       }
     });
 
+    Future<Position> getCurrentPosition () async {
+      return await Geolocator.getCurrentPosition(locationSettings: locationSettings);
+    }
+
     // Emit data every 5 seconds
     _locationTimer = Timer.periodic(Duration(seconds: 5), (timer) async {
 
