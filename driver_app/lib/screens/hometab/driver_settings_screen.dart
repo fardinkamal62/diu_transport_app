@@ -1,5 +1,6 @@
 import 'package:diu_transport_driver_app/widget/setting_tile.dart';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class DriverSettingsScreen extends StatefulWidget {
   const DriverSettingsScreen({super.key});
@@ -9,6 +10,12 @@ class DriverSettingsScreen extends StatefulWidget {
 }
 
 class _DriverSettingsScreenState extends State<DriverSettingsScreen> {
+  Future<void> _logout() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.clear(); // Clear all stored data
+    Navigator.pushReplacementNamed(context, '/driver-login'); // Navigate to login screen
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -74,16 +81,7 @@ class _DriverSettingsScreenState extends State<DriverSettingsScreen> {
                       theme: theme,
                       title: 'Logout',
                       leadingIcon: Icons.logout,
-                      onTap: () {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text('You have been logged out successfully.', style: TextStyle(color: theme.colorScheme.onPrimary)),
-                            backgroundColor: theme.colorScheme.primary,
-                            duration: const Duration(seconds: 3),
-                          ),
-                        );
-                        Navigator.pushReplacementNamed(context, '/driver-login');
-                      },
+                      onTap: _logout,
                     ),
                   ],
                 ),

@@ -142,16 +142,6 @@ class _SymbolMapState extends State<SymbolMap> {
               },
             ),
           ),
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: TextField(
-              controller: vehicleIdController,
-              decoration: InputDecoration(
-                labelText: 'Enter Vehicle ID',
-                border: OutlineInputBorder(),
-              ),
-            ),
-          ),
         ],
       ),
     );

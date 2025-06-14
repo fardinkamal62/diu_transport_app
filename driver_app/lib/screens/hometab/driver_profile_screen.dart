@@ -1,7 +1,46 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'dart:convert';
 
-class DriverProfileScreen extends StatelessWidget {
+import '../../widget/setting_tile.dart';
+
+class DriverProfileScreen extends StatefulWidget {
   const DriverProfileScreen({super.key});
+
+  @override
+  State<DriverProfileScreen> createState() => _DriverProfileScreen();
+}
+
+class _DriverProfileScreen extends State<DriverProfileScreen> {
+  String? phoneNumber;
+  String? name;
+  List<dynamic>? preferredVehicle;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadUserData();
+  }
+
+  Future<void> _loadUserData() async {
+    final prefs = await SharedPreferences.getInstance();
+    final userData = prefs.getString('userData');
+
+    if (userData != null) {
+      final data = json.decode(userData);
+      setState(() {
+        phoneNumber = data['driverDetails']['phoneNumber'];
+        name = data['driverDetails']['name'];
+        preferredVehicle = data['driverDetails']['preferredVehicle'];
+      });
+    }
+  }
+
+  Future<void> _logout() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.clear(); // Clear all stored data
+    Navigator.pushReplacementNamed(context, '/driver-login'); // Navigate to login screen
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -28,16 +67,10 @@ class DriverProfileScreen extends StatelessWidget {
             ),
             const SizedBox(height: 16),
             Text(
-              'Fardin Ka Mal', // Driver's Name
+              '$name', // Driver's Name
               style: theme.textTheme.headlineMedium!.copyWith(
                 color: theme.colorScheme.primary,
                 fontWeight: FontWeight.bold,
-              ),
-            ),
-            Text(
-              'Driver ID: DRV12345', // Driver ID
-              style: theme.textTheme.titleMedium!.copyWith(
-                color: theme.colorScheme.onSurface.withOpacity(0.7),
               ),
             ),
             const SizedBox(height: 30),
@@ -64,65 +97,19 @@ class DriverProfileScreen extends StatelessWidget {
                       context,
                       icon: Icons.phone,
                       label: 'Phone',
-                      value: '+880 1XXXXXXXXX',
-                    ),
-                    _buildProfileDetailRow(
-                      context,
-                      icon: Icons.email,
-                      label: 'Email',
-                      value: 'abdullah.mamun@diu.edu.bd',
-                    ),
-                    _buildProfileDetailRow(
-                      context,
-                      icon: Icons.location_on,
-                      label: 'Address',
-                      value: '123 Main Street, Dhaka, Bangladesh',
-                    ),
-                    _buildProfileDetailRow(
-                      context,
-                      icon: Icons.calendar_today,
-                      label: 'Date of Birth',
-                      value: 'January 15, 1985',
+                      value: '$phoneNumber',
                     ),
                   ],
                 ),
               ),
             ),
-
-            Card(
-              elevation: 4,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-              color: theme.colorScheme.surface,
-              child: Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Emergency Contact',
-                      style: theme.textTheme.titleLarge!.copyWith(
-                        color: theme.colorScheme.primary,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    const Divider(height: 20),
-                    _buildProfileDetailRow(
-                      context,
-                      icon: Icons.contact_emergency,
-                      label: 'Name',
-                      value: 'Va*i',
-                    ),
-                    _buildProfileDetailRow(
-                      context,
-                      icon: Icons.phone_android,
-                      label: 'Phone',
-                      value: '+880 1YXXXXXXXX',
-                    ),
-                  ],
-                ),
-              ),
-            ),
-            const SizedBox(height: 30),
+            Center(
+              child: SettingTile(
+              theme: theme,
+              title: 'Logout',
+              leadingIcon: Icons.logout,
+              onTap: _logout,
+            )),
           ],
         ),
       ),

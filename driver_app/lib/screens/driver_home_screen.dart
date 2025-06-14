@@ -4,7 +4,6 @@ import 'package:geolocator/geolocator.dart';
 import 'dart:async';
 
 import 'hometab/driver_profile_screen.dart';
-import 'hometab/driver_settings_screen.dart';
 import 'hometab/home_screen_content.dart';
 import 'hometab/qr_scanner_page.dart';
 
@@ -19,17 +18,14 @@ class _DriverHomeScreenState extends State<DriverHomeScreen> {
   bool _isConnected = true;
   bool _hasLocationPermission = false;
   bool _locationServiceEnabled = false;
-  String? _selectedVehicle;
-  final List<String> _availableVehicles = ['Bus 101 (DHA-GAZ)', 'Bus 102 (DHA-SAV)', 'Microbus A01'];
   bool shiftStartStatus = false;
 
   int _selectedIndex = 0;
-  late StreamSubscription<ConnectivityResult> _connectivitySubscription;
+  late StreamSubscription<List<ConnectivityResult>> _connectivitySubscription;
 
   final List<Widget> _otherWidgetOptions = <Widget>[
     const QRScannerPage(),
     const DriverProfileScreen(),
-    const DriverSettingsScreen(),
   ];
 
   @override
@@ -46,8 +42,6 @@ class _DriverHomeScreenState extends State<DriverHomeScreen> {
   }
 
   void _toggleShiftStatus() {
-    if (_selectedVehicle == null) return;
-
     setState(() {
       shiftStartStatus = !shiftStartStatus;
     });
@@ -56,8 +50,8 @@ class _DriverHomeScreenState extends State<DriverHomeScreen> {
       SnackBar(
         content: Text(
           shiftStartStatus
-              ? 'Shift started for $_selectedVehicle'
-              : 'Shift ended for $_selectedVehicle',
+              ? 'Shift started'
+              : 'Shift ended',
         ),
       ),
     );
@@ -71,9 +65,10 @@ class _DriverHomeScreenState extends State<DriverHomeScreen> {
   }
 
   void _setupConnectivityListener() {
-    _connectivitySubscription = Connectivity().onConnectivityChanged.listen((ConnectivityResult result) {
+    _connectivitySubscription = Connectivity().onConnectivityChanged.listen((List<ConnectivityResult> results) {
       setState(() {
-        _isConnected = result != ConnectivityResult.none;
+        // Consider connected if any result is not 'none'
+        _isConnected = results.any((r) => r != ConnectivityResult.none);
       });
     });
   }
@@ -175,13 +170,6 @@ class _DriverHomeScreenState extends State<DriverHomeScreen> {
 
     final List<Widget> pages = [
       HomeScreenContent(
-        selectedVehicle: _selectedVehicle,
-        availableVehicles: _availableVehicles,
-        onVehicleChanged: (newValue) {
-          setState(() {
-            _selectedVehicle = newValue;
-          });
-        },
         onShiftToggle: _toggleShiftStatus,
         shiftStarted: shiftStartStatus,
       ),
@@ -260,7 +248,6 @@ class _DriverHomeScreenState extends State<DriverHomeScreen> {
           BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
           BottomNavigationBarItem(icon: Icon(Icons.qr_code), label: 'Reservations'),
           BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profile'),
-          BottomNavigationBarItem(icon: Icon(Icons.settings), label: 'Settings'),
         ],
         currentIndex: _selectedIndex,
         onTap: _onItemTapped,
@@ -268,5 +255,3 @@ class _DriverHomeScreenState extends State<DriverHomeScreen> {
     );
   }
 }
-
-

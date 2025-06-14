@@ -7,13 +7,13 @@ io.Socket socketio() {
     print("Connecting to socket.io server");
   }
 
-  final socketUrl = dotenv.env['SOCKET_URL'] ?? '';
+  final socketUrl = dotenv.env['SERVER_URL'] ?? '';
 
   if (socketUrl.isEmpty) {
     if (kDebugMode) {
-      print('Error: SOCKET_URL is not set in the .env file');
+      print('Error: SERVER_URL is not set in the .env file');
     }
-    throw Exception('SOCKET_URL is not configured in the environment variables');
+    throw Exception('SERVER_URL is not configured in the environment variables');
   }
   // Dart client
   io.Socket socket = io.io(

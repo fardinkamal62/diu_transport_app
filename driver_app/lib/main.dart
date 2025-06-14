@@ -39,7 +39,7 @@ Future main() async {
 
   // Validate required environment variables
   if (envLoaded) {
-    final requiredEnvVars = ['API_KEY', 'SOCKET_URL'];
+    final requiredEnvVars = ['API_KEY', 'SERVER_URL'];
     final missingEnvVars = requiredEnvVars.where((v) => dotenv.env[v] == null).toList();
 
     if (missingEnvVars.isNotEmpty) {
