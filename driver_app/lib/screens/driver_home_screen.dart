@@ -6,6 +6,7 @@ import 'dart:async';
 import 'hometab/driver_profile_screen.dart';
 import 'hometab/home_screen_content.dart';
 import 'hometab/qr_scanner_page.dart';
+import 'package:diu_transport_driver_app/screens/schedule_list.dart';
 
 class DriverHomeScreen extends StatefulWidget {
   const DriverHomeScreen({super.key});
@@ -25,6 +26,7 @@ class _DriverHomeScreenState extends State<DriverHomeScreen> {
 
   final List<Widget> _otherWidgetOptions = <Widget>[
     const QRScannerPage(),
+    const ScheduleList(),
     const DriverProfileScreen(),
   ];
 
@@ -245,9 +247,10 @@ class _DriverHomeScreenState extends State<DriverHomeScreen> {
       ),
       bottomNavigationBar: BottomNavigationBar(
         items: const <BottomNavigationBarItem>[
-          BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
-          BottomNavigationBarItem(icon: Icon(Icons.qr_code), label: 'Reservations'),
-          BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profile'),
+          BottomNavigationBarItem(icon: Icon(Icons.home_outlined), label: 'Home'),
+          BottomNavigationBarItem(icon: Icon(Icons.qr_code_outlined), label: 'Reservations'),
+          BottomNavigationBarItem(icon: Icon(Icons.schedule_outlined), label: 'Schedule'),
+          BottomNavigationBarItem(icon: Icon(Icons.person_outlined), label: 'Profile'),
         ],
         currentIndex: _selectedIndex,
         onTap: _onItemTapped,
