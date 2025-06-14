@@ -1,4 +1,9 @@
 import 'dart:io';
+import 'package:diu_transport_driver_app/screens/auth/driver_login_screen.dart';
+import 'package:diu_transport_driver_app/screens/driver_home_screen.dart';
+import 'package:diu_transport_driver_app/screens/settings/about_app_screen.dart';
+import 'package:diu_transport_driver_app/screens/settings/privacy_policy_screen.dart';
+import 'package:diu_transport_driver_app/theme/driver_transit_theme.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
@@ -75,10 +80,16 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'DIU Transport Driver App',
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-      ),
-      home: SymbolMap(socket: socket),
+      theme: driverTransitTheme,
+      debugShowCheckedModeBanner: false,
+      initialRoute: '/driver-login', // Start at login screen
+      routes: {
+        '/driver-login': (context) => const DriverLoginScreen(),
+        '/driver-home-screen': (context) => const DriverHomeScreen(),
+        '/about-app': (context) => const AboutAppScreen(),
+        '/privacy-policy': (context) => const PrivacyPolicyScreen(), // Reusing AboutAppScreen for privacy policy
+      },
+      // home: SymbolMap(socket: socket),
     );
   }
 }
