@@ -1,10 +1,11 @@
 import express from 'express';
 
-import { NotFound, Unauthorized, InternalServerError } from 'http-errors';
+import { NotFound, Unauthorized, InternalServerError, BadRequest } from 'http-errors';
 
 import userSchema from '../../schemas/user';
 import vehicleSchema from '../../schemas/vehicle';
 import allocationSchema from '../../schemas/allocation';
+import reservationSchema from '../../schemas/reservation';
 
 
 import logger from '../../utils/logger';
@@ -109,9 +110,45 @@ const getAllocation = async (req: express.Request): Promise<object> => {
 	}
 };
 
+const journeyToggle = async (req: express.Request): Promise<object> => {
+	try {
+		const vehicleId = req.body.vehicleId as string;
+
+		if (vehicleId == null) {
+			throw new BadRequest('Vehicle ID is required');
+		}
+
+		const vehicle = await vehicleSchema.Vehicle.findOne({ _id: vehicleId });
+
+		if (vehicle == null) {
+			throw new NotFound('Vehicle not found');
+		}
+
+		if (vehicle.enRoute === false) {
+			await reservationSchema.VehicleReservation.updateMany({
+				vehicleId: vehicle._id,
+			}, { $set: { status: 'onboard' } });
+		} else {
+			await reservationSchema.VehicleReservation.updateMany({
+				vehicleId: vehicle._id,
+			}, { $set: { status: 'completed' } });
+		}
+
+		await vehicleSchema.Vehicle.updateOne({ _id: vehicleId }, { $set: { enRoute: !vehicle.enRoute } });
+
+		return {
+			message: 'Vehicle status updated',
+		}
+	} catch (e: any) {
+		logger.error(('Failed to toggle status'), e);
+		throw new Error(e.message);
+	}
+};
+
 const driverApi = {
 	login,
 	getAllocation,
+	journeyToggle,
 }
 
 export default driverApi;

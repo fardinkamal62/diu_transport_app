@@ -14,31 +14,6 @@ import logger from '../../utils/logger';
 const Vehicle = vehicleSchema.Vehicle;
 const User = userSchema.User;
 
-const journeyToggle = async (req: express.Request): Promise<object> => {
-	try {
-		const vehicleId = req.body.vehicleId as string;
-
-		if (vehicleId == null) {
-			throw new BadRequest('Vehicle ID is required');
-		}
-
-		const vehicle = await Vehicle.findOne({ _id: vehicleId });
-
-		if (vehicle == null) {
-			throw new NotFound('Vehicle not found');
-		}
-
-		await Vehicle.updateOne({ _id: vehicleId }, { $set: { enRoute: !vehicle.enRoute } });
-
-		return {
-			message: 'Vehicle status updated',
-		}
-	} catch (e: any) {
-		logger.error(('Failed to toggle status'), e);
-		throw new Error(e.message);
-	}
-};
-
 interface vehicleLocation {
 	vehicleId: string;
 	latitude: number;
@@ -172,11 +147,46 @@ const getSchedules = async (req: express.Request): Promise<object[]> => {
 	now.setHours(6, 0, 0, 0);
 	const timeStr = req.query.time as string || now.toISOString();
 
+	const dispatchTime = req.query.dispatchTime as string || null;
+	const vehicleId = req.query.vehicleId as string || null;
+
+	let select: string = '';
+
 	try {
 		const time = new Date(timeStr);
-		const schedules = await scheduleSchema.find({
-			campusReturnTime: { $gte: time },
-		}).select('campusReturnTime requirements dispatches');
+
+		// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+		const query = {} as any;
+
+		let schedules: string | any[];
+		if (dispatchTime != null) {
+			const thisHour = new Date();
+			thisHour.setHours(thisHour.getHours(), 0, 0, 0);
+			const nextHour = new Date(thisHour);
+			nextHour.setHours(nextHour.getHours() + 1, 0, 0, 0);
+
+			const dispatchDate = new Date(dispatchTime);
+
+			query['dispatches.dispatchTime'] = {
+				$gte: dispatchDate,
+				$lt: nextHour
+			}
+
+			select = ' campusReturnTime requirements dispatches.vehicleId dispatches.dispatchTime';
+		} else {
+			query.campusReturnTime = {
+				$gte: time,
+				$lt: new Date(time.getTime() + 24 * 60 * 60 * 1000) // Next day
+			}
+			select = 'campusReturnTime requirements dispatches.vehicleId dispatches.dispatchTime';
+		}
+
+		if (vehicleId != null) {
+			query['dispatches.vehicleId'] = vehicleId;
+			select += ' dispatches.passengers';
+		}
+
+		schedules = await scheduleSchema.find(query).select(select);
 
 		if (schedules.length === 0) {
 			return [];
@@ -185,6 +195,7 @@ const getSchedules = async (req: express.Request): Promise<object[]> => {
 		// Loop over schedules and populate vehicle data in dispatches
 		const updatedSchedules = [];
 		for (const schedule of schedules) {
+			// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
 			const scheduleObj = schedule.toObject(); // Convert Mongoose document to plain object
 			for (const dispatch of scheduleObj.dispatches) {
 				if (dispatch.vehicleId) {
@@ -208,5 +219,5 @@ const getSchedules = async (req: express.Request): Promise<object[]> => {
 	}
 };
 
-const api = { journeyToggle, getVehiclesLocation, getVehicles, getDrivers, manualReservation, getSchedules };
+const api = { getVehiclesLocation, getVehicles, getDrivers, manualReservation, getSchedules };
 export default api;

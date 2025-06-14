@@ -56,6 +56,15 @@ router.get('/allocation', async (req: express.Request, res: express.Response) =>
 	}
 });
 
+router.post('/journey', async (req: express.Request, res: express.Response) => {
+	try {
+		const result = await controllers.journeyToggle(req);
+		res.status(200).json({ success: true, data: result });
+	} catch (error) {
+		res.status(400).json({ success: false, error: (error as Error).message || 'Failed to toggle journey' });
+	}
+});
+
 router.use(middlewares.adminAuth);
 
 const driverRoutes = { router }
