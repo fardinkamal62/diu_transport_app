@@ -13,14 +13,16 @@ import rateLimit from 'express-rate-limit';
 import { config } from 'dotenv';
 import swaggerUi from 'swagger-ui-express';
 
-import indexRoute from './routes/v1/index'
 import mongo from './db';
 import errorHandler from './middlewares/error-handler';
 import redisDatabase from './db/redis_db';
-import adminRoutes from './routes/v1/admin';
 import { initSocket } from './socket';
-import userRoutes from './routes/v1/user';
 import swaggerSpec from './swagger';
+
+import indexRoute from './routes/v1/index'
+import userRoutes from './routes/v1/user';
+import adminRoutes from './routes/v1/admin';
+import driverRoutes from './routes/v1/driver';
 
 import logger from './utils/logger';
 import utils from './utils';
@@ -67,6 +69,7 @@ app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 // Router
 app.use('/api/v1/admin', adminRoutes.router);
 app.use('/api/v1/user', userRoutes.router);
+app.use('/api/v1/driver', driverRoutes.router);
 app.use('/api/v1', indexRoute.router);
 
 // Handle 404 errors
