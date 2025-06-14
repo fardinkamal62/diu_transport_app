@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:maplibre_gl/maplibre_gl.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:geolocator/geolocator.dart';
 
 class SymbolMap extends StatefulWidget {
   final dynamic socket;
@@ -33,8 +34,11 @@ class _SymbolMapState extends State<SymbolMap> {
   final List<LatLng> coordinates = [];
   final Map<String, LatLng> vehicleLocations = {};
   List<Symbol> symbols = [];
-  final TextEditingController vehicleIdController = TextEditingController();
 
+  final LocationSettings locationSettings = LocationSettings(
+    accuracy: LocationAccuracy.high,
+    distanceFilter: 100,
+  );
   @override
   void initState() {
     super.initState();
@@ -68,16 +72,16 @@ class _SymbolMapState extends State<SymbolMap> {
       }
     });
 
-    // Add listener to vehicleIdController
     // Emit data every 5 seconds
-    _locationTimer = Timer.periodic(Duration(seconds: 5), (timer) {
+    _locationTimer = Timer.periodic(Duration(seconds: 5), (timer) async {
+
+      Position currentPosition = await getCurrentPosition();
 
       if (widget.vehicle?['vehicleId']!.isNotEmpty && mController != null) {
-        LatLng? currentLocation = mController!.cameraPosition?.target;
         widget.socket.emit('location', {
           'vehicleId': widget.vehicle?['vehicleId'],
-          'latitude': currentLocation?.latitude.toString(),
-          'longitude': currentLocation?.longitude.toString(),
+          'latitude': currentPosition.latitude.toString(),
+          'longitude': currentPosition.longitude.toString(),
           'vehicleName': widget.vehicle?['vehicleName'],
         });
       }
@@ -93,7 +97,6 @@ class _SymbolMapState extends State<SymbolMap> {
     _locationTimer?.cancel();
     // Clean up map controller
     mController?.onSymbolTapped.remove(_onSymbolTapped);
-    vehicleIdController.dispose();
     super.dispose();
   }
 
