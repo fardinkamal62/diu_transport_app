@@ -98,18 +98,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 ),
               ],
             ),
-            const SizedBox(height: 20),
-            if (regCode != null)
-              Column(
-                children: [
-                  const SizedBox(height: 10),
-                  QrImageView(
-                    data: regCode!,
-                    version: QrVersions.auto,
-                    size: 150.0,
-                  ),
-                ],
-              ),
             const Spacer(), // Push the logout button to the bottom
             ElevatedButton.icon(
               onPressed: _logout,

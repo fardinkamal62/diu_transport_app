@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:qr_flutter/qr_flutter.dart';
@@ -8,14 +9,22 @@ import 'package:shared_preferences/shared_preferences.dart';
 class ReservationDetails extends StatelessWidget {
   final Map<String, dynamic> reservation;
 
-  const ReservationDetails({Key? key, required this.reservation}) : super(key: key);
+  const ReservationDetails({super.key, required this.reservation});
 
-  Future<String?> _getRegistrationCode() async {
+  Future<Map<String, String>?> _getQrData() async {
     final prefs = await SharedPreferences.getInstance();
     final userData = prefs.getString('userData');
     if (userData != null) {
       final data = Map<String, dynamic>.from(json.decode(userData));
-      return data['user']['reg_code'];
+      final registrationCode = data['user']['reg_code'];
+      final userType = data['user']['type'] ?? 'student';
+      if (registrationCode != null && userType != null) {
+        return {
+          "registrationCode": registrationCode,
+          "userType": userType,
+          "reservationId": reservation['_id'].toString(),
+        };
+      }
     }
     return null;
   }
@@ -86,20 +95,24 @@ class ReservationDetails extends StatelessWidget {
             const SizedBox(height: 20),
 
             const SizedBox(height: 10),
-            FutureBuilder<String?>(
-              future: _getRegistrationCode(),
+            FutureBuilder<Map<String, String>?>(
+              future: _getQrData(),
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
                   return const Center(child: CircularProgressIndicator());
                 } else if (snapshot.hasData && snapshot.data != null) {
+                  final qrData = json.encode(snapshot.data);
                   return Center(
                     child: QrImageView(
-                      data: snapshot.data!,
+                      data: qrData,
                       version: QrVersions.auto,
                       size: 150.0,
                     ),
                   );
                 } else {
+                  if (kDebugMode) {
+                    print("Failed to load QR data: ${snapshot.error}");
+                  }
                   return const Center(
                     child: Text(
                       "Failed to load QR Code",

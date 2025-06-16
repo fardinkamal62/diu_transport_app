@@ -87,18 +87,20 @@ class _ScheduleListState extends State<ScheduleList> {
       body: isLoading
           ? const Center(child: CircularProgressIndicator())
           : DefaultTabController(
-              length: 24,
+              length: 14, // Only 14 hours (8 AM to 9 PM)
               child: Column(
                 children: [
                   TabBar(
                     isScrollable: true,
                     tabs: List.generate(
-                      24,
-                      (index) => Tab(text: _formatHour(index.toString())), // Format hour in AM-PM
+                      14,
+                      (index) => Tab(
+                        text: _formatHour((index + 8).toString()), // Start from 8 AM
+                      ),
                     ),
                     onTap: (index) {
                       setState(() {
-                        selectedHour = index.toString();
+                        selectedHour = (index + 8).toString(); // Adjust for 8 AM start
                       });
                     },
                   ),
