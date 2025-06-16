@@ -72,6 +72,10 @@ class _HomeScreenContentState extends State<HomeScreenContent> {
             allocationVehicle = data['data']['allocation'];
             loadingVehicle = false;
           });
+
+          // Store vehicleId in SharedPreferences
+          final prefs = await SharedPreferences.getInstance();
+          await prefs.setString('vehicleId', allocationVehicle!['vehicleId']);
         } else {
           setState(() {
             allocationVehicle = null;
@@ -98,14 +102,18 @@ class _HomeScreenContentState extends State<HomeScreenContent> {
     try {
       final SERVER_URL = dotenv.env['SERVER_URL'];
       final now = DateTime.now();
-      final response = await http.get(Uri.parse('$SERVER_URL/api/v1/schedules?driverId=$driverId&dispatchTime=2025-06-13T04:00:00.782Z'));
+      final response = await http.get(Uri.parse('$SERVER_URL/api/v1/schedules?driverId=$driverId&dispatchTime=${now.toIso8601String()}'));
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
         if (data['success'] == true && data['data'] != null && data['data'].isNotEmpty) {
           // Find dispatch for this vehicle
           final schedule = data['data'][0];
           scheduleId = schedule['_id'];
-          print('VehicleId: ${allocationVehicle!['vehicleId']}');
+
+          // Store scheduleId in SharedPreferences
+          final prefs = await SharedPreferences.getInstance();
+          await prefs.setString('scheduleId', scheduleId!);
+
           final dispatch = (schedule['dispatches'] as List).firstWhere(
             (d) => d['vehicleId'] == allocationVehicle!['vehicleId'],
             orElse: () => null,

@@ -10,6 +10,7 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 import 'package:diu_transport_driver_app/barikoi_map.dart';
 import 'package:diu_transport_driver_app/socketio.dart' as socketio;
+import 'package:diu_transport_driver_app/widget/loader.dart';
 
 class MyHttpOverrides extends HttpOverrides {
   @override
@@ -54,12 +55,19 @@ Future main() async {
   }
 
   var socket = socketio.socketio();
+  bool socketConnected = false;
+
+  runApp(MaterialApp(
+    home: const Loader(),
+    debugShowCheckedModeBanner: false,
+  ));
 
   // Handle socket connection status
   socket.on('connect', (_) {
     if (kDebugMode) {
       print('Socket connected');
     }
+    socketConnected = true;
   });
 
   socket.on('connect_error', (error) {
@@ -67,6 +75,10 @@ Future main() async {
       print('Socket connection error: $error');
     }
   });
+
+  while (!socketConnected) {
+    await Future.delayed(const Duration(milliseconds: 100));
+  }
 
   runApp(MyApp(socket: socket));
 }
