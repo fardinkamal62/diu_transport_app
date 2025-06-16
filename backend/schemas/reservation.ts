@@ -55,6 +55,9 @@ interface VehicleReservationDocument extends mongoose.Document {
 	} | null;
 }
 
+reservationSchema.index({ time: -1 });
+reservationSchema.index({ registrationCode: 1, time: -1 });
+
 const VehicleReservation = mongoose.model<VehicleReservationDocument>('VehicleReservation', reservationSchema);
 
 const schemas = {

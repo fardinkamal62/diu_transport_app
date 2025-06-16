@@ -9,7 +9,7 @@ const init = async (mongoUri: string) : Promise<void> => {
 			await mongoose.connect(mongoUri, {
 				connectTimeoutMS: 5000,
 				socketTimeoutMS: 45000,
-				maxPoolSize: 50,
+				maxPoolSize: 100,
 				retryWrites: true,
 			});
 			logger.info('MongoDB connected successfully');

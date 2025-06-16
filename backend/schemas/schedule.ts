@@ -151,6 +151,9 @@ interface ScheduleDocument extends mongoose.Document {
 	};
 }
 
+scheduleSchema.index({ campusReturnTime: -1 });
+scheduleSchema.index({ 'dispatches.dispatchTime': -1 });
+
 const VehicleSchedule = mongoose.model<ScheduleDocument>('VehicleSchedule', scheduleSchema);
 
 
