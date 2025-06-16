@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
 import 'package:flutter/services.dart'; // Import Clipboard functionality
-import 'package:qr_flutter/qr_flutter.dart'; // Import QR code package
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
