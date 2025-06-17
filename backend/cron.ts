@@ -141,6 +141,7 @@ function scheduleHourlyDispatch(): void {
                         {_id: {$in: reservationsToUpdate.map(r => r._id)}},
                         {
                             vehicleId: vehicleId,
+                            scheduleId: schedule._id,
                             status: 'onboard',
                             message: `Assigned to ${dispatch.type} departing at ${dispatch.dispatchTime}`
                         }

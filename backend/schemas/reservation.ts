@@ -37,6 +37,10 @@ const reservationSchema = new mongoose.Schema({
 		type: Date,
 		default: ():Date => new Date(),
 	},
+	scheduleId: {
+		type: mongoose.Schema.Types.ObjectId,
+		ref: 'VehicleSchedule',
+	}
 }, { autoIndex: false });
 
 
@@ -53,10 +57,17 @@ interface VehicleReservationDocument extends mongoose.Document {
 		registrationNumber: string;
 		type: string;
 	} | null;
+	scheduleId?: mongoose.Types.ObjectId;
+	schedule?: {
+		dispatchTime: Date;
+		returnTime: Date;
+		pickupTime: Date;
+	}
 }
 
 reservationSchema.index({ time: -1 });
 reservationSchema.index({ registrationCode: 1, time: -1 });
+reservationSchema.index({ scheduleId: -1 });
 
 const VehicleReservation = mongoose.model<VehicleReservationDocument>('VehicleReservation', reservationSchema);
 

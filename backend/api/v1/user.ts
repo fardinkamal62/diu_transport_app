@@ -4,6 +4,7 @@ import { BadRequest, InternalServerError } from 'http-errors';
 import reservationSchema from '../../schemas/reservation';
 import logger from '../../utils/logger';
 import vehicleSchema from '../../schemas/vehicle';
+import scheduleSchema from '../../schemas/schedule';
 
 const addReservation = async(req: express.Request): Promise<object> => {
 	const registrationCode = req.body.registrationCode as string;
@@ -89,6 +90,21 @@ const getReservations = async(req: express.Request): Promise<object> => {
 					};
 				} else {
 					reservationObj.vehicle = null;
+				}
+			}
+
+			if (reservation.scheduleId) {
+				const schedule = await scheduleSchema.findById(reservation.scheduleId);
+				if (schedule) {
+					schedule.dispatches.forEach((dispatch) => {
+						if (dispatch.vehicleId && dispatch.vehicleId.equals(reservation.vehicleId)) {
+							reservationObj.schedule = {
+								dispatchTime: dispatch.dispatchTime,
+								returnTime: dispatch.returnTime,
+								pickupTime: dispatch.pickupTime,
+							};
+						}
+					});
 				}
 			}
 			enrichedReservations.push(reservationObj);
