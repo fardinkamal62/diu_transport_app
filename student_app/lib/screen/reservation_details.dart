@@ -118,8 +118,13 @@ class ReservationDetails extends StatelessWidget {
                 style: const TextStyle(fontSize: 16),
               ),
             if (reservation['status'] == 'scheduled')
+              if (reservation['location'] == 'campus')
+                Text(
+                  "Vehicle schedule will be available by: ${DateFormat('hh:00 a').format(reservationDate.toLocal())}",
+                )
+              else
               Text(
-                "Vehicle schedule will be available by: ${DateFormat('hh:mm a').format(reservationDate.subtract(const Duration(hours: 1)).toLocal())}",
+                "Vehicle schedule will be available by: ${DateFormat('hh:00 a').format(reservationDate.subtract(const Duration(hours: 1)).toLocal())}",
               ),
             const SizedBox(height: 20),
 
