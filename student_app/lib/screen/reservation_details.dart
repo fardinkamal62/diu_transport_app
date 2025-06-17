@@ -32,7 +32,21 @@ class ReservationDetails extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final reservationDate = DateTime.parse(reservation['time']);
-    final formattedTime = DateFormat('MMMM dd, yyyy hh:mm a').format(reservationDate.toLocal());
+
+    // Make dispatchTime and pickupTime optional
+    DateTime? dispatchTime;
+    DateTime? pickupTime;
+    try {
+      if (reservation['schedule']?['dispatchTime'] != null) {
+        dispatchTime = DateTime.parse(reservation['schedule']['dispatchTime']);
+      }
+    } catch (_) {}
+    try {
+      if (reservation['schedule']?['pickupTime'] != null) {
+        pickupTime = DateTime.parse(reservation['schedule']['pickupTime']);
+      }
+    } catch (_) {}
+
     final vehicle = reservation['vehicle']; // Extract vehicle details
 
     return Scaffold(
@@ -50,7 +64,7 @@ class ReservationDetails extends StatelessWidget {
             ),
             const SizedBox(height: 10),
             Text(
-              "Time: $formattedTime",
+              "Time: ${DateFormat('MMMM dd, yyyy hh:mm a').format(reservationDate.toLocal())}",
               style: const TextStyle(fontSize: 16),
             ),
             const SizedBox(height: 10),
@@ -92,6 +106,21 @@ class ReservationDetails extends StatelessWidget {
                 ),
               ),
             ],
+            const SizedBox(height: 20),
+            if (dispatchTime != null)
+              Text(
+                "Leave Campus by: ${DateFormat('hh:mm a').format(dispatchTime.toLocal())}",
+                style: const TextStyle(fontSize: 16),
+              ),
+            if (pickupTime != null)
+              Text(
+                "Reach Notunbazar by: ${DateFormat('hh:mm a').format(pickupTime.toLocal())}",
+                style: const TextStyle(fontSize: 16),
+              ),
+            if (reservation['status'] == 'scheduled')
+              Text(
+                "Vehicle schedule will be available by: ${DateFormat('hh:mm a').format(reservationDate.subtract(const Duration(hours: 1)).toLocal())}",
+              ),
             const SizedBox(height: 20),
 
             const SizedBox(height: 10),
