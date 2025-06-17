@@ -2,7 +2,7 @@
   "name": "diu_transport_app_backend",
   "module": "index.ts",
   "private": false,
-  "version": "1.4.0",
+  "version": "1.9.1-beta",
   "description": "Backend for DIU Transport App",
   "scripts": {
     "start": "ts-node index.ts",
