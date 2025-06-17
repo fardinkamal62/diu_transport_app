@@ -1,0 +1,32 @@
+services:
+  backend:
+    build: .
+    image: diu_transport_backend:1.9.2-beta
+    container_name: diu_transport_backend
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      - REDIS_URL=redis://redis:6379
+    depends_on:
+      - redis
+    env_file:
+      - .env
+    mem_limit: 512m
+    cpus: 1.0
+
+  redis:
+    image: redis:8.0.2-alpine
+    container_name: diu_transport_redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    mem_limit: 128m
+    cpus: 0.5
+
+volumes:
+  redis_data:
+
+
