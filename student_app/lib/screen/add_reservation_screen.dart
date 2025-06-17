@@ -283,8 +283,12 @@ class _ReservationScreenState extends State<ReservationScreen> {
                                       parsedTime.minute,
                                     );
 
-                                    // Disable button if time is in the past or within 2 hours
-                                    if (fullDateTime.isAfter(now.add(const Duration(hours: 2)))) {
+                                    // Disable button if time is in the past or within 40 minutes for campus, 2 hours for others
+                                    final minDuration = selectedLocation == 'campus'
+                                        ? const Duration(minutes: 40)
+                                        : const Duration(hours: 2);
+
+                                    if (fullDateTime.isAfter(now.add(minDuration))) {
                                       await _showConfirmationDialog(
                                         timingList[j]['label']!,
                                         timingList[j]['value']!,
@@ -303,8 +307,12 @@ class _ReservationScreenState extends State<ReservationScreen> {
                                           parsedTime.minute,
                                         );
 
-                                        // Disable button if time is in the past or within 2 hours
-                                        if (fullDateTime.isBefore(now.add(const Duration(hours: 2)))) {
+                                        // Disable button if time is in the past or within 40 minutes for campus, 2 hours for others
+                                        final minDuration = selectedLocation == 'campus'
+                                            ? const Duration(minutes: 40)
+                                            : const Duration(hours: 2);
+
+                                        if (fullDateTime.isBefore(now.add(minDuration))) {
                                           return Colors.grey.shade600; // Disabled text color
                                         }
                                         return diuSurfaceColor; // Enabled text color
@@ -342,8 +350,12 @@ class _ReservationScreenState extends State<ReservationScreen> {
     final parsedTime = DateFormat("HH:mm").parse(timeValue);
     final fullDateTime = DateTime(now.year, now.month, now.day, parsedTime.hour, parsedTime.minute);
 
-    // Return disabled color if time is in the past or within 2 hours
-    if (fullDateTime.isBefore(now.add(const Duration(hours: 2)))) {
+    // Return disabled color if time is in the past or within 40 minutes for campus, 2 hours for others
+    final minDuration = selectedLocation == 'campus'
+        ? const Duration(minutes: 40)
+        : const Duration(hours: 2);
+
+    if (fullDateTime.isBefore(now.add(minDuration))) {
       return Colors.grey.shade300; // Disabled button color
     }
     return diuLightGreen; // Enabled button color
