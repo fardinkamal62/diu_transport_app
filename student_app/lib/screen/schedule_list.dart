@@ -86,97 +86,100 @@ class _ScheduleListState extends State<ScheduleList> {
     return Scaffold(
       body: isLoading
           ? const Center(child: CircularProgressIndicator())
-          : DefaultTabController(
-              length: 14, // Only 14 hours (8 AM to 9 PM)
-              child: Column(
-                children: [
-                  TabBar(
-                    isScrollable: true,
-                    tabs: List.generate(
-                      14,
-                      (index) => Tab(
-                        text: _formatHour((index + 8).toString()), // Start from 8 AM
+          : RefreshIndicator(
+              onRefresh: _fetchSchedules,
+              child: DefaultTabController(
+                length: 14, // Only 14 hours (8 AM to 9 PM)
+                child: Column(
+                  children: [
+                    TabBar(
+                      isScrollable: true,
+                      tabs: List.generate(
+                        14,
+                        (index) => Tab(
+                          text: _formatHour((index + 8).toString()), // Start from 8 AM
+                        ),
                       ),
+                      onTap: (index) {
+                        setState(() {
+                          selectedHour = (index + 8).toString(); // Adjust for 8 AM start
+                        });
+                      },
                     ),
-                    onTap: (index) {
-                      setState(() {
-                        selectedHour = (index + 8).toString(); // Adjust for 8 AM start
-                      });
-                    },
-                  ),
-                  Expanded(
-                    child: selectedHour.isEmpty
-                        ? const Center(child: Text('Select an hour to view details.'))
-                        : Builder(
-                            builder: (context) {
-                              final schedules = hourlySchedules[selectedHour] ?? [];
-                              if (schedules.isEmpty) {
-                                return const Center(child: Text('No schedules available.'));
-                              }
-                              final schedule = schedules.first; // Safely access the first schedule
-                              final campusReturnTime = DateTime.parse(schedule['campusReturnTime']).toLocal(); // Convert to local time
-                              final dispatches = schedule['dispatches'];
+                    Expanded(
+                      child: selectedHour.isEmpty
+                          ? const Center(child: Text('Select an hour to view details.'))
+                          : Builder(
+                              builder: (context) {
+                                final schedules = hourlySchedules[selectedHour] ?? [];
+                                if (schedules.isEmpty) {
+                                  return const Center(child: Text('No schedules available.'));
+                                }
+                                final schedule = schedules.first; // Safely access the first schedule
+                                final campusReturnTime = DateTime.parse(schedule['campusReturnTime']).toLocal(); // Convert to local time
+                                final dispatches = schedule['dispatches'];
 
-                              if (dispatches.isEmpty) {
-                                return const Center(child: Text('No dispatch details available.'));
-                              }
+                                if (dispatches.isEmpty) {
+                                  return const Center(child: Text('No dispatch details available.'));
+                                }
 
-                              return Padding(
-                                padding: const EdgeInsets.all(16.0),
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      'Campus Return Time: ${DateFormat('hh:mm a').format(campusReturnTime)}',
-                                      style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                                    ),
-                                    const SizedBox(height: 16),
-                                    Text(
-                                      'Dispatch Details:',
-                                      style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                                    ),
-                                    const SizedBox(height: 8),
-                                    Expanded(
-                                      child: ListView.builder(
-                                        itemCount: dispatches.length,
-                                        itemBuilder: (context, index) {
-                                          final dispatch = dispatches[index];
-                                          final vehicle = dispatch['vehicle'];
-                                          final pickupTime = DateTime.parse(dispatch['pickupTime']).toLocal(); // Convert to local time
-                                          final dispatchTime = DateTime.parse(dispatch['dispatchTime']).toLocal(); // Convert to local time
-                                          final returnTime = DateTime.parse(dispatch['returnTime']).toLocal(); // Convert to local time
-
-                                          return Card(
-                                            margin: const EdgeInsets.symmetric(vertical: 8),
-                                            child: Padding(
-                                              padding: const EdgeInsets.all(8.0),
-                                              child: Column(
-                                                crossAxisAlignment: CrossAxisAlignment.start,
-                                                children: [
-                                                  Text(
-                                                    'Vehicle: ${vehicle['name']}',
-                                                    style: const TextStyle(fontWeight: FontWeight.bold),
-                                                  ),
-                                                  Text('Type: ${vehicle['type'][0].toUpperCase()}${vehicle['type'].substring(1)}'),
-                                                  Text('Registration: ${vehicle['vehicleRegistrationNumber']}'),
-                                                  const SizedBox(height: 8),
-                                                  Text('Pickup Time: ${DateFormat('hh:mm a').format(pickupTime)}'),
-                                                  Text('Campus Leave Time: ${DateFormat('hh:mm a').format(dispatchTime)}'),
-                                                  Text('Return Time: ${DateFormat('hh:mm a').format(returnTime)}'),
-                                                ],
-                                              ),
-                                            ),
-                                          );
-                                        },
+                                return Padding(
+                                  padding: const EdgeInsets.all(16.0),
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        'Campus Return Time: ${DateFormat('hh:mm a').format(campusReturnTime)}',
+                                        style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                                       ),
-                                    ),
-                                  ],
-                                ),
-                              );
-                            },
-                          ),
-                  ),
-                ],
+                                      const SizedBox(height: 16),
+                                      Text(
+                                        'Dispatch Details:',
+                                        style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                                      ),
+                                      const SizedBox(height: 8),
+                                      Expanded(
+                                        child: ListView.builder(
+                                          itemCount: dispatches.length,
+                                          itemBuilder: (context, index) {
+                                            final dispatch = dispatches[index];
+                                            final vehicle = dispatch['vehicle'];
+                                            // final pickupTime = DateTime.parse(dispatch['pickupTime']).toLocal(); // Convert to local time
+                                            final dispatchTime = DateTime.parse(dispatch['dispatchTime']).toLocal(); // Convert to local time
+                                            // final returnTime = DateTime.parse(dispatch['returnTime']).toLocal(); // Convert to local time
+
+                                            return Card(
+                                              margin: const EdgeInsets.symmetric(vertical: 8),
+                                              child: Padding(
+                                                padding: const EdgeInsets.all(8.0),
+                                                child: Column(
+                                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                                  children: [
+                                                    Text(
+                                                      'Vehicle: ${vehicle['name']}',
+                                                      style: const TextStyle(fontWeight: FontWeight.bold),
+                                                    ),
+                                                    Text('Type: ${vehicle['type'][0].toUpperCase()}${vehicle['type'].substring(1)}'),
+                                                    Text('Registration: ${vehicle['vehicleRegistrationNumber']}'),
+                                                    const SizedBox(height: 8),
+                                                    // Text('Pickup Time: ${DateFormat('hh:mm a').format(pickupTime)}'),
+                                                    Text('Campus Leave Time: ${DateFormat('hh:mm a').format(dispatchTime)}'),
+                                                    Text('Return Time: ${DateFormat('hh:mm a').format(campusReturnTime)}'),
+                                                  ],
+                                                ),
+                                              ),
+                                            );
+                                          },
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                );
+                              },
+                            ),
+                    ),
+                  ],
+                ),
               ),
             ),
     );
