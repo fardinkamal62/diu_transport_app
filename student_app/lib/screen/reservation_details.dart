@@ -64,7 +64,7 @@ class ReservationDetails extends StatelessWidget {
             ),
             const SizedBox(height: 10),
             Text(
-              "Time: ${DateFormat('MMMM dd, yyyy hh:mm a').format(reservationDate.toLocal())}",
+              "Time: ${DateFormat('MMMM dd, yyyy hh:mm a').format(reservationDate)}",
               style: const TextStyle(fontSize: 16),
             ),
             const SizedBox(height: 10),
@@ -109,22 +109,22 @@ class ReservationDetails extends StatelessWidget {
             const SizedBox(height: 20),
             if (dispatchTime != null)
               Text(
-                "Leave Campus by: ${DateFormat('hh:mm a').format(dispatchTime.toLocal())}",
+                "Leave Campus by: ${DateFormat('hh:mm a').format(dispatchTime)}",
                 style: const TextStyle(fontSize: 16),
               ),
             if (pickupTime != null)
               Text(
-                "Reach Notunbazar by: ${DateFormat('hh:mm a').format(pickupTime.toLocal())}",
+                "Reach Notunbazar by: ${DateFormat('hh:mm a').format(pickupTime)}",
                 style: const TextStyle(fontSize: 16),
               ),
             if (reservation['status'] == 'scheduled')
               if (reservation['location'] == 'campus')
                 Text(
-                  "Vehicle schedule will be available by: ${DateFormat('hh:00 a').format(reservationDate.toLocal())}",
+                  "Vehicle schedule will be available by: ${DateFormat('hh:00 a').format(reservationDate)}",
                 )
               else
               Text(
-                "Vehicle schedule will be available by: ${DateFormat('hh:00 a').format(reservationDate.subtract(const Duration(hours: 1)).toLocal())}",
+                "Vehicle schedule will be available by: ${DateFormat('hh:00 a').format(reservationDate.subtract(const Duration(hours: 1)))}",
               ),
             const SizedBox(height: 20),
 
