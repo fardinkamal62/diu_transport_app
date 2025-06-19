@@ -32,8 +32,13 @@ import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 
 import BarikoiMap from "@/components/BarikoiMap";
+import { useRouter } from 'next/navigation'; // Import useRouter for navigation
+
+import NavBar from '@/components/Navbar';
 
 function Home() {
+    const router = useRouter(); // Initialize useRouter
+
     const [open, setOpen] = useState(false);
     const [popupType, setPopupType] = useState('');
 
@@ -241,12 +246,37 @@ function Home() {
     };
 
     useEffect(() => {
+        // Add Axios interceptor
+        const interceptor = axios.interceptors.response.use(
+            response => response,
+            error => {
+                if (error.response && error.response.status === 401) {
+                    localStorage.removeItem('token'); // Remove token from localStorage
+                    router.push('/login'); // Redirect to logout page
+                }
+                return Promise.reject(error);
+            }
+        );
+
+        // Cleanup interceptor on component unmount
+        return () => {
+            axios.interceptors.response.eject(interceptor);
+        };
+    }, [router]);
+
+    useEffect(() => {
         fetchVehicles();
         fetchDrivers();
     }, []);
 
+    const navbarPages = [
+        {title: 'Home', url: '/'},
+    ];
+
     return (
-        <div className="p-4">
+        <>
+            <NavBar pages={navbarPages}/>
+            <div className="p-4">
             <Typography variant="h4" gutterBottom align="center">
                 Welcome, Admin
             </Typography>
@@ -469,6 +499,7 @@ function Home() {
                 </Snackbar>
             }
         </div>
+        </>
     );
 }
 
