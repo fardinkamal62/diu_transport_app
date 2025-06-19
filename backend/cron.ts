@@ -60,22 +60,31 @@ function scheduleHourlyDispatch(): void {
             const arrivalTime = nextHour;
 
 
-            const [vehicles, drivers, reservations, vehicleAllocation] = await Promise.all([
+            const [vehicles, drivers, vehicleAllocation, campusReservation, nonCampusReservation] = await Promise.all([
                 vehicleSchema.Vehicle.find({status: 'active', enRoute: false}).sort({capacity: -1}),
                 userSchema.User.find({groups: 'driver', status: 'active'}),
+                vehicleAllocationSchema.find({
+                    createdAt: {
+                        $gte: new Date(new Date().setDate(new Date().getDate() - 1)),
+                        $lt: new Date(),
+                    },
+                }),
                 reservationSchema.VehicleReservation.find({
                     time: {
                         $gte: now,
                         $lte: nextHour,
                     },
                     status: 'scheduled',
+                    location: 'campus',
                 }),
-                vehicleAllocationSchema.find({
-                    createdAt: {
-                        $gte: new Date(new Date().setDate(new Date().getDate() - 1)),
-                        $lt: new Date(),
+                reservationSchema.VehicleReservation.find({
+                    time: {
+                        $gte: now,
+                        $lte: nextHour,
                     },
-                })
+                    status: 'scheduled',
+                    location: { $ne: 'campus' },
+                }),
             ]);
 
             if (vehicles.length === 0 || drivers.length === 0) {
@@ -83,9 +92,27 @@ function scheduleHourlyDispatch(): void {
                 return;
             }
 
+            const studentsFromCampus = campusReservation.filter(reservation => reservation.userType === 'student').length;
+            const teachersFromCampus = campusReservation.filter(reservation => reservation.userType === 'teacher').length;
 
-            const students = reservations.filter(reservation => reservation.userType === 'student').length;
-            const teachers = reservations.filter(reservation => reservation.userType === 'teacher').length;
+            const studentsFromNonCampus = nonCampusReservation.filter(reservation => reservation.userType === 'student').length;
+            const teachersFromNonCampus = nonCampusReservation.filter(reservation => reservation.userType === 'teacher').length;
+
+            let reservations;
+            let students;
+            let teachers;
+
+            if(studentsFromCampus > studentsFromNonCampus) {
+                students = studentsFromCampus;
+                teachers = teachersFromCampus;
+
+                reservations = campusReservation;
+            } else {
+                students = studentsFromNonCampus;
+                teachers = teachersFromNonCampus;
+
+                reservations = nonCampusReservation;
+            }
 
             const allocatedVehicles = calculateHourlyDispatch({arrivalTime, students, teachers}, drivers, vehicles);
             const schedule = await scheduleSchema.create(allocatedVehicles);
