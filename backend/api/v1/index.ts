@@ -172,18 +172,18 @@ const getSchedules = async (req: express.Request): Promise<object[]> => {
 				$lt: nextHour
 			}
 
-			select = ' campusReturnTime requirements dispatches.vehicleId dispatches.dispatchTime';
+			select = 'campusReturnTime requirements dispatches.vehicleId dispatches.dispatchTime';
 		} else {
 			query.campusReturnTime = {
 				$gte: time,
 				$lt: new Date(time.getTime() + 24 * 60 * 60 * 1000) // Next day
 			}
-			select = 'campusReturnTime requirements dispatches.vehicleId dispatches.dispatchTime';
+			select = 'campusReturnTime requirements dispatches.vehicleId dispatches.dispatchTime dispatches.pickupTime';
 		}
 
 		if (vehicleId != null) {
 			query['dispatches.vehicleId'] = vehicleId;
-			select += ' dispatches.passengers';
+			select += 'dispatches.passengers';
 		}
 
 		schedules = await scheduleSchema.find(query).select(select);
