@@ -28,37 +28,37 @@ class _ReservationScreenState extends State<ReservationScreen> {
 
   // Time when bus will reach campus
   final List<Map<String, String>> campusReachTiming = [
-    {'label': '08:30 AM', 'value': '8:30'},
-    {'label': '09:00 AM', 'value': '9:00'},
-    {'label': '10:00 AM', 'value': '10:00'},
-    {'label': '11:00 AM', 'value': '11:00'},
-    {'label': '12:00 PM', 'value': '12:00'},
-    {'label': '01:00 PM', 'value': '13:00'},
-    {'label': '02:00 PM', 'value': '14:00'},
-    {'label': '03:00 PM', 'value': '15:00'},
-    {'label': '04:00 PM', 'value': '16:00'},
-    {'label': '05:00 PM', 'value': '17:00'},
-    {'label': '06:00 PM', 'value': '18:00'},
-    {'label': '07:00 PM', 'value': '19:00'},
-    {'label': '08:00 PM', 'value': '20:00'},
-    {'label': '09:00 PM', 'value': '21:00'},
+    // {'label': '08:30 AM', 'value': '8:30'},
+    {'label': '08:00 AM', 'value': '9:00'},
+    {'label': '09:00 AM', 'value': '10:00'},
+    {'label': '10:00 AM', 'value': '11:00'},
+    {'label': '11:00 AM', 'value': '12:00'},
+    {'label': '12:00 PM', 'value': '13:00'},
+    {'label': '01:00 PM', 'value': '14:00'},
+    {'label': '02:00 PM', 'value': '15:00'},
+    {'label': '03:00 PM', 'value': '16:00'},
+    {'label': '04:00 PM', 'value': '17:00'},
+    {'label': '05:00 PM', 'value': '18:00'},
+    {'label': '06:00 PM', 'value': '19:00'},
+    {'label': '07:00 PM', 'value': '20:00'},
+    {'label': '08:00 PM', 'value': '21:00'},
   ];
 
   // Time when bus will leave campus
   final List<Map<String, String>> campusLeaveTime = [
-    {'label': '07:40 AM', 'value': '7:40'},
-    {'label': '08:40 AM', 'value': '8:40'},
-    {'label': '09:40 AM', 'value': '9:40'},
-    {'label': '10:40 AM', 'value': '10:40'},
-    {'label': '11:40 AM', 'value': '11:40'},
-    {'label': '12:40 PM', 'value': '12:40'},
-    {'label': '01:40 PM', 'value': '13:40'},
-    {'label': '02:40 PM', 'value': '14:40'},
-    {'label': '03:40 PM', 'value': '15:40'},
-    {'label': '04:40 PM', 'value': '16:40'},
-    {'label': '05:40 PM', 'value': '17:40'},
-    {'label': '06:40 PM', 'value': '18:40'},
-    {'label': '07:40 PM', 'value': '19:40'},
+    {'label': '07:00 AM', 'value': '7:40'},
+    {'label': '08:00 AM', 'value': '8:40'},
+    {'label': '09:00 AM', 'value': '9:40'},
+    {'label': '10:00 AM', 'value': '10:40'},
+    {'label': '11:00 AM', 'value': '11:40'},
+    {'label': '12:00 PM', 'value': '12:40'},
+    {'label': '01:00 PM', 'value': '13:40'},
+    {'label': '02:00 PM', 'value': '14:40'},
+    {'label': '03:00 PM', 'value': '15:40'},
+    {'label': '04:00 PM', 'value': '16:40'},
+    {'label': '05:00 PM', 'value': '17:40'},
+    {'label': '06:00 PM', 'value': '18:40'},
+    {'label': '07:00 PM', 'value': '19:40'},
   ];
 
   Future<void> _makeReservation(String location, String time) async {
@@ -126,9 +126,7 @@ class _ReservationScreenState extends State<ReservationScreen> {
       builder: (context) => AlertDialog(
         title: const Text('Confirm Reservation?'),
         content: Text(
-          'Location: $locationLabel\nTime: $timeLabel${locationLabel == 'Campus' ? '\n\nBus will leave campus at ${timeLabel}\nMicrobus will leave campus at ${timeLabel
-              .substring(0, 3)}20.' : '\n\nBus will be available by ${int.parse(timeLabel.substring(0, 2)) - 1}:20\nMicrobus will be available by ${int.parse(timeLabel
-              .substring(0, 2)) - 1}:40.'}',
+          'Location: $locationLabel\nTime: $timeLabel\n\nAllocation will be available at $timeLabel',
         ),
         actions: [
           TextButton(
@@ -244,10 +242,7 @@ class _ReservationScreenState extends State<ReservationScreen> {
 
                   child: Padding(
                     padding: const EdgeInsets.all(15.0),
-                    child: Text(
-                      selectedLocation == 'campus'
-                          ? "Select the time you want to leave campus"
-                          : "Select the time you want to reach campus",
+                    child: Text("Select time slot",
                       style: TextStyle(color: diuOnPrimaryColor),
                       textAlign: TextAlign.center,
                     ),
@@ -286,7 +281,7 @@ class _ReservationScreenState extends State<ReservationScreen> {
                                     // Disable button if time is in the past or within 40 minutes for campus, 2 hours for others
                                     final minDuration = selectedLocation == 'campus'
                                         ? const Duration(minutes: 40)
-                                        : const Duration(hours: 2);
+                                        : const Duration(hours: 1);
 
                                     if (fullDateTime.isAfter(now.add(minDuration))) {
                                       await _showConfirmationDialog(
@@ -310,7 +305,7 @@ class _ReservationScreenState extends State<ReservationScreen> {
                                         // Disable button if time is in the past or within 40 minutes for campus, 2 hours for others
                                         final minDuration = selectedLocation == 'campus'
                                             ? const Duration(minutes: 40)
-                                            : const Duration(hours: 2);
+                                            : const Duration(hours: 1);
 
                                         if (fullDateTime.isBefore(now.add(minDuration))) {
                                           return Colors.grey.shade600; // Disabled text color
@@ -353,7 +348,7 @@ class _ReservationScreenState extends State<ReservationScreen> {
     // Return disabled color if time is in the past or within 40 minutes for campus, 2 hours for others
     final minDuration = selectedLocation == 'campus'
         ? const Duration(minutes: 40)
-        : const Duration(hours: 2);
+        : const Duration(hours: 1);
 
     if (fullDateTime.isBefore(now.add(minDuration))) {
       return Colors.grey.shade300; // Disabled button color

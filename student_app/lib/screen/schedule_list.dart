@@ -47,7 +47,7 @@ class _ScheduleListState extends State<ScheduleList> {
           Map<String, List<dynamic>> groupedSchedules = {};
 
           for (var schedule in data) {
-            final campusReturnTime = DateTime.parse(schedule['campusReturnTime']).toLocal(); // Convert to UTC+6
+            final campusReturnTime = DateTime.parse(schedule['campusReturnTime']).subtract(Duration(hours: 1)).toLocal(); // Convert to UTC+6
             final hour = campusReturnTime.hour.toString();
             groupedSchedules.putIfAbsent(hour, () => []).add(schedule);
           }
@@ -108,19 +108,55 @@ class _ScheduleListState extends State<ScheduleList> {
                     ),
                     Expanded(
                       child: selectedHour.isEmpty
-                          ? const Center(child: Text('Select an hour to view details.'))
+                          ? RefreshIndicator(
+                              onRefresh: _fetchSchedules,
+                              child: ListView(
+                                children: const [
+                                  Center(
+                                    child: Padding(
+                                      padding: EdgeInsets.all(16.0),
+                                      child: Text('Select an hour to view details.'),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            )
                           : Builder(
                               builder: (context) {
                                 final schedules = hourlySchedules[selectedHour] ?? [];
                                 if (schedules.isEmpty) {
-                                  return const Center(child: Text('No schedules available.'));
+                                  return RefreshIndicator(
+                                    onRefresh: _fetchSchedules,
+                                    child: ListView(
+                                      children: const [
+                                        Center(
+                                          child: Padding(
+                                            padding: EdgeInsets.all(16.0),
+                                            child: Text('No schedules available.'),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  );
                                 }
                                 final schedule = schedules.first; // Safely access the first schedule
-                                final campusReturnTime = DateTime.parse(schedule['campusReturnTime']).toLocal(); // Convert to local time
+                                final campusReturnTime = DateTime.parse(schedule['campusReturnTime']).subtract(Duration(hours: 1)).toLocal(); // Convert to local time
                                 final dispatches = schedule['dispatches'];
 
                                 if (dispatches.isEmpty) {
-                                  return const Center(child: Text('No dispatch details available.'));
+                                  return RefreshIndicator(
+                                    onRefresh: _fetchSchedules,
+                                    child: ListView(
+                                      children: const [
+                                        Center(
+                                          child: Padding(
+                                            padding: EdgeInsets.all(16.0),
+                                            child: Text('No dispatch details available.'),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  );
                                 }
 
                                 return Padding(
@@ -129,7 +165,7 @@ class _ScheduleListState extends State<ScheduleList> {
                                     crossAxisAlignment: CrossAxisAlignment.start,
                                     children: [
                                       Text(
-                                        'Campus Return Time: ${DateFormat('hh:mm a').format(campusReturnTime)}',
+                                        'Time: ${DateFormat('hh:mm a').format(campusReturnTime)}',
                                         style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                                       ),
                                       const SizedBox(height: 16),
@@ -144,7 +180,7 @@ class _ScheduleListState extends State<ScheduleList> {
                                           itemBuilder: (context, index) {
                                             final dispatch = dispatches[index];
                                             final vehicle = dispatch['vehicle'];
-                                            // final pickupTime = DateTime.parse(dispatch['pickupTime']).toLocal(); // Convert to local time
+                                            final pickupTime = DateTime.parse(dispatch['pickupTime']).toLocal(); // Convert to local time
                                             final dispatchTime = DateTime.parse(dispatch['dispatchTime']).toLocal(); // Convert to local time
                                             // final returnTime = DateTime.parse(dispatch['returnTime']).toLocal(); // Convert to local time
 
@@ -162,9 +198,10 @@ class _ScheduleListState extends State<ScheduleList> {
                                                     Text('Type: ${vehicle['type'][0].toUpperCase()}${vehicle['type'].substring(1)}'),
                                                     Text('Registration: ${vehicle['vehicleRegistrationNumber']}'),
                                                     const SizedBox(height: 8),
-                                                    // Text('Pickup Time: ${DateFormat('hh:mm a').format(pickupTime)}'),
-                                                    Text('Campus Leave Time: ${DateFormat('hh:mm a').format(dispatchTime)}'),
-                                                    Text('Return Time: ${DateFormat('hh:mm a').format(campusReturnTime)}'),
+                                                    Text('Times',
+                                                        style: const TextStyle(fontWeight: FontWeight.bold)),
+                                                    Text('Leave Campus: ${DateFormat('hh:mm a').format(dispatchTime)}'),
+                                                    Text('Notunbazar: ${DateFormat('hh:mm a').format(pickupTime)}'),
                                                   ],
                                                 ),
                                               ),

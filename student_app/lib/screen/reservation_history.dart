@@ -94,9 +94,16 @@ class _ReservationHistoryState extends State<ReservationHistory> {
                       itemCount: reservations.length,
                       itemBuilder: (context, index) {
                         final reservation = reservations[index];
-                        final reservationDate = DateTime.parse(reservation['time']);
-                        final formattedTime = DateFormat('MMMM dd, yyyy hh:mm a').format(reservationDate);
-                        final isToday = DateFormat('yyyy-MM-dd').format(reservationDate) ==
+                        final DateTime reservationDate;
+
+                        if (reservation['location'] == 'campus'){
+                          reservationDate = DateTime.parse(reservation['time']);
+                        } else {
+                          reservationDate = DateTime.parse(reservation['time']).subtract(Duration(hours: 1));
+                        }
+
+                        final formattedTime = DateFormat('MMMM dd, yyyy hh:00 a').format(reservationDate.toLocal());
+                        final isToday = DateFormat('yyyy-MM-dd').format(reservationDate.toLocal()) ==
                             DateFormat('yyyy-MM-dd').format(DateTime.now());
                         final isScheduled = reservation['status'].toLowerCase() == 'scheduled';
 
@@ -106,6 +113,9 @@ class _ReservationHistoryState extends State<ReservationHistory> {
                           child: ListTile(
                             title: Text(
                               "Location: ${reservation['location'][0].toUpperCase()}${reservation['location'].substring(1)}",
+                              style: TextStyle(
+                                fontWeight: isScheduled ? FontWeight.normal : FontWeight.bold,
+                              ),
                             ),
                             subtitle: Text(
                               "Time: $formattedTime\nStatus: ${reservation['status'][0].toUpperCase()}${reservation['status'].substring(1)}",

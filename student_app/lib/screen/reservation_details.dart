@@ -31,19 +31,19 @@ class ReservationDetails extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final reservationDate = DateTime.parse(reservation['time']);
+    final reservationDate = DateTime.parse(reservation['time']).toLocal(); // Convert to local time
 
     // Make dispatchTime and pickupTime optional
     DateTime? dispatchTime;
     DateTime? pickupTime;
     try {
       if (reservation['schedule']?['dispatchTime'] != null) {
-        dispatchTime = DateTime.parse(reservation['schedule']['dispatchTime']);
+        dispatchTime = DateTime.parse(reservation['schedule']['dispatchTime']).toLocal(); // Convert to local time
       }
     } catch (_) {}
     try {
       if (reservation['schedule']?['pickupTime'] != null) {
-        pickupTime = DateTime.parse(reservation['schedule']['pickupTime']);
+        pickupTime = DateTime.parse(reservation['schedule']['pickupTime']).toLocal(); // Convert to local time
       }
     } catch (_) {}
 
@@ -63,10 +63,16 @@ class ReservationDetails extends StatelessWidget {
               style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 10),
-            Text(
-              "Time: ${DateFormat('MMMM dd, yyyy hh:mm a').format(reservationDate)}",
-              style: const TextStyle(fontSize: 16),
-            ),
+            if (reservation['location'] == 'campus')
+              Text(
+                "Time: ${DateFormat('MMMM dd, yyyy hh:00 a').format(reservationDate)}",
+                style: const TextStyle(fontSize: 16),
+              )
+            else
+              Text(
+                "Time: ${DateFormat('MMMM dd, yyyy hh:00 a').format(reservationDate.subtract(Duration(hours: 1)))}",
+                style: const TextStyle(fontSize: 16),
+              ),
             const SizedBox(height: 10),
             Text(
               "Status: ${reservation['status'][0].toUpperCase()}${reservation['status'].substring(1)}",
@@ -108,15 +114,17 @@ class ReservationDetails extends StatelessWidget {
             ],
             const SizedBox(height: 20),
             if (dispatchTime != null)
-              Text(
-                "Leave Campus by: ${DateFormat('hh:mm a').format(dispatchTime)}",
-                style: const TextStyle(fontSize: 16),
-              ),
+              if (reservation['location'] == 'campus')
+                Text(
+                  "Leave Campus by: ${DateFormat('hh:mm a').format(dispatchTime)}",
+                  style: const TextStyle(fontSize: 16),
+                ),
             if (pickupTime != null)
-              Text(
-                "Reach Notunbazar by: ${DateFormat('hh:mm a').format(pickupTime)}",
-                style: const TextStyle(fontSize: 16),
-              ),
+              if (reservation['location'] == 'notunbazar')
+                Text(
+                  "Reach Notunbazar by: ${DateFormat('hh:mm a').format(pickupTime)}",
+                  style: const TextStyle(fontSize: 16),
+                ),
             if (reservation['status'] == 'scheduled')
               if (reservation['location'] == 'campus')
                 Text(
