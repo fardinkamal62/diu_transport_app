@@ -107,35 +107,24 @@ class _ScheduleListState extends State<ScheduleList> {
                       },
                     ),
                     Expanded(
-                      child: selectedHour.isEmpty
-                          ? RefreshIndicator(
-                              onRefresh: _fetchSchedules,
-                              child: ListView(
-                                children: const [
-                                  Center(
-                                    child: Padding(
-                                      padding: EdgeInsets.all(16.0),
-                                      child: Text('Select an hour to view details.'),
-                                    ),
-                                  ),
-                                ],
+                      child: ListView(
+                        children: [
+                          if (selectedHour.isEmpty)
+                            const Center(
+                              child: Padding(
+                                padding: EdgeInsets.all(16.0),
+                                child: Text('Select an hour to view details.'),
                               ),
                             )
-                          : Builder(
+                          else
+                            Builder(
                               builder: (context) {
                                 final schedules = hourlySchedules[selectedHour] ?? [];
                                 if (schedules.isEmpty) {
-                                  return RefreshIndicator(
-                                    onRefresh: _fetchSchedules,
-                                    child: ListView(
-                                      children: const [
-                                        Center(
-                                          child: Padding(
-                                            padding: EdgeInsets.all(16.0),
-                                            child: Text('No schedules available.'),
-                                          ),
-                                        ),
-                                      ],
+                                  return const Center(
+                                    child: Padding(
+                                      padding: EdgeInsets.all(16.0),
+                                      child: Text('No schedules available.'),
                                     ),
                                   );
                                 }
@@ -144,17 +133,10 @@ class _ScheduleListState extends State<ScheduleList> {
                                 final dispatches = schedule['dispatches'];
 
                                 if (dispatches.isEmpty) {
-                                  return RefreshIndicator(
-                                    onRefresh: _fetchSchedules,
-                                    child: ListView(
-                                      children: const [
-                                        Center(
-                                          child: Padding(
-                                            padding: EdgeInsets.all(16.0),
-                                            child: Text('No dispatch details available.'),
-                                          ),
-                                        ),
-                                      ],
+                                  return const Center(
+                                    child: Padding(
+                                      padding: EdgeInsets.all(16.0),
+                                      child: Text('No dispatch details available.'),
                                     ),
                                   );
                                 }
@@ -174,46 +156,47 @@ class _ScheduleListState extends State<ScheduleList> {
                                         style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                                       ),
                                       const SizedBox(height: 8),
-                                      Expanded(
-                                        child: ListView.builder(
-                                          itemCount: dispatches.length,
-                                          itemBuilder: (context, index) {
-                                            final dispatch = dispatches[index];
-                                            final vehicle = dispatch['vehicle'];
-                                            final pickupTime = DateTime.parse(dispatch['pickupTime']).toLocal(); // Convert to local time
-                                            final dispatchTime = DateTime.parse(dispatch['dispatchTime']).toLocal(); // Convert to local time
-                                            // final returnTime = DateTime.parse(dispatch['returnTime']).toLocal(); // Convert to local time
+                                      ListView.builder(
+                                        shrinkWrap: true,
+                                        physics: const NeverScrollableScrollPhysics(),
+                                        itemCount: dispatches.length,
+                                        itemBuilder: (context, index) {
+                                          final dispatch = dispatches[index];
+                                          final vehicle = dispatch['vehicle'];
+                                          final pickupTime = DateTime.parse(dispatch['pickupTime']).toLocal(); // Convert to local time
+                                          final dispatchTime = DateTime.parse(dispatch['dispatchTime']).toLocal(); // Convert to local time
 
-                                            return Card(
-                                              margin: const EdgeInsets.symmetric(vertical: 8),
-                                              child: Padding(
-                                                padding: const EdgeInsets.all(8.0),
-                                                child: Column(
-                                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                                  children: [
-                                                    Text(
-                                                      'Vehicle: ${vehicle['name']}',
-                                                      style: const TextStyle(fontWeight: FontWeight.bold),
-                                                    ),
-                                                    Text('Type: ${vehicle['type'][0].toUpperCase()}${vehicle['type'].substring(1)}'),
-                                                    Text('Registration: ${vehicle['vehicleRegistrationNumber']}'),
-                                                    const SizedBox(height: 8),
-                                                    Text('Times',
-                                                        style: const TextStyle(fontWeight: FontWeight.bold)),
-                                                    Text('Leave Campus: ${DateFormat('hh:mm a').format(dispatchTime)}'),
-                                                    Text('Notunbazar: ${DateFormat('hh:mm a').format(pickupTime)}'),
-                                                  ],
-                                                ),
+                                          return Card(
+                                            margin: const EdgeInsets.symmetric(vertical: 8),
+                                            child: Padding(
+                                              padding: const EdgeInsets.all(8.0),
+                                              child: Column(
+                                                crossAxisAlignment: CrossAxisAlignment.start,
+                                                children: [
+                                                  Text(
+                                                    'Vehicle: ${vehicle['name']}',
+                                                    style: const TextStyle(fontWeight: FontWeight.bold),
+                                                  ),
+                                                  Text('Type: ${vehicle['type'][0].toUpperCase()}${vehicle['type'].substring(1)}'),
+                                                  Text('Registration: ${vehicle['vehicleRegistrationNumber']}'),
+                                                  const SizedBox(height: 8),
+                                                  Text('Times',
+                                                      style: const TextStyle(fontWeight: FontWeight.bold)),
+                                                  Text('Leave Campus: ${DateFormat('hh:mm a').format(dispatchTime)}'),
+                                                  Text('Notunbazar: ${DateFormat('hh:mm a').format(pickupTime)}'),
+                                                ],
                                               ),
-                                            );
-                                          },
-                                        ),
+                                            ),
+                                          );
+                                        },
                                       ),
                                     ],
                                   ),
                                 );
                               },
                             ),
+                        ],
+                      ),
                     ),
                   ],
                 ),
