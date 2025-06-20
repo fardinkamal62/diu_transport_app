@@ -6,6 +6,7 @@ import userSchema from '../../schemas/user';
 import vehicleSchema from '../../schemas/vehicle';
 import allocationSchema from '../../schemas/allocation';
 import reservationSchema from '../../schemas/reservation';
+import vehicleReport from '../../schemas/vehicleReport';
 
 
 import logger from '../../utils/logger';
@@ -145,10 +146,101 @@ const journeyToggle = async (req: express.Request): Promise<object> => {
 	}
 };
 
+const addDriverReport = async (req: express.Request): Promise<object> => {
+	const vehicleId = req.body.vehicleId as string;
+	const driverId = req.body.driverId as string;
+	const damage = req.body.damage as string;
+	const refueling = req.body.refueling as string;
+	const servicing = req.body.servicing as string;
+
+	if (!vehicleId || !driverId || !damage || !refueling || !servicing) {
+		throw new BadRequest(`${!vehicleId && 'Vehicle ID'} ${!driverId && 'Driver ID'} ${!damage && 'Damage'} ${!refueling && 'Refueling'} ${!servicing && 'Servicing'} is required`);
+	}
+
+	try {
+		const vehicle = await vehicleSchema.Vehicle.findById(vehicleId);
+		if (!vehicle) {
+			throw new NotFound('Vehicle not found');
+		}
+
+		const driver = await User.findById(driverId);
+		if (!driver) {
+			throw new NotFound('Driver not found');
+		}
+
+		const report = new vehicleReport({
+			time: new Date(new Date().setHours(0, 0, 0, 0)), // Set to today's date
+			vehicleId: vehicle._id,
+			driverId: driver._id,
+			damage,
+			refueling,
+			servicing,
+		});
+
+		await report.save();
+		return report;
+	} catch (e) {
+		logger.error('Failed to add driver report', e);
+		throw new InternalServerError('Failed to add driver report');
+	}
+};
+
+const getDriverReport = async (req: express.Request): Promise<object> => {
+	const driverId = req.query?.driverId as string || null;
+	const vehicleId = req.query?.vehicleId as string || null;
+	const time = req.query?.time as string || null;
+
+	let query: any = {};
+
+	if (driverId != null) query.driverId = driverId;
+	if (vehicleId != null) query.vehicleId = vehicleId;
+	if (time != null) {
+		const date = new Date(time);
+		query.time = {
+			$gte: new Date(date.setHours(0, 0, 0, 0)),
+			$lt: new Date(date.setHours(23, 59, 59, 999)),
+		};
+	} else {
+		query.time = {
+			$gte: new Date(new Date().setHours(0, 0, 0, 0)),
+			$lt: new Date(new Date().setHours(23, 59, 59, 999)),
+		};
+	}
+
+	try {
+		const reports = await vehicleReport.find(query);
+
+		const enrichedReports = await Promise.all(reports.map(async (report) => {
+			const vehicle = await vehicleSchema.Vehicle.findById(report.vehicleId);
+			const driver = await User.findById(report.driverId);
+
+			return {
+				...report.toObject(),
+				vehicle: vehicle ? {
+					name: vehicle.name,
+					registrationNumber: vehicle.vehicleRegistrationNumber,
+					type: vehicle.type,
+				} : null,
+				driver: driver ? {
+					name: driver.name,
+					phoneNumber: driver.phoneNumber,
+				} : null,
+			};
+		}));
+
+		return enrichedReports;
+	} catch (e) {
+		logger.error('Failed to get driver report', e);
+		throw new InternalServerError('Failed to get driver report');
+	}
+};
+
 const driverApi = {
 	login,
 	getAllocation,
 	journeyToggle,
+	addDriverReport,
+	getDriverReport,
 }
 
 export default driverApi;

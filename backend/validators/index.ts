@@ -69,6 +69,12 @@ const driverLoginSchema = Joi.object({
 	password: Joi.string().min(8).required(),
 });
 
+const addDriverReportSchema = Joi.object({
+	damage: Joi.string().valid('major', 'minor', 'scratch', 'none').required(),
+	refueling: Joi.string().valid(1, 2, 3, 4, 5).required(),
+	servicing: Joi.string().valid('interior', 'exterior', 'tire_pump', 'cleaning', 'none').required(),
+})
+
 const schemas = {
 	coOrdinateSchema,
 	adminLoginSchema,
@@ -78,6 +84,7 @@ const schemas = {
 	userLoginSchema,
 	addReservationSchema,
 	driverLoginSchema,
+	addDriverReportSchema,
 }
 
 export default schemas;

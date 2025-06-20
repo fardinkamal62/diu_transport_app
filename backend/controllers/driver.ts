@@ -14,10 +14,20 @@ const journeyToggle = (req: Request) : Promise<object> => {
 	return api.journeyToggle(req);
 };
 
+const addDriverReport = (req: Request) : Promise<object> => {
+	return api.addDriverReport(req);
+};
+
+const getDriverReport = (req: Request) : Promise<object> => {
+	return api.getDriverReport(req);
+};
+
 const controllers = {
 	login,
 	getAllocation,
-	journeyToggle
+	journeyToggle,
+	addDriverReport,
+	getDriverReport,
 };
 
 export default controllers;
