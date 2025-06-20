@@ -270,12 +270,12 @@ function Home() {
     }, []);
 
     const navbarPages = [
-        {title: 'Home', url: '/'},
+        {title: 'Vehicle Reports', url: '/vehicle_report'},
     ];
 
     return (
         <>
-            <NavBar pages={navbarPages}/>
+            <NavBar pages={navbarPages} title={'Overview'}/>
             <div className="p-4">
             <Typography variant="h4" gutterBottom align="center">
                 Welcome, Admin

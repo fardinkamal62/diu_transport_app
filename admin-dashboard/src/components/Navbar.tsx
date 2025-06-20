@@ -16,13 +16,13 @@ const navbarTheme = createTheme({
     }
 });
 
-function NavBar({pages}) {
+function NavBar({pages, title}) {
     return (
         <AppBar position="sticky" className={'bg-gray-50 dark:bg-gray-950 dark:text-black'} sx={{boxShadow: 'none'}}
                 theme={navbarTheme}>
             <Container maxWidth="xl">
                 <Toolbar className={'text-gray-700 dark:text-gray-400'}>
-                    <Link href='/' className={`text-4xl mb-2`}>{'DIU Transport Admin Panel'}</Link>
+                    <Link href='/' className={`text-4xl mb-2`}>{title}</Link>
 
                     <Box sx={{flexGrow: 100}}></Box>
                     <Box className={'flex sm:hidden md:flex'}>
