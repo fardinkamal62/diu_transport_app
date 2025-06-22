@@ -66,10 +66,7 @@ Future main() async {
   bool socketConnected = false;
 
   // Show a loading screen until the socket connects
-  runApp(MaterialApp(
-    home: const Loader(),
-    debugShowCheckedModeBanner: false,
-  ));
+  runApp(MaterialApp(home: const Loader(), debugShowCheckedModeBanner: false));
 
   socket?.on('connect', (_) {
     if (kDebugMode) {
@@ -99,7 +96,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'DIU Transport Student App',
-      initialRoute: '/login',
+      initialRoute: '/home-screen',
       routes: {
         '/login': (context) => const LoginScreen(),
         '/signup': (context) => const SignUpScreen(), // Added const

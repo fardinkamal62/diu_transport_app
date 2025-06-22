@@ -19,7 +19,8 @@ class VehicleDetailsWidget extends StatefulWidget {
   State<VehicleDetailsWidget> createState() => _VehicleDetailsWidgetState();
 }
 
-class _VehicleDetailsWidgetState extends State<VehicleDetailsWidget> with SingleTickerProviderStateMixin {
+class _VehicleDetailsWidgetState extends State<VehicleDetailsWidget>
+    with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   late Animation<double> _scaleAnimation;
 
@@ -30,9 +31,10 @@ class _VehicleDetailsWidgetState extends State<VehicleDetailsWidget> with Single
       vsync: this,
       duration: const Duration(milliseconds: 300),
     );
-    _scaleAnimation = Tween<double>(begin: 1.0, end: 0.98).animate(
-      CurvedAnimation(parent: _controller, curve: Curves.easeOut),
-    );
+    _scaleAnimation = Tween<double>(
+      begin: 1.0,
+      end: 0.98,
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOut));
   }
 
   @override
@@ -110,9 +112,7 @@ class _VehicleDetailsWidgetState extends State<VehicleDetailsWidget> with Single
                   padding: const EdgeInsets.all(8.0),
                   child: ClipRRect(
                     borderRadius: BorderRadius.circular(12.0),
-                    child: Image.asset(
-                      widget.vehicleImage,
-                      fit: BoxFit.cover, ),
+                    child: Image.asset(widget.vehicleImage, fit: BoxFit.cover),
                   ),
                 ),
                 Expanded(
@@ -140,7 +140,10 @@ class _VehicleDetailsWidgetState extends State<VehicleDetailsWidget> with Single
                         ),
                         const SizedBox(height: 10.0),
                         Container(
-                          padding: const EdgeInsets.symmetric(vertical: 6.0, horizontal: 12.0),
+                          padding: const EdgeInsets.symmetric(
+                            vertical: 6.0,
+                            horizontal: 12.0,
+                          ),
                           decoration: BoxDecoration(
                             color: diuLightGreen,
                             borderRadius: BorderRadius.circular(20.0),

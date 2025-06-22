@@ -8,7 +8,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
-import 'package:diu_transport_driver_app/barikoi_map.dart';
 import 'package:diu_transport_driver_app/socketio.dart' as socketio;
 import 'package:diu_transport_driver_app/widget/loader.dart';
 
@@ -41,15 +40,20 @@ Future main() async {
   // Validate required environment variables
   if (envLoaded) {
     final requiredEnvVars = ['API_KEY', 'SERVER_URL'];
-    final missingEnvVars = requiredEnvVars.where((v) => dotenv.env[v] == null).toList();
+    final missingEnvVars =
+        requiredEnvVars.where((v) => dotenv.env[v] == null).toList();
 
     if (missingEnvVars.isNotEmpty) {
       if (kDebugMode) {
-        print('Missing required environment variables: ${missingEnvVars.join(', ')}');
+        print(
+          'Missing required environment variables: ${missingEnvVars.join(', ')}',
+        );
       }
       // In production, fail fast if required env vars are missing
       if (const bool.fromEnvironment('dart.vm.product') == true) {
-        throw Exception('Missing required environment variables: ${missingEnvVars.join(', ')}');
+        throw Exception(
+          'Missing required environment variables: ${missingEnvVars.join(', ')}',
+        );
       }
     }
   }
@@ -57,10 +61,7 @@ Future main() async {
   var socket = socketio.socketio();
   bool socketConnected = false;
 
-  runApp(MaterialApp(
-    home: const Loader(),
-    debugShowCheckedModeBanner: false,
-  ));
+  runApp(MaterialApp(home: const Loader(), debugShowCheckedModeBanner: false));
 
   // Handle socket connection status
   socket.on('connect', (_) {
@@ -94,12 +95,14 @@ class MyApp extends StatelessWidget {
       title: 'DIU Transport Driver App',
       theme: driverTransitTheme,
       debugShowCheckedModeBanner: false,
-      initialRoute: '/driver-login', // Start at login screen
+      initialRoute: '/driver-home-screen', // Start at login screen
       routes: {
         '/driver-login': (context) => const DriverLoginScreen(),
         '/driver-home-screen': (context) => const DriverHomeScreen(),
         '/about-app': (context) => const AboutAppScreen(),
-        '/privacy-policy': (context) => const PrivacyPolicyScreen(), // Reusing AboutAppScreen for privacy policy
+        '/privacy-policy':
+            (context) =>
+                const PrivacyPolicyScreen(), // Reusing AboutAppScreen for privacy policy
       },
       // home: SymbolMap(socket: socket),
     );

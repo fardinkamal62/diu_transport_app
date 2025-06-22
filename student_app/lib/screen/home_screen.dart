@@ -1,3 +1,4 @@
+import 'package:diu_transport_student_app/screen/auth/qr_scanner_page.dart';
 import 'package:flutter/material.dart';
 import 'package:diu_transport_student_app/barikoi_map.dart'; // Import the map widget
 import 'package:diu_transport_student_app/socketio.dart';
@@ -20,7 +21,8 @@ class _HomeScreenState extends State<HomeScreen> {
   // Define a list of your content widgets corresponding to each tab
   late final List<Widget> _widgetOptions = <Widget>[
     SymbolMap(socket: socket), // Show the map in the Home tab
-    ReservationHistory(), // Add ReservationHistory to the widget options
+    ReservationHistory(),
+    QRScannerPage(), // Add ReservationHistory to the widget options
     ScheduleList(), // Add ScheduleList to the widget options
     ProfileScreen(), // Add ProfileScreen to the widget options
     // Add more content widgets here for additional tabs
@@ -41,42 +43,55 @@ class _HomeScreenState extends State<HomeScreen> {
       appBar: AppBar(
         title: Text(
           // Dynamically change app bar title based on selected tab
-          _selectedIndex == 0 ? 'Home' :
-          _selectedIndex == 1 ? 'History' :
-          _selectedIndex == 2 ? 'Schedule' :
-          _selectedIndex == 3 ? 'Profile' : 'Other',
+          _selectedIndex == 0
+              ? 'Home'
+              : _selectedIndex == 1
+              ? 'History'
+              : _selectedIndex == 2
+              ? 'Scaner'
+              : _selectedIndex == 3
+              ? 'Sehedule'
+              : _selectedIndex == 4
+              ? 'Profile'
+              : 'Other',
           style: theme.appBarTheme.titleTextStyle, // Use theme's title style
         ),
-        centerTitle: theme.appBarTheme.centerTitle, // Use theme's centerTitle property
-        backgroundColor: theme.appBarTheme.backgroundColor, // Use theme's background color
-        foregroundColor: theme.appBarTheme.foregroundColor, // Use theme's foreground color for title/icons
+        centerTitle:
+            theme.appBarTheme.centerTitle, // Use theme's centerTitle property
+        backgroundColor:
+            theme.appBarTheme.backgroundColor, // Use theme's background color
+        foregroundColor:
+            theme
+                .appBarTheme
+                .foregroundColor, // Use theme's foreground color for title/icons
         elevation: theme.appBarTheme.elevation, // Use theme's elevation
       ),
       body: IndexedStack(
         index: _selectedIndex, // Displays the widget at the current index
         children: _widgetOptions, // The list of all possible content widgets
       ),
-      floatingActionButton: _selectedIndex == 0
-          ? FloatingActionButton(
-              onPressed: () {
-                Navigator.of(context).push(
-                  MaterialPageRoute(builder: (context) => const ReservationScreen()),
-                );
-              },
-              child: const Icon(Icons.add),
-            )
-          : null,
+      floatingActionButton:
+          _selectedIndex == 0
+              ? FloatingActionButton(
+                onPressed: () {
+                  Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (context) => const ReservationScreen(),
+                    ),
+                  );
+                },
+                child: const Icon(Icons.add),
+              )
+              : null,
       bottomNavigationBar: BottomNavigationBar(
         // THE BOTTOM NAVIGATION BAR STYLE IS ALREADY APPLIED VIA `transitTheme`
         items: const [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.home),
-            label: 'Home',
-          ),
+          BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
           BottomNavigationBarItem(
             icon: Icon(Icons.history),
             label: 'History', // Add History tab
           ),
+          BottomNavigationBarItem(icon: Icon(Icons.qr_code_2), label: 'Scaner'),
           BottomNavigationBarItem(
             icon: Icon(Icons.schedule), // Add Schedule tab
             label: 'Schedule',
@@ -86,7 +101,8 @@ class _HomeScreenState extends State<HomeScreen> {
             label: 'Profile',
           ),
         ],
-        currentIndex: _selectedIndex, // Link to the current selected index state
+        currentIndex:
+            _selectedIndex, // Link to the current selected index state
         onTap: _onItemTapped, // Call our state-updating function
       ),
     );

@@ -38,7 +38,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
   Future<void> _logout() async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.clear(); // Clear all stored data
-    Navigator.pushReplacementNamed(context, '/login'); // Navigate to login screen
+    Navigator.pushReplacementNamed(
+      context,
+      '/login',
+    ); // Navigate to login screen
   }
 
   @override
@@ -73,17 +76,18 @@ class _ProfileScreenState extends State<ProfileScreen> {
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Text(
-                  'Registration Number:',
-                  style: theme.textTheme.bodyMedium,
-                ),
+                Text('Registration Number:', style: theme.textTheme.bodyMedium),
                 const SizedBox(width: 8),
                 GestureDetector(
                   onTap: () {
                     if (regCode != null) {
                       Clipboard.setData(ClipboardData(text: regCode!));
                       ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Registration code copied to clipboard')),
+                        const SnackBar(
+                          content: Text(
+                            'Registration code copied to clipboard',
+                          ),
+                        ),
                       );
                     }
                   },
@@ -97,18 +101,25 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 ),
               ],
             ),
-            const Spacer(), // Push the logout button to the bottom
+            const Spacer(flex: 12),
+            // Push the logout button to the bottom
             ElevatedButton.icon(
               onPressed: _logout,
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.red, // Make the button red
-                padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 20),
+                padding: const EdgeInsets.symmetric(
+                  vertical: 12,
+                  horizontal: 20,
+                ),
               ),
               label: const Text(
                 'Logout',
                 style: TextStyle(color: Colors.white),
               ),
-              icon: const Icon(Icons.logout, color: Colors.white), // Add logout icon
+              icon: const Icon(
+                Icons.logout,
+                color: Colors.white,
+              ), // Add logout icon
             ),
           ],
         ),

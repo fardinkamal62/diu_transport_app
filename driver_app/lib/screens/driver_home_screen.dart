@@ -1,3 +1,4 @@
+import 'package:diu_transport_driver_app/screens/hometab/qr_scanner_page.dart';
 import 'package:flutter/material.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:geolocator/geolocator.dart';
@@ -5,7 +6,6 @@ import 'dart:async';
 
 import 'hometab/driver_profile_screen.dart';
 import 'hometab/home_screen_content.dart';
-import 'hometab/qr_scanner_page.dart';
 import 'package:diu_transport_driver_app/screens/schedule_list.dart';
 
 class DriverHomeScreen extends StatefulWidget {
@@ -50,11 +50,7 @@ class _DriverHomeScreenState extends State<DriverHomeScreen> {
 
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text(
-          shiftStartStatus
-              ? 'Shift started'
-              : 'Shift ended',
-        ),
+        content: Text(shiftStartStatus ? 'Shift started' : 'Shift ended'),
       ),
     );
   }
@@ -67,7 +63,9 @@ class _DriverHomeScreenState extends State<DriverHomeScreen> {
   }
 
   void _setupConnectivityListener() {
-    _connectivitySubscription = Connectivity().onConnectivityChanged.listen((List<ConnectivityResult> results) {
+    _connectivitySubscription = Connectivity().onConnectivityChanged.listen((
+      List<ConnectivityResult> results,
+    ) {
       setState(() {
         // Consider connected if any result is not 'none'
         _isConnected = results.any((r) => r != ConnectivityResult.none);
@@ -81,8 +79,9 @@ class _DriverHomeScreenState extends State<DriverHomeScreen> {
 
     setState(() {
       _locationServiceEnabled = serviceEnabled;
-      _hasLocationPermission = (permission == LocationPermission.whileInUse ||
-          permission == LocationPermission.always);
+      _hasLocationPermission =
+          (permission == LocationPermission.whileInUse ||
+              permission == LocationPermission.always);
     });
 
     if (!serviceEnabled) {
@@ -97,8 +96,9 @@ class _DriverHomeScreenState extends State<DriverHomeScreen> {
   Future<void> _requestLocationPermission() async {
     LocationPermission permission = await Geolocator.requestPermission();
     setState(() {
-      _hasLocationPermission = (permission == LocationPermission.whileInUse ||
-          permission == LocationPermission.always);
+      _hasLocationPermission =
+          (permission == LocationPermission.whileInUse ||
+              permission == LocationPermission.always);
     });
   }
 
@@ -108,21 +108,29 @@ class _DriverHomeScreenState extends State<DriverHomeScreen> {
       builder: (BuildContext context) {
         return AlertDialog(
           title: const Text('Location Services Disabled'),
-          content: const Text('Please enable location services for the app to function properly.'),
+          content: const Text(
+            'Please enable location services for the app to function properly.',
+          ),
           actions: <Widget>[
             TextButton(
               onPressed: () {
                 Navigator.of(context).pop();
                 Geolocator.openLocationSettings();
               },
-              child: Text('Open Settings', style: Theme.of(context).textTheme.labelLarge),
+              child: Text(
+                'Open Settings',
+                style: Theme.of(context).textTheme.labelLarge,
+              ),
             ),
             TextButton(
               onPressed: () {
                 Navigator.of(context).pop();
                 _checkLocationPermission();
               },
-              child: Text('Cancel', style: Theme.of(context).textTheme.labelMedium),
+              child: Text(
+                'Cancel',
+                style: Theme.of(context).textTheme.labelMedium,
+              ),
             ),
           ],
         );
@@ -136,18 +144,26 @@ class _DriverHomeScreenState extends State<DriverHomeScreen> {
       builder: (BuildContext context) {
         return AlertDialog(
           title: const Text('Location Permission Denied'),
-          content: const Text('Location access is permanently denied. Please enable it from app settings to continue.'),
+          content: const Text(
+            'Location access is permanently denied. Please enable it from app settings to continue.',
+          ),
           actions: <Widget>[
             TextButton(
               onPressed: () {
                 Navigator.of(context).pop();
                 Geolocator.openAppSettings();
               },
-              child: Text('Open App Settings', style: Theme.of(context).textTheme.labelLarge),
+              child: Text(
+                'Open App Settings',
+                style: Theme.of(context).textTheme.labelLarge,
+              ),
             ),
             TextButton(
               onPressed: () => Navigator.of(context).pop(),
-              child: Text('Cancel', style: Theme.of(context).textTheme.labelMedium),
+              child: Text(
+                'Cancel',
+                style: Theme.of(context).textTheme.labelMedium,
+              ),
             ),
           ],
         );
@@ -196,7 +212,9 @@ class _DriverHomeScreenState extends State<DriverHomeScreen> {
                   Expanded(
                     child: Text(
                       'No Internet Connection. Some features may not work.',
-                      style: theme.textTheme.bodyMedium!.copyWith(color: theme.colorScheme.onError),
+                      style: theme.textTheme.bodyMedium!.copyWith(
+                        color: theme.colorScheme.onError,
+                      ),
                     ),
                   ),
                 ],
@@ -208,14 +226,19 @@ class _DriverHomeScreenState extends State<DriverHomeScreen> {
               padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
               child: Row(
                 children: [
-                  Icon(Icons.location_off, color: theme.colorScheme.onSecondary),
+                  Icon(
+                    Icons.location_off,
+                    color: theme.colorScheme.onSecondary,
+                  ),
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(
                       !_locationServiceEnabled
                           ? 'Location services are disabled. Tap to enable.'
                           : 'Location permission not granted. Tap to allow.',
-                      style: theme.textTheme.bodyMedium!.copyWith(color: theme.colorScheme.onSecondary),
+                      style: theme.textTheme.bodyMedium!.copyWith(
+                        color: theme.colorScheme.onSecondary,
+                      ),
                     ),
                   ),
                   InkWell(
@@ -237,20 +260,27 @@ class _DriverHomeScreenState extends State<DriverHomeScreen> {
                 ],
               ),
             ),
-          Expanded(
-            child: IndexedStack(
-              index: _selectedIndex,
-              children: pages,
-            ),
-          ),
+          Expanded(child: IndexedStack(index: _selectedIndex, children: pages)),
         ],
       ),
       bottomNavigationBar: BottomNavigationBar(
         items: const <BottomNavigationBarItem>[
-          BottomNavigationBarItem(icon: Icon(Icons.home_outlined), label: 'Home'),
-          BottomNavigationBarItem(icon: Icon(Icons.qr_code_outlined), label: 'Reservations'),
-          BottomNavigationBarItem(icon: Icon(Icons.schedule_outlined), label: 'Schedule'),
-          BottomNavigationBarItem(icon: Icon(Icons.person_outlined), label: 'Profile'),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.home_outlined),
+            label: 'Home',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.qr_code_outlined),
+            label: 'Reservations',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.schedule_outlined),
+            label: 'Schedule',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.person_outlined),
+            label: 'Profile',
+          ),
         ],
         currentIndex: _selectedIndex,
         onTap: _onItemTapped,
