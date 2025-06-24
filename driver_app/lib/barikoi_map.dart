@@ -77,11 +77,11 @@ class _SymbolMapState extends State<SymbolMap> {
     }
 
     // Emit data every 5 seconds
-    _locationTimer = Timer.periodic(Duration(seconds: 5), (timer) async {
+    _locationTimer = Timer.periodic(Duration(seconds: 10), (timer) async {
 
       Position currentPosition = await getCurrentPosition();
 
-      if (widget.vehicle?['vehicleId']!.isNotEmpty && mController != null) {
+      if (widget.vehicle != null && widget.vehicle?['vehicleId'] is String && widget.vehicle?['vehicleId']!.isNotEmpty && mController != null) {
         widget.socket.emit('location', {
           'vehicleId': widget.vehicle?['vehicleId'],
           'latitude': currentPosition.latitude.toString(),
