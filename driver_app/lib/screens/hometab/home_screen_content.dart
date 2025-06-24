@@ -3,6 +3,8 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'package:qr_flutter/qr_flutter.dart';
+import 'package:flutter/foundation.dart';
 
 import 'package:diu_transport_driver_app/barikoi_map.dart';
 import 'package:diu_transport_driver_app/socketio.dart';
@@ -32,6 +34,7 @@ class _HomeScreenContentState extends State<HomeScreenContent> {
   bool shiftApiLoading = false;
   String? scheduleId;
   bool showMap = false; // State to control map visibility
+  bool showQr = false; // State to control QR code visibility
 
   @override
   void initState() {
@@ -190,190 +193,245 @@ class _HomeScreenContentState extends State<HomeScreenContent> {
     }
   }
 
+  Future<Map<String, String>?> _getQrData() async {
+    if (allocationVehicle == null || scheduleDispatchInfo == null) {
+      return null;
+    }
+    return {
+      "vehicleId": allocationVehicle!['vehicleId'] ?? '',
+      "scheduleId": scheduleId ?? '',
+    };
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     return Padding(
       padding: const EdgeInsets.all(24.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Text(
-            name != null ? 'Welcome, $name!' : 'Welcome, Driver!',
-            style: theme.textTheme.headlineLarge!.copyWith(
-              color: theme.colorScheme.primary,
+      child: SingleChildScrollView( // Wrap with SingleChildScrollView
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Text(
+              name != null ? 'Welcome, $name!' : 'Welcome, Driver!',
+              style: theme.textTheme.headlineLarge!.copyWith(
+                color: theme.colorScheme.primary,
+              ),
+              textAlign: TextAlign.center,
             ),
-            textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: 16),
-          loadingVehicle
-              ? Center(child: CircularProgressIndicator())
-              : allocationVehicle != null
-              ? Column(
-                children: [
+            const SizedBox(height: 16),
+            loadingVehicle
+                ? Center(child: CircularProgressIndicator())
+                : allocationVehicle != null
+                ? Column(
+              children: [
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 16,
+                  ),
+                  decoration: BoxDecoration(
+                    color: theme.colorScheme.surface,
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: theme.colorScheme.outline),
+                    boxShadow: [
+                      BoxShadow(
+                        color: theme.colorScheme.shadow.withOpacity(0.05),
+                        blurRadius: 10,
+                        offset: const Offset(0, 4),
+                      ),
+                    ],
+                  ),
+                  child: Row(
+                    children: [
+                      Image.asset(
+                        'assets/icons/${allocationVehicle!['vehicleType']}.png',
+                        width: 40,
+                        height: 40,
+                        color: theme.colorScheme.primary,
+                      ),
+                      const SizedBox(width: 16),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              allocationVehicle!['vehicleName'] ?? '',
+                              style: theme.textTheme.titleLarge,
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              allocationVehicle!['vehicleRegistrationNumber'] ??
+                                  '',
+                              style: theme.textTheme.bodyMedium!.copyWith(
+                                color: theme.colorScheme.onSurface
+                                    .withOpacity(0.7),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 12),
+                // New: Dispatch info card
+                if (scheduleDispatchInfo != null)
                   Container(
                     padding: const EdgeInsets.symmetric(
                       horizontal: 16,
                       vertical: 16,
                     ),
                     decoration: BoxDecoration(
-                      color: theme.colorScheme.surface,
+                      color: theme.colorScheme.surfaceContainerHighest,
                       borderRadius: BorderRadius.circular(12),
                       border: Border.all(color: theme.colorScheme.outline),
-                      boxShadow: [
-                        BoxShadow(
-                          color: theme.colorScheme.shadow.withOpacity(0.05),
-                          blurRadius: 10,
-                          offset: const Offset(0, 4),
-                        ),
-                      ],
                     ),
-                    child: Row(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Image.asset(
-                          'assets/icons/${allocationVehicle!['vehicleType']}.png',
-                          width: 40,
-                          height: 40,
-                          color: theme.colorScheme.primary,
+                        Text(
+                          'Dispatch Details',
+                          style: theme.textTheme.titleMedium,
                         ),
-                        const SizedBox(width: 16),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                allocationVehicle!['vehicleName'] ?? '',
-                                style: theme.textTheme.titleLarge,
+                        const SizedBox(height: 8),
+                        Row(
+                          children: [
+                            Icon(
+                              Icons.schedule,
+                              size: 20,
+                              color: theme.colorScheme.primary,
+                            ),
+                            const SizedBox(width: 8),
+                            Text(
+                              'Dispatch Time: ',
+                              style: theme.textTheme.bodyMedium!.copyWith(
+                                fontWeight: FontWeight.bold,
                               ),
-                              const SizedBox(height: 4),
-                              Text(
-                                allocationVehicle!['vehicleRegistrationNumber'] ??
-                                    '',
-                                style: theme.textTheme.bodyMedium!.copyWith(
-                                  color: theme.colorScheme.onSurface
-                                      .withOpacity(0.7),
-                                ),
+                            ),
+                            Text(
+                              _formatDateTime(
+                                scheduleDispatchInfo!['dispatchTime'],
                               ),
-                            ],
-                          ),
+                              style: theme.textTheme.bodyMedium,
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 6),
+                        Row(
+                          children: [
+                            Icon(
+                              Icons.keyboard_return,
+                              size: 20,
+                              color: theme.colorScheme.primary,
+                            ),
+                            const SizedBox(width: 8),
+                            Text(
+                              'Return Time: ',
+                              style: theme.textTheme.bodyMedium!.copyWith(
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            Text(
+                              campusReturnTime != null
+                                  ? _formatDateTime(
+                                campusReturnTime!.toIso8601String(),
+                              )
+                                  : '-',
+                              style: theme.textTheme.bodyMedium,
+                            ),
+                          ],
                         ),
                       ],
                     ),
                   ),
-                  const SizedBox(height: 12),
-                  // New: Dispatch info card
-                  if (scheduleDispatchInfo != null)
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 16,
-                        vertical: 16,
-                      ),
-                      decoration: BoxDecoration(
-                        color: theme.colorScheme.surfaceContainerHighest,
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(color: theme.colorScheme.outline),
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'Dispatch Details',
-                            style: theme.textTheme.titleMedium,
-                          ),
-                          const SizedBox(height: 8),
-                          Row(
-                            children: [
-                              Icon(
-                                Icons.schedule,
-                                size: 20,
-                                color: theme.colorScheme.primary,
-                              ),
-                              const SizedBox(width: 8),
-                              Text(
-                                'Dispatch Time: ',
-                                style: theme.textTheme.bodyMedium!.copyWith(
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                              Text(
-                                _formatDateTime(
-                                  scheduleDispatchInfo!['dispatchTime'],
-                                ),
-                                style: theme.textTheme.bodyMedium,
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 6),
-                          Row(
-                            children: [
-                              Icon(
-                                Icons.keyboard_return,
-                                size: 20,
-                                color: theme.colorScheme.primary,
-                              ),
-                              const SizedBox(width: 8),
-                              Text(
-                                'Return Time: ',
-                                style: theme.textTheme.bodyMedium!.copyWith(
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                              Text(
-                                campusReturnTime != null
-                                    ? _formatDateTime(
-                                      campusReturnTime!.toIso8601String(),
-                                    )
-                                    : '-',
-                                style: theme.textTheme.bodyMedium,
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
-                    ),
-                ],
-              )
-              : Center(
-                child: Text(
-                  'No vehicle allocated.',
-                  style: theme.textTheme.bodyMedium,
-                ),
+              ],
+            )
+                : Center(
+              child: Text(
+                'No vehicle allocated.',
+                style: theme.textTheme.bodyMedium,
               ),
-          const SizedBox(height: 16),
-          shiftApiLoading
-              ? Center(child: CircularProgressIndicator())
-              : ElevatedButton.icon(
-                onPressed:
-                    allocationVehicle == null ? null : _handleShiftToggle,
-                icon: Icon(widget.shiftStarted ? Icons.stop : Icons.play_arrow),
-                label: Text(widget.shiftStarted ? 'End Shift' : 'Start Shift'),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: widget.shiftStarted ? Colors.red : null,
-                  padding: const EdgeInsets.symmetric(vertical: 15),
-                ),
-              ),
-          const SizedBox(height: 16),
-          // Button to toggle map visibility
-          ElevatedButton.icon(
-            onPressed: () {
-              setState(() {
-                showMap = !showMap; // Toggle map visibility
-              });
-            },
-            icon: Icon(Icons.map), // Add map icon
-            label: Text(showMap ? 'Hide Map' : 'Show Map'),
-          ),
-          const SizedBox(height: 16),
-          // Use Visibility widget to control map visibility
-          AnimatedContainer(
-            duration: const Duration(milliseconds: 100),
-            height: showMap ? 400 : 0, // Adjust height based on visibility
-            child: Visibility(
-              visible: showMap, // Control visibility without removing from tree
-              child: SymbolMap(socket: socket, vehicle: allocationVehicle),
             ),
-          ),
-        ],
+            const SizedBox(height: 16),
+            shiftApiLoading
+                ? Center(child: CircularProgressIndicator())
+                : ElevatedButton.icon(
+              onPressed:
+                  allocationVehicle == null ? null : _handleShiftToggle,
+              icon: Icon(widget.shiftStarted ? Icons.stop : Icons.play_arrow),
+              label: Text(widget.shiftStarted ? 'End Shift' : 'Start Shift'),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: widget.shiftStarted ? Colors.red : null,
+                padding: const EdgeInsets.symmetric(vertical: 15),
+              ),
+            ),
+            const SizedBox(height: 16),
+            // Button to toggle map visibility
+            ElevatedButton.icon(
+              onPressed: () {
+                setState(() {
+                  showMap = !showMap; // Toggle map visibility
+                });
+              },
+              icon: Icon(Icons.map), // Add map icon
+              label: Text(showMap ? 'Hide Map' : 'Show Map'),
+            ),
+            const SizedBox(height: 16),
+            // Use Visibility widget to control map visibility
+            AnimatedContainer(
+              duration: const Duration(milliseconds: 100),
+              height: showMap ? 400 : 0, // Adjust height based on visibility
+              child: Visibility(
+                visible: showMap, // Control visibility without removing from tree
+                child: SymbolMap(socket: socket, vehicle: allocationVehicle),
+              ),
+            ),
+            ElevatedButton.icon(
+              onPressed: () {
+                setState(() {
+                  showQr = !showQr; // Toggle QR visibility
+                });
+              },
+              icon: Icon(Icons.qr_code), // Add QR icon
+              label: Text(showQr ? 'Hide QR' : 'Show QR'),
+            ),
+            AnimatedContainer(
+              duration: const Duration(milliseconds: 100),
+              height: showQr ? 400 : 0, // Adjust height based on visibility
+              child: Visibility(
+                visible: showQr, // Control visibility without removing from tree
+                child: FutureBuilder<Map<String, String>?>(
+                  future: _getQrData(),
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return const Center(child: CircularProgressIndicator());
+                    } else if (snapshot.hasData && snapshot.data != null) {
+                      final qrData = json.encode(snapshot.data);
+                      return Center(
+                        child: QrImageView(
+                          data: qrData,
+                          version: QrVersions.auto,
+                          size: 150.0,
+                        ),
+                      );
+                    } else {
+                      if (kDebugMode) {
+                        print("Failed to load QR data: ${snapshot.error}");
+                      }
+                      return const Center(
+                        child: Text(
+                          "Failed to load QR Code",
+                          style: TextStyle(color: Colors.red),
+                        ),
+                      );
+                    }
+                  },
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
