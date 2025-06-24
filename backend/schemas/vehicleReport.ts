@@ -27,8 +27,8 @@ const vehicleReport = new mongoose.Schema({
 		required: true,
 	},
 	refueling: {
-		type: String,
-		enum: ['1', '2', '3', '4', '5'],
+		type: Number,
+		enum: [0, 1, 2, 3, 4, 5],
 		required: true,
 	},
 	servicing: {
@@ -44,7 +44,7 @@ interface VehicleReportDocument extends mongoose.Document {
 	vehicleId: mongoose.Types.ObjectId;
 	driverId: mongoose.Types.ObjectId;
 	damage: 'major' | 'minor' | 'scratch' | 'none';
-	refueling: '1' | '2' | '3' | '4' | '5';
+	refueling: 0 | 1 | 2 | 3 | 4 | 5;
 	servicing: 'interior' | 'exterior' | 'tire_pump' | 'cleaning' | 'none';
 	vehicle?: {
 		name: string;

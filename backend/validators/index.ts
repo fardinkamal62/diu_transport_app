@@ -71,8 +71,10 @@ const driverLoginSchema = Joi.object({
 
 const addDriverReportSchema = Joi.object({
 	damage: Joi.string().valid('major', 'minor', 'scratch', 'none').required(),
-	refueling: Joi.string().valid(1, 2, 3, 4, 5).required(),
+	refueling: Joi.string().valid(0, 1, 2, 3, 4, 5).required(),
 	servicing: Joi.string().valid('interior', 'exterior', 'tire_pump', 'cleaning', 'none').required(),
+	driverId: Joi.string().hex().length(24).required(),
+	vehicleId: Joi.string().hex().length(24).required(),
 })
 
 const schemas = {

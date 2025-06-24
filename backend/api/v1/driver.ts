@@ -150,12 +150,8 @@ const addDriverReport = async (req: express.Request): Promise<object> => {
 	const vehicleId = req.body.vehicleId as string;
 	const driverId = req.body.driverId as string;
 	const damage = req.body.damage as string;
-	const refueling = req.body.refueling as string;
+	const refueling = req.body.refueling as number;
 	const servicing = req.body.servicing as string;
-
-	if (!vehicleId || !driverId || !damage || !refueling || !servicing) {
-		throw new BadRequest(`${!vehicleId && 'Vehicle ID'} ${!driverId && 'Driver ID'} ${!damage && 'Damage'} ${!refueling && 'Refueling'} ${!servicing && 'Servicing'} is required`);
-	}
 
 	try {
 		const vehicle = await vehicleSchema.Vehicle.findById(vehicleId);
