@@ -6,7 +6,6 @@ import 'package:http/http.dart' as http;
 import 'package:qr_flutter/qr_flutter.dart';
 import 'package:flutter/foundation.dart';
 
-import 'package:diu_transport_driver_app/barikoi_map.dart';
 import 'package:diu_transport_driver_app/socketio.dart';
 
 class HomeScreenContent extends StatefulWidget {
@@ -33,7 +32,6 @@ class _HomeScreenContentState extends State<HomeScreenContent> {
   DateTime? campusReturnTime;
   bool shiftApiLoading = false;
   String? scheduleId;
-  bool showMap = false; // State to control map visibility
   bool showQr = false; // State to control QR code visibility
 
   @override
@@ -367,26 +365,7 @@ class _HomeScreenContentState extends State<HomeScreenContent> {
               ),
             ),
             const SizedBox(height: 16),
-            // Button to toggle map visibility
-            ElevatedButton.icon(
-              onPressed: () {
-                setState(() {
-                  showMap = !showMap; // Toggle map visibility
-                });
-              },
-              icon: Icon(Icons.map), // Add map icon
-              label: Text(showMap ? 'Hide Map' : 'Show Map'),
-            ),
-            const SizedBox(height: 16),
             // Use Visibility widget to control map visibility
-            AnimatedContainer(
-              duration: const Duration(milliseconds: 100),
-              height: showMap ? 400 : 0, // Adjust height based on visibility
-              child: Visibility(
-                visible: showMap, // Control visibility without removing from tree
-                child: SymbolMap(socket: socket, vehicle: allocationVehicle),
-              ),
-            ),
             ElevatedButton.icon(
               onPressed: () {
                 setState(() {
