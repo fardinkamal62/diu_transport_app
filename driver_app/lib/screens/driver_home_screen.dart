@@ -7,6 +7,7 @@ import 'dart:async';
 import 'hometab/driver_profile_screen.dart';
 import 'hometab/home_screen_content.dart';
 import 'package:diu_transport_driver_app/screens/schedule_list.dart';
+import 'package:diu_transport_driver_app/screens/vehicle_reporting.dart';
 
 class DriverHomeScreen extends StatefulWidget {
   const DriverHomeScreen({super.key});
@@ -27,6 +28,7 @@ class _DriverHomeScreenState extends State<DriverHomeScreen> {
   final List<Widget> _otherWidgetOptions = <Widget>[
     const QRScannerPage(),
     const ScheduleList(),
+    const VehicleReporting(),
     const DriverProfileScreen(),
   ];
 
@@ -276,6 +278,10 @@ class _DriverHomeScreenState extends State<DriverHomeScreen> {
           BottomNavigationBarItem(
             icon: Icon(Icons.schedule_outlined),
             label: 'Schedule',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.car_repair_outlined),
+            label: 'Reporting',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.person_outlined),
