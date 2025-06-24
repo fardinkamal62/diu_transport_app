@@ -110,6 +110,7 @@ const manualReservation = async (req: express.Request): Promise<object> => {
 			throw new NotFound('Vehicle not found');
 		}
 
+		// Case: Passenger scanning QR code to board the vehicle
 		if (reservationId != null) {
 			await reservationSchema.VehicleReservation.findByIdAndUpdate(
 				reservationId,
@@ -118,6 +119,17 @@ const manualReservation = async (req: express.Request): Promise<object> => {
 			)
 
 			return { message: 'Reservation status updated', registrationCode };
+		} else {
+			// Case: Passenger has reservation but driver is scanning QR code
+			const reservation = await reservationSchema.VehicleReservation.findOneAndUpdate({
+				registrationCode,
+				scheduleId,
+				status: 'reserved'
+			}, { status: 'onboard', vehicleId: vehicle._id });
+
+			if (reservation) {
+				return { message: 'Reservation status updated', registrationCode };
+			}
 		}
 
 		const schedule = await scheduleSchema.findById(scheduleId);
@@ -125,6 +137,7 @@ const manualReservation = async (req: express.Request): Promise<object> => {
 			throw new NotFound('Schedule not found');
 		}
 
+		// Case: Driver manually reserving a vehicle for a passenger
 		await reservationSchema.VehicleReservation.create({
 			registrationCode,
 			time: schedule.campusReturnTime,
