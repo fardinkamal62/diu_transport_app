@@ -45,6 +45,9 @@ class _ReservationHistoryState extends State<ReservationHistory> {
             reservations = responseData['data']['reservations'];
             isLoading = false;
           });
+
+          // Save reservations to SharedPreferences
+          await prefs.setString('reservations', json.encode(reservations));
         } else {
           setState(() {
             isLoading = false;

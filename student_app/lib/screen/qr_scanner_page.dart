@@ -47,6 +47,33 @@ class _QRScannerPageState extends State<QRScannerPage> {
     });
   }
 
+  Future<String?> _findMatchingReservationId() async {
+    final prefs = await SharedPreferences.getInstance();
+    final reservationsData = prefs.getString('reservations');
+
+    if (reservationsData != null) {
+      final reservations = json.decode(reservationsData) as List<dynamic>;
+      final currentTime = DateTime.now();
+
+      for (final reservation in reservations) {
+        final pickupTime = DateTime.parse(reservation['schedule']['pickupTime']);
+
+        // Check if the pickupTime matches the current day and hour
+        if (pickupTime.year == currentTime.year &&
+            pickupTime.month == currentTime.month &&
+            pickupTime.day == currentTime.day &&
+            pickupTime.hour == currentTime.hour) {
+          if (kDebugMode) {
+            print('Matching reservation ID: ${reservation['_id']}');
+          }
+          return reservation['_id'];
+        }
+      }
+    }
+
+    return null; // Return null if no matching reservation is found
+  }
+
   Future<String> _determineLocation() async {
     try {
       Position position = await Geolocator.getCurrentPosition(
@@ -93,28 +120,29 @@ class _QRScannerPageState extends State<QRScannerPage> {
     }
   }
 
-  Future<void> _makeReservationApiCall(
-    String registrationCode,
-    String? reservationId,
-    String userType,
-  ) async {
-    if (vehicleId == null || scheduleId == null) {
-      _showToast("Vehicle or schedule data is missing.");
-      return;
-    }
-
+  Future<void> _makeReservationApiCall() async {
     final prefs = await SharedPreferences.getInstance();
     final userData = prefs.getString('userData');
+    String registrationCode = '';
+    String userType = 'student'; // Default user type
+    String reservationId = await _findMatchingReservationId() ?? '';
 
     if (userData != null) {
       final data = json.decode(userData);
       setState(() {
         token = data['token'];
       });
+
+      registrationCode = data['user']['reg_code'];
+      userType = data['user']['user_type'] ?? 'student';
     }
 
-    final location =
-        await _determineLocation(); // Dynamically determine location
+    if (reservationId == '') {
+      _showToast("No reservations found.");
+      return;
+    }
+
+    final location = await _determineLocation(); // Dynamically determine location
     final serverUrl = dotenv.env['SERVER_URL'];
 
     final url = Uri.parse('$serverUrl/api/v1/manual-reservation');
@@ -178,15 +206,17 @@ class _QRScannerPageState extends State<QRScannerPage> {
       if (rawValue != null) {
         try {
           final data = json.decode(rawValue);
-          final registrationCode = data['registrationCode'];
-          final reservationId = data['reservationId'];
-          final userType = data['userType'];
-
-          if (registrationCode != null && userType != null) {
-            _makeReservationApiCall(registrationCode, reservationId, userType);
+          final vehicleId = data['vehicleId'];
+          final scheduleId = data['scheduleId'];
+          if (vehicleId != null && scheduleId != null) {
+            this.vehicleId = vehicleId;
+            this.scheduleId = scheduleId;
           } else {
             _showToast("Invalid QR code data.");
+            return;
           }
+
+          _makeReservationApiCall();
         } catch (e) {
           _showToast("Error parsing QR code: $e");
         }

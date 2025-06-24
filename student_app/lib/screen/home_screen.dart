@@ -1,4 +1,4 @@
-import 'package:diu_transport_student_app/screen/auth/qr_scanner_page.dart';
+import 'package:diu_transport_student_app/screen/qr_scanner_page.dart';
 import 'package:flutter/material.dart';
 import 'package:diu_transport_student_app/barikoi_map.dart'; // Import the map widget
 import 'package:diu_transport_student_app/socketio.dart';
