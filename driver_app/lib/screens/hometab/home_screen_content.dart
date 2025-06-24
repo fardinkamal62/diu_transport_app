@@ -31,6 +31,7 @@ class _HomeScreenContentState extends State<HomeScreenContent> {
   DateTime? campusReturnTime;
   bool shiftApiLoading = false;
   String? scheduleId;
+  bool showMap = false; // State to control map visibility
 
   @override
   void initState() {
@@ -352,9 +353,25 @@ class _HomeScreenContentState extends State<HomeScreenContent> {
                 ),
               ),
           const SizedBox(height: 16),
-          // Show the map widget below the shift button
-          Expanded(
-            child: SymbolMap(socket: socket, vehicle: allocationVehicle),
+          // Button to toggle map visibility
+          ElevatedButton.icon(
+            onPressed: () {
+              setState(() {
+                showMap = !showMap; // Toggle map visibility
+              });
+            },
+            icon: Icon(Icons.map), // Add map icon
+            label: Text(showMap ? 'Hide Map' : 'Show Map'),
+          ),
+          const SizedBox(height: 16),
+          // Use Visibility widget to control map visibility
+          AnimatedContainer(
+            duration: const Duration(milliseconds: 100),
+            height: showMap ? 400 : 0, // Adjust height based on visibility
+            child: Visibility(
+              visible: showMap, // Control visibility without removing from tree
+              child: SymbolMap(socket: socket, vehicle: allocationVehicle),
+            ),
           ),
         ],
       ),
