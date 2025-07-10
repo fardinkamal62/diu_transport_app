@@ -30,6 +30,10 @@ const deleteDriver = (req: Request) : Promise<object> => {
 	return api.deleteDriver(req);
 };
 
+const statistics = (req: Request) : Promise<object> => {
+	return api.statistics(req);
+};
+
 const controllers = {
 	login,
 	addVehicle,
@@ -38,6 +42,7 @@ const controllers = {
 	updateDriverData,
 	deleteVehicle,
 	deleteDriver,
+	statistics
 };
 
 export default controllers;

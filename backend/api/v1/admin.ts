@@ -5,6 +5,7 @@ import express from 'express';
 import utils from '../../utils';
 import userSchema from '../../schemas/user';
 import vehicleSchema from '../../schemas/vehicle';
+import tripSchema from '../../schemas/trip';
 
 import logger from '../../utils/logger';
 
@@ -291,6 +292,56 @@ const deleteDriver = async (req: express.Request): Promise<object> => {
 	}
 };
 
+const statistics = async (req: express.Request): Promise<object> => {
+	const startTime = new Date(req.query.startTime as string) || new Date(new Date().setHours(0, 0, 0, 0));
+	const endTime = new Date(req.query.endTime as string) || new Date(new Date().setHours(23, 59, 59, 999));
+
+
+	const result: {
+		totalTrips: number;
+		vehicleReports: any[];
+		driverReports: any[];
+	} = {
+		totalTrips: 0,
+		vehicleReports: [],
+		driverReports: []
+	};
+
+	try {
+		// Total trips
+		const totalTrips = await tripSchema.countDocuments({
+			createdAt: { $gte: startTime, $lt: endTime },
+			status: 'completed'
+		});
+		result.totalTrips = totalTrips;
+
+		// Trips grouped by vehicle
+		const vehicleReports = await tripSchema.aggregate([
+			{ $match: { createdAt: { $gte: startTime, $lt: endTime }, status: 'completed' } },
+			{ $group: { _id: '$vehicleId', tripCount: { $sum: 1 } } },
+			{ $lookup: { from: 'vehicles', localField: '_id', foreignField: '_id', as: 'vehicle' } },
+			{ $unwind: '$vehicle' },
+			{ $project: { vehicleId: '$_id', tripCount: 1, vehicleName: '$vehicle.name', vehicleRegistrationNumber: '$vehicle.vehicleRegistrationNumber' } }
+		]);
+		result.vehicleReports = vehicleReports;
+
+		// Trips grouped by driver
+		const driverReports = await tripSchema.aggregate([
+			{ $match: { createdAt: { $gte: startTime, $lt: endTime }, status: 'completed' } },
+			{ $group: { _id: '$driverId', tripCount: { $sum: 1 } } },
+			{ $lookup: { from: 'users', localField: '_id', foreignField: '_id', as: 'driver' } },
+			{ $unwind: '$driver' },
+			{ $project: { driverId: '$_id', tripCount: 1, driverName: '$driver.name', phoneNumber: '$driver.phoneNumber' } }
+		]);
+		result.driverReports = driverReports;
+
+		return result;
+	} catch (e) {
+		logger.error('Failed to fetch statistics', e);
+		throw new InternalServerError('Failed to fetch statistics');
+	}
+};
+
 const adminApi = {
 	login,
 	addVehicle,
@@ -299,6 +350,7 @@ const adminApi = {
 	updateDriverData,
 	deleteVehicle,
 	deleteDriver,
+	statistics
 };
 
 export default adminApi;
