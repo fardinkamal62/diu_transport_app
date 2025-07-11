@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:diu_transport_student_app/theme/transit_theme.dart';
 import 'package:diu_transport_student_app/widgets/loader.dart'; // Import the Loader widget
+import 'package:diu_transport_student_app/services/notification_service.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
@@ -61,6 +62,67 @@ class _ReservationScreenState extends State<ReservationScreen> {
     {'label': '07:00 PM', 'value': '19:40'},
   ];
 
+  @override
+  void initState() {
+    super.initState();
+    _checkNotificationPermissions();
+  }
+
+  Future<void> _checkNotificationPermissions() async {
+    // Check if notifications are enabled
+    final notificationService = NotificationService();
+    
+    // Get pending notifications to see if we have permission
+    final pendingNotifications =
+        await notificationService.getPendingNotifications();
+
+    if (kDebugMode) {
+      print('Pending notifications: ${pendingNotifications.length}');
+    }
+    
+    // Request special Samsung permissions if needed
+    await notificationService.requestSamsungAlarmPermissions(context);
+  }
+
+  Future<void> _scheduleReservationNotifications(
+    String location,
+    DateTime time,
+  ) async {
+    try {
+      // Get location label for notification
+      final locationLabel =
+          locations.firstWhere(
+            (loc) => loc['value'] == location,
+            orElse: () => {'label': location},
+          )['label'];
+
+      // Format time for display
+      final timeLabel = DateFormat("HH:mm").format(time);
+
+      // Schedule multiple notifications
+      await NotificationService().scheduleReservationNotifications(
+        location: locationLabel!,
+        timeSlot: timeLabel,
+        reservationDateTime: time,
+      );
+
+      if (kDebugMode) {
+        print('Notifications scheduled for $locationLabel at $timeLabel');
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        print('Error scheduling notifications: $e');
+      }
+      // Show a non-intrusive message to the user
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Reservation confirmed, but notification setup failed'),
+          backgroundColor: Colors.orange,
+        ),
+      );
+    }
+  }
+
   Future<void> _makeReservation(String location, String time) async {
     try {
       setState(() {
@@ -76,21 +138,47 @@ class _ReservationScreenState extends State<ReservationScreen> {
 
         final response = await http.post(
           Uri.parse('$socketUrl/api/v1/user/reservation'),
-          headers: {'Content-Type': 'application/json','Authorization': '${data['token']}'},
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': '${data['token']}',
+          },
           body: jsonEncode({
             'location': location,
-            'time': '${DateFormat("yyyy-MM-dd").format(DateTime.now())}T$time:00',
+            'time':
+                '${DateFormat("yyyy-MM-dd").format(DateTime.now())}T$time:00',
             'registrationCode': data['user']['reg_code'],
             'userType': 'student',
           }),
         );
 
         if (response.statusCode == 200) {
+          try {
+            // Schedule notification on reservation time instead of 10 seconds later or 1 minute later
+            await _scheduleReservationNotifications(
+              location,
+              DateFormat("yyyy-MM-dd HH:mm").parse('${DateFormat("yyyy-MM-dd").format(DateTime.now())} $time'),
+            );
+          } catch (e) {
+            // Handle notification scheduling error gracefully
+            if (kDebugMode) {
+              print('Error scheduling notifications: $e');
+            }
+            // Continue with reservation success message anyway
+          }
+          
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Reservation confirmed successfully!'), backgroundColor: diuPrimaryGreen,),
+            const SnackBar(
+              content: Text(
+                'Reservation confirmed!',
+                style: TextStyle(color: Colors.white),
+              ),
+              backgroundColor: Colors.green,
+            ),
           );
         } else {
-          final errorMsg = jsonDecode(response.body)['error'] ?? 'Failed to confirm reservation.';
+          final errorMsg =
+              jsonDecode(response.body)['error'] ??
+              'Failed to confirm reservation.';
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text(
@@ -106,9 +194,9 @@ class _ReservationScreenState extends State<ReservationScreen> {
         }
       }
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error: $e')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Error: $e')));
     } finally {
       setState(() {
         isLoading = false; // Hide loading overlay
@@ -116,29 +204,34 @@ class _ReservationScreenState extends State<ReservationScreen> {
     }
   }
 
-  Future<void> _showConfirmationDialog(String timeLabel, String timeValue) async {
-    final locationLabel = locations.firstWhere(
-      (loc) => loc['value'] == selectedLocation,
-      orElse: () => {'label': ''},
-    )['label'];
+  Future<void> _showConfirmationDialog(
+    String timeLabel,
+    String timeValue,
+  ) async {
+    final locationLabel =
+        locations.firstWhere(
+          (loc) => loc['value'] == selectedLocation,
+          orElse: () => {'label': ''},
+        )['label'];
     final confirmed = await showDialog<bool>(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Confirm Reservation?'),
-        content: Text(
-          'Location: $locationLabel\nTime: $timeLabel\n\nAllocation will be available at $timeLabel',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(false),
-            child: const Text('Cancel'),
+      builder:
+          (context) => AlertDialog(
+            title: const Text('Confirm Reservation?'),
+            content: Text(
+              'Location: $locationLabel\nTime: $timeLabel\n\nAllocation will be available at $timeLabel',
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(false),
+                child: const Text('Cancel'),
+              ),
+              ElevatedButton(
+                onPressed: () => Navigator.of(context).pop(true),
+                child: const Text('Confirm'),
+              ),
+            ],
           ),
-          ElevatedButton(
-            onPressed: () => Navigator.of(context).pop(true),
-            child: const Text('Confirm'),
-          ),
-        ],
-      ),
     );
     if (confirmed == true) {
       setState(() {
@@ -194,38 +287,42 @@ class _ReservationScreenState extends State<ReservationScreen> {
                 children: [
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
-                    children: locations.map((loc) {
-                      final isSelected = selectedLocation == loc['value'];
-                      return Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 5.0),
-                        child: Container(
-                          width: 120.0,
-                          height: 80.0,
-                          decoration: BoxDecoration(
-                            color: isSelected
-                                ? diuPrimaryGreen // Darker shade when selected
-                                : diuLightGreen,
-                            borderRadius: BorderRadius.circular(42.0),
-                          ),
-                          child: TextButton.icon(
-                            onPressed: () {
-                              setState(() {
-                                selectedLocation = loc['value'];
-                                selectedTime = null; // Reset time selection
-                              });
-                            },
-                            label: Padding(
-                              padding: const EdgeInsets.all(8.0),
-                              child: Text(
-                                loc['label']!,
-                                style: TextStyle(color: diuSurfaceColor),
+                    children:
+                        locations.map((loc) {
+                          final isSelected = selectedLocation == loc['value'];
+                          return Padding(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 5.0,
+                            ),
+                            child: Container(
+                              width: 120.0,
+                              height: 80.0,
+                              decoration: BoxDecoration(
+                                color:
+                                    isSelected
+                                        ? diuPrimaryGreen // Darker shade when selected
+                                        : diuLightGreen,
+                                borderRadius: BorderRadius.circular(42.0),
+                              ),
+                              child: TextButton.icon(
+                                onPressed: () {
+                                  setState(() {
+                                    selectedLocation = loc['value'];
+                                    selectedTime = null; // Reset time selection
+                                  });
+                                },
+                                label: Padding(
+                                  padding: const EdgeInsets.all(8.0),
+                                  child: Text(
+                                    loc['label']!,
+                                    style: TextStyle(color: diuSurfaceColor),
+                                  ),
+                                ),
+                                icon: const SizedBox.shrink(),
                               ),
                             ),
-                            icon: const SizedBox.shrink(),
-                          ),
-                        ),
-                      );
-                    }).toList(),
+                          );
+                        }).toList(),
                   ),
                 ],
               ),
@@ -242,7 +339,8 @@ class _ReservationScreenState extends State<ReservationScreen> {
 
                   child: Padding(
                     padding: const EdgeInsets.all(15.0),
-                    child: Text("Select time slot",
+                    child: Text(
+                      "Select time slot",
                       style: TextStyle(color: diuOnPrimaryColor),
                       textAlign: TextAlign.center,
                     ),
@@ -255,21 +353,34 @@ class _ReservationScreenState extends State<ReservationScreen> {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          for (int j = i; j < i + 3 && j < timingList.length; j++)
+                          for (
+                            int j = i;
+                            j < i + 3 && j < timingList.length;
+                            j++
+                          )
                             Padding(
-                              padding: const EdgeInsets.symmetric(horizontal: 5.0, vertical: 8.0),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 5.0,
+                                vertical: 8.0,
+                              ),
                               child: Container(
                                 width: 120.0,
                                 height: 80.0,
                                 decoration: BoxDecoration(
-                                  color: selectedTime == timingList[j]['value']
-                                      ? diuPrimaryGreen
-                                      : _getButtonColor(timingList[j]['value']!, now),
+                                  color:
+                                      selectedTime == timingList[j]['value']
+                                          ? diuPrimaryGreen
+                                          : _getButtonColor(
+                                            timingList[j]['value']!,
+                                            now,
+                                          ),
                                   borderRadius: BorderRadius.circular(42.0),
                                 ),
                                 child: TextButton(
                                   onPressed: () async {
-                                    final parsedTime = DateFormat("HH:mm").parse(timingList[j]['value']!);
+                                    final parsedTime = DateFormat(
+                                      "HH:mm",
+                                    ).parse(timingList[j]['value']!);
                                     final fullDateTime = DateTime(
                                       now.year,
                                       now.month,
@@ -279,11 +390,14 @@ class _ReservationScreenState extends State<ReservationScreen> {
                                     );
 
                                     // Disable button if time is in the past or within 40 minutes for campus, 2 hours for others
-                                    final minDuration = selectedLocation == 'campus'
-                                        ? const Duration(minutes: 40)
-                                        : const Duration(hours: 1);
+                                    final minDuration =
+                                        selectedLocation == 'campus'
+                                            ? const Duration(minutes: 40)
+                                            : const Duration(hours: 1);
 
-                                    if (fullDateTime.isAfter(now.add(minDuration))) {
+                                    if (fullDateTime.isAfter(
+                                      now.add(minDuration),
+                                    )) {
                                       await _showConfirmationDialog(
                                         timingList[j]['label']!,
                                         timingList[j]['value']!,
@@ -291,37 +405,46 @@ class _ReservationScreenState extends State<ReservationScreen> {
                                     }
                                   },
                                   style: ButtonStyle(
-                                    foregroundColor: WidgetStateProperty.resolveWith<Color>(
-                                      (states) {
-                                        final parsedTime = DateFormat("HH:mm").parse(timingList[j]['value']!);
-                                        final fullDateTime = DateTime(
-                                          now.year,
-                                          now.month,
-                                          now.day,
-                                          parsedTime.hour,
-                                          parsedTime.minute,
-                                        );
+                                    foregroundColor: WidgetStateProperty.resolveWith<
+                                      Color
+                                    >((states) {
+                                      final parsedTime = DateFormat(
+                                        "HH:mm",
+                                      ).parse(timingList[j]['value']!);
+                                      final fullDateTime = DateTime(
+                                        now.year,
+                                        now.month,
+                                        now.day,
+                                        parsedTime.hour,
+                                        parsedTime.minute,
+                                      );
 
-                                        // Disable button if time is in the past or within 40 minutes for campus, 2 hours for others
-                                        final minDuration = selectedLocation == 'campus'
-                                            ? const Duration(minutes: 40)
-                                            : const Duration(hours: 1);
+                                      // Disable button if time is in the past or within 40 minutes for campus, 2 hours for others
+                                      final minDuration =
+                                          selectedLocation == 'campus'
+                                              ? const Duration(minutes: 40)
+                                              : const Duration(hours: 1);
 
-                                        if (fullDateTime.isBefore(now.add(minDuration))) {
-                                          return Colors.grey.shade600; // Disabled text color
-                                        }
-                                        return diuSurfaceColor; // Enabled text color
-                                      },
-                                    ),
+                                      if (fullDateTime.isBefore(
+                                        now.add(minDuration),
+                                      )) {
+                                        return Colors
+                                            .grey
+                                            .shade600; // Disabled text color
+                                      }
+                                      return diuSurfaceColor; // Enabled text color
+                                    }),
                                   ),
                                   child: Padding(
                                     padding: const EdgeInsets.all(8.0),
                                     child: Text(
                                       timingList[j]['label']!,
                                       style: TextStyle(
-                                        color: selectedTime == timingList[j]['value']
-                                            ? Colors.white
-                                            : diuSurfaceColor,
+                                        color:
+                                            selectedTime ==
+                                                    timingList[j]['value']
+                                                ? Colors.white
+                                                : diuSurfaceColor,
                                       ),
                                     ),
                                   ),
@@ -343,12 +466,19 @@ class _ReservationScreenState extends State<ReservationScreen> {
 
   Color _getButtonColor(String timeValue, DateTime now) {
     final parsedTime = DateFormat("HH:mm").parse(timeValue);
-    final fullDateTime = DateTime(now.year, now.month, now.day, parsedTime.hour, parsedTime.minute);
+    final fullDateTime = DateTime(
+      now.year,
+      now.month,
+      now.day,
+      parsedTime.hour,
+      parsedTime.minute,
+    );
 
     // Return disabled color if time is in the past or within 40 minutes for campus, 2 hours for others
-    final minDuration = selectedLocation == 'campus'
-        ? const Duration(minutes: 40)
-        : const Duration(hours: 1);
+    final minDuration =
+        selectedLocation == 'campus'
+            ? const Duration(minutes: 40)
+            : const Duration(hours: 1);
 
     if (fullDateTime.isBefore(now.add(minDuration))) {
       return Colors.grey.shade300; // Disabled button color

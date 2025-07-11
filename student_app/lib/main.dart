@@ -6,6 +6,7 @@ import 'package:diu_transport_student_app/screen/home_screen.dart';
 import 'package:diu_transport_student_app/screen/add_reservation_screen.dart';
 import 'package:diu_transport_student_app/theme/transit_theme.dart';
 import 'package:diu_transport_student_app/screen/vehicle_list.dart';
+import 'package:diu_transport_student_app/services/notification_service.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
@@ -25,6 +26,10 @@ class MyHttpOverrides extends HttpOverrides {
 
 Future main() async {
   WidgetsFlutterBinding.ensureInitialized(); // Ensure Flutter binding is initialized
+
+  // Initialize notification service
+  await NotificationService().initialize();
+
   // Only use this in development builds
   if (const bool.fromEnvironment('dart.vm.product') == false) {
     HttpOverrides.global = MyHttpOverrides();
