@@ -56,7 +56,7 @@ function Home() {
     });
 
 
-    const url = process.env.API_URL || 'http://localhost:3000';
+    const url = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
 
     const fetchVehicleReports = (date?: Date) => {
         const endpoint = `/api/v1/driver/report${date ? `?time=${date.toISOString()}` : ''}`;
@@ -112,6 +112,7 @@ function Home() {
 
     const navbarPages = [
         {title: 'Home', url: '/'},
+        {title: 'Statistics', url: '/statistics'},
     ];
 
     return (

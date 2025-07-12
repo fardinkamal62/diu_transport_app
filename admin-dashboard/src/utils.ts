@@ -2,7 +2,8 @@ import axios from 'axios';
 import { jwtDecode } from 'jwt-decode';
 
 export const login = async (username: string, password: string) => {
-    const url = process.env.API_URL || 'http://localhost:3000';
+    const url = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
+    console.log(process.env, url);
     try {
         const response = await axios.post(url + '/api/v1/admin/login', { username, password });
         const { token } = response.data.data;

@@ -48,7 +48,7 @@ function Home() {
         setSnackbarQueue(prevQueue => [...prevQueue, {message, severity}]);
     };
 
-    const url = process.env.API_URL || 'http://localhost:3000';
+    const url = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
 
     const fetchStats = () => {
         if (!selectedStartDate || !selectedEndDate) {
@@ -111,6 +111,7 @@ function Home() {
 
     const navbarPages = [
         {title: 'Home', url: '/'},
+        {title: 'Vehicle Reports', url: '/vehicle_report'},
     ];
 
     return (

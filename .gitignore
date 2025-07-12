@@ -2,3 +2,6 @@
 *.rdb
 
 .vscode
+
+.replit
+replit.nix
