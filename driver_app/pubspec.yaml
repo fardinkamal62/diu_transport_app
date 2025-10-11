@@ -11,6 +11,11 @@ dependencies:
   flutter:
     sdk: flutter
 
+
+## == State Management == ##
+  get: ^4.7.2
+
+
   cupertino_icons: ^1.0.8
   maplibre_gl: ^0.21.0
   http: ^1.4.0
