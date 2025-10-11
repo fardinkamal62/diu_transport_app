@@ -110,10 +110,14 @@
 
 
 import 'package:diu_transport_driver_app/features/onbording/views/setusertype_screen.dart';
+import 'package:diu_transport_driver_app/screens/driver_home_screen.dart';
+import 'package:diu_transport_driver_app/screens/schedule_list.dart';
+import 'package:diu_transport_driver_app/screens/vehicle_reporting.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
+import 'core/localization/app_translations.dart';
 import 'features/initial_screen.dart';
 
 Future main() async {
@@ -129,6 +133,9 @@ class EntryApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return GetMaterialApp(
       title: 'UniRide Control',
+      translations: AppTranslations(),
+      locale: const Locale('en', 'US'),
+      fallbackLocale: const Locale('en', 'US'),
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         primarySwatch: Colors.blue,

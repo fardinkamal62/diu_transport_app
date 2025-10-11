@@ -1,4 +1,6 @@
+import 'package:diu_transport_driver_app/features/auth/views/driver_login_screen.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 
 class SetusertypeScreen extends StatefulWidget {
   const SetusertypeScreen({super.key});
@@ -22,9 +24,9 @@ class _SetusertypeScreenState extends State<SetusertypeScreen> {
           children: [
             const Icon(Icons.school, color: Colors.blueAccent, size: 30),
             const SizedBox(width: 8),
-            const Text(
-              'UniTransport',
-              style: TextStyle(
+            Text(
+              'app_title'.tr,
+              style: const TextStyle(
                 fontWeight: FontWeight.bold,
                 color: Colors.black87,
                 fontSize: 18,
@@ -38,6 +40,11 @@ class _SetusertypeScreenState extends State<SetusertypeScreen> {
               setState(() {
                 lang = newValue;
               });
+              if (newValue == 'English') {
+                Get.updateLocale(const Locale('en', 'US'));
+              } else {
+                Get.updateLocale(const Locale('bn', 'BD'));
+              }
             },
             itemBuilder: (BuildContext context) => const [
               PopupMenuItem<String>(
@@ -73,20 +80,20 @@ class _SetusertypeScreenState extends State<SetusertypeScreen> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             const Spacer(),
-            const Text(
-              'Your Campus Ride Awaits',
+            Text(
+              'tagline'.tr,
               textAlign: TextAlign.center,
-              style: TextStyle(
+              style: const TextStyle(
                 fontSize: 24,
                 fontWeight: FontWeight.bold,
                 color: Colors.black87,
               ),
             ),
             const SizedBox(height: 8),
-            const Text(
-              'Connect with fellow students and staff.\nChoose your role to get started.',
+            Text(
+              'subtitle'.tr,
               textAlign: TextAlign.center,
-              style: TextStyle(
+              style: const TextStyle(
                 fontSize: 14,
                 color: Colors.grey,
               ),
@@ -103,13 +110,15 @@ class _SetusertypeScreenState extends State<SetusertypeScreen> {
                   });
                 },
                 icon: const Icon(Icons.directions_car_rounded),
-                label: const Text(
-                  'I am a Driver',
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                label: Text(
+                  'driver'.tr,
+                  style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
                 ),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: selectedBtn == 0 ? Colors.blueAccent : Colors.white,
-                  foregroundColor: selectedBtn == 0 ? Colors.white : Colors.blueAccent,
+                  backgroundColor:
+                  selectedBtn == 0 ? Colors.blueAccent : Colors.white,
+                  foregroundColor:
+                  selectedBtn == 0 ? Colors.white : Colors.blueAccent,
                   padding: const EdgeInsets.symmetric(vertical: 14),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(10),
@@ -129,14 +138,16 @@ class _SetusertypeScreenState extends State<SetusertypeScreen> {
                     selectedBtn = 1;
                   });
                 },
-                icon: const Icon(Icons.person_outline),
-                label: const Text(
-                  'I am a Commuter',
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                icon: const Icon(Icons.verified_user_rounded),
+                label: Text(
+                  'commuter'.tr,
+                  style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
                 ),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: selectedBtn == 1 ? Colors.blueAccent : Colors.white,
-                  foregroundColor: selectedBtn == 1 ? Colors.white : Colors.blueAccent,
+                  backgroundColor:
+                  selectedBtn == 1 ? Colors.blueAccent : Colors.white,
+                  foregroundColor:
+                  selectedBtn == 1 ? Colors.white : Colors.blueAccent,
                   padding: const EdgeInsets.symmetric(vertical: 14),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(10),
@@ -145,34 +156,33 @@ class _SetusertypeScreenState extends State<SetusertypeScreen> {
               ),
             ),
 
+            const SizedBox(height: 50),
 
-            SizedBox(height: 50),
-
-
-              ElevatedButton(
-                onPressed: () {
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.blueAccent,
-                  foregroundColor: Colors.white,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(50),
-                  ),
-                  padding: const EdgeInsets.symmetric(vertical: 12),
+            ElevatedButton(
+              onPressed: () {
+                Get.to(DriverLoginScreen());
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.blueAccent,
+                foregroundColor: Colors.white,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(50),
                 ),
-                child: const Icon(Icons.arrow_forward_rounded,size: 40,),
+                padding: const EdgeInsets.symmetric(vertical: 12),
               ),
+              child: const Icon(Icons.arrow_forward_rounded, size: 40),
+            ),
 
             const Spacer(),
             Padding(
               padding: const EdgeInsets.only(bottom: 16),
               child: Text.rich(
                 TextSpan(
-                  text: 'By continuing, you agree to our ',
+                  text: 'terms'.tr,
                   style: const TextStyle(fontSize: 12, color: Colors.grey),
                   children: [
                     TextSpan(
-                      text: 'Terms of Service',
+                      text: 'terms_of_service'.tr,
                       style: const TextStyle(
                         color: Colors.blueAccent,
                         decoration: TextDecoration.underline,
@@ -180,7 +190,7 @@ class _SetusertypeScreenState extends State<SetusertypeScreen> {
                     ),
                     const TextSpan(text: ' and '),
                     TextSpan(
-                      text: 'Privacy Policy',
+                      text: 'privacy_policy'.tr,
                       style: const TextStyle(
                         color: Colors.blueAccent,
                         decoration: TextDecoration.underline,
