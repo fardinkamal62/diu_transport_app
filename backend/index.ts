@@ -23,6 +23,7 @@ import indexRoute from './routes/v1/index'
 import userRoutes from './routes/v1/user';
 import adminRoutes from './routes/v1/admin';
 import driverRoutes from './routes/v1/driver';
+import linemanRoutes from './routes/v1/lineman';
 
 import logger from './utils/logger';
 import utils from './utils';
@@ -70,6 +71,7 @@ app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 app.use('/api/v1/admin', adminRoutes.router);
 app.use('/api/v1/user', userRoutes.router);
 app.use('/api/v1/driver', driverRoutes.router);
+app.use('/api/v1/lineman', linemanRoutes.router);
 app.use('/api/v1', indexRoute.router);
 
 // Handle 404 errors
