@@ -109,6 +109,22 @@ const scheduleSchema = new mongoose.Schema({
 				default: 0,
 			},
 		}
+	},
+	status: {
+		type: String,
+		enum: ['pending', 'approved', 'rejected', 'modified'],
+		default: 'pending',
+	},
+	approvedBy: {
+		type: mongoose.Schema.Types.ObjectId,
+		ref: 'User',
+	},
+	approvedAt: {
+		type: Date,
+	},
+	linemanNotes: {
+		type: String,
+		default: '',
 	}
 }, { autoIndex: false });
 
@@ -149,6 +165,10 @@ interface ScheduleDocument extends mongoose.Document {
 		students: number;
 		teachers: number;
 	};
+	status: 'pending' | 'approved' | 'rejected' | 'modified';
+	approvedBy?: mongoose.Types.ObjectId;
+	approvedAt?: Date;
+	linemanNotes?: string;
 }
 
 scheduleSchema.index({ campusReturnTime: -1 });

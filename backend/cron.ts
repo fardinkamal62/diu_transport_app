@@ -115,69 +115,12 @@ function scheduleHourlyDispatch(): void {
             }
 
             const allocatedVehicles = calculateHourlyDispatch({arrivalTime, students, teachers}, drivers, vehicles);
-            const schedule = await scheduleSchema.create(allocatedVehicles);
+            const schedule = await scheduleSchema.create({
+                ...allocatedVehicles,
+                status: 'pending',
+            });
 
-            // Create trips for each vehicle in the dispatches
-            const trips: any[] = [];
-
-            // For each dispatch (bus or microbus group)
-            for (const dispatch of allocatedVehicles.dispatches) {
-                // Create trip record
-                trips.push({
-                    vehicleId: dispatch.vehicleId,
-                    driverId: vehicleAllocation.find(alloc => alloc.vehicleId.toString() === dispatch.vehicleId.toString())?.driverId,
-                    scheduleId: schedule._id,
-                    status: 'scheduled',
-                    message: `Scheduled for ${dispatch.type} dispatch at ${dispatch.dispatchTime}`
-                });
-            }
-
-            // Save all trip records
-            if (trips.length > 0) {
-                await tripSchema.insertMany(trips);
-            }
-
-            // Assign reservations to vehicles
-            // Separate reservations by user type
-            const studentReservations = reservations.filter(r => r.userType === 'student');
-            const teacherReservations = reservations.filter(r => r.userType === 'teacher');
-
-            // Distribute reservations among vehicles
-            let studentIndex = 0;
-            let teacherIndex = 0;
-
-            for (const dispatch of allocatedVehicles.dispatches) {
-				const vehicleId = dispatch.vehicleId;
-
-				const studentsToAssign = studentReservations.slice(
-					studentIndex,
-					Math.min(studentIndex + dispatch.passengers.students, studentReservations.length)
-				);
-				studentIndex += studentsToAssign.length;
-
-				// Assign teachers to this vehicle
-				const teachersToAssign = teacherReservations.slice(
-					teacherIndex,
-					Math.min(teacherIndex + dispatch.passengers.teachers, teacherReservations.length)
-				);
-				teacherIndex += teachersToAssign.length;
-
-                const reservationsToUpdate = [...studentsToAssign, ...teachersToAssign];
-                if (reservationsToUpdate.length > 0) {
-                    await reservationSchema.VehicleReservation.updateMany(
-                        {_id: {$in: reservationsToUpdate.map(r => r._id)}},
-                        {
-                            vehicleId: vehicleId,
-                            scheduleId: schedule._id,
-                            status: 'onboard',
-                            message: `Assigned to ${dispatch.type} departing at ${dispatch.dispatchTime}`
-                        }
-                    );
-                }
-
-            }
-
-            logger.info('Hourly dispatch scheduled successfully!');
+            logger.info(`Hourly dispatch schedule created (ID: ${schedule._id}) and pending lineman approval`);
         } catch (error) {
             logger.error('Error during hourly dispatch:', error);
         }

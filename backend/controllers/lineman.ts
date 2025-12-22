@@ -6,4 +6,16 @@ const login = (req: Request) : Promise<object> => {
 	return api.login(req);
 };
 
-export default { login };
+const getSchedules = (req: Request) : Promise<object> => {
+	return api.getSchedules(req);
+};
+
+const getScheduleById = (req: Request) : Promise<object> => {
+	return api.getScheduleById(req);
+};
+
+const approveSchedule = (req: Request) : Promise<object> => {
+	return api.approveSchedule(req);
+};
+
+export default { login, getSchedules, getScheduleById, approveSchedule };
