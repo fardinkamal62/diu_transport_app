@@ -11,13 +11,13 @@ import {
     DialogTitle,
     FormControlLabel, FormGroup,
     FormLabel,
-    Grid,
     List,
     ListItem,
     ListItemIcon,
     ListItemText,
     Radio,
     RadioGroup,
+    Stack,
     TextField,
     Typography
 } from '@mui/material';
@@ -35,6 +35,25 @@ import BarikoiMap from "@/components/BarikoiMap";
 import { useRouter } from 'next/navigation'; // Import useRouter for navigation
 
 import NavBar from '@/components/Navbar';
+
+interface Vehicle {
+    id: string;
+    name: string;
+    type: string;
+    vehicleRegistrationNumber: string;
+    status: string;
+    capacity: number;
+    reservedSeats: number;
+}
+
+interface Driver {
+    id: string;
+    name: string;
+    phoneNumber: string;
+    password: string;
+    status: string;
+    preferredVehicle: string[];
+}
 
 function Home() {
     const router = useRouter(); // Initialize useRouter
@@ -54,10 +73,10 @@ function Home() {
     const [vehicleReservedSeats, setVehicleReservedSeats] = useState(0);
 
     const [driverStatus, setDriverStatus] = useState('inactive');
-    const [driverPreferredVehicle, setDriverPreferredVehicle] = useState([]);
+    const [driverPreferredVehicle, setDriverPreferredVehicle] = useState<string[]>([]);
 
-    const [vehicles, setVehicles] = useState([]);
-    const [drivers, setDrivers] = useState([]);
+    const [vehicles, setVehicles] = useState<Vehicle[]>([]);
+    const [drivers, setDrivers] = useState<Driver[]>([]);
     const [vehicleStatus, setVehicleStatus] = useState('inactive');
 
     const [isEdit, setIsEdit] = useState(false);
@@ -272,6 +291,7 @@ function Home() {
     const navbarPages = [
         {title: 'Vehicle Reports', url: '/vehicle_report'},
         {title: 'Statistics', url: '/statistics'},
+        {title: 'Settings', url: '/settings'},
     ];
 
     return (
@@ -281,77 +301,73 @@ function Home() {
             <Typography variant="h4" gutterBottom align="center">
                 Welcome, Admin
             </Typography>
-            <Grid container spacing={2} justifyContent="center" className='mt-10'>
-                <Grid item xs={12} md={6}>
-                    <Box className="p-4 border rounded shadow">
-                        <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
-                            <Typography variant="h5" gutterBottom>Vehicles</Typography>
-                            <Button onClick={() => fetchVehicles()}>
-                                <RefreshIcon />
-                            </Button>
-                        </Box>
-                        <List dense={false}>
-                            {
-                                vehicles.map((vehicle: object, index: number) => (
-                                    <ListItem key={index}>
-                                        <ListItemIcon>
-                                            <DirectionsBusIcon
-                                                color={vehicle.status === 'active' ? 'primary' : 'error'}/>
-                                        </ListItemIcon>
-                                        <ListItemText
-                                            primary={vehicle.name}
-                                            secondary={`Capacity: ${vehicle.capacity}, Reserved Seats: ${vehicle.reservedSeats}`}
-                                        />
-                                        <Button onClick={() => handleEdit('vehicle', vehicle)}>
-                                            <EditIcon />
-                                        </Button>
-                                        <Button onClick={() => handleDelete('vehicle', vehicle.id)}>
-                                            <DeleteIcon color='error'/>
-                                        </Button>
-                                    </ListItem>
-                                ))
-                            }
-                        </List>
-                        <Button variant="contained" color="primary" onClick={() => handleClickOpen('vehicle')}>
-                            Add Vehicle
+            <Stack direction={{ xs: 'column', md: 'row' }} spacing={2} justifyContent="center" className='mt-10'>
+                <Box className="p-4 border rounded shadow" sx={{ flex: 1, maxWidth: { md: '50%' } }}>
+                    <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
+                        <Typography variant="h5" gutterBottom>Vehicles</Typography>
+                        <Button onClick={() => fetchVehicles()}>
+                            <RefreshIcon />
                         </Button>
                     </Box>
-                </Grid>
-                <Grid item xs={12} md={6}>
-                    <Box className="p-4 border rounded shadow">
-                        <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
-                            <Typography variant="h5" gutterBottom>Drivers</Typography>
-                            <Button onClick={() => fetchDrivers()}>
-                                <RefreshIcon />
-                            </Button>
-                        </Box>
-                        <List dense={false}>
-                            {
-                                drivers.map((driver: object, index: number) => (
-                                    <ListItem key={index}>
-                                        <ListItemIcon>
-                                            <Man3Icon color={driver.status === 'active' ? 'primary' : 'error'}/>
-                                        </ListItemIcon>
-                                        <ListItemText
-                                            primary={driver.name}
-                                            secondary={`Phone Number: ${driver.phoneNumber}`}
-                                        />
-                                        <Button onClick={() => handleEdit('driver', driver)}>
-                                            <EditIcon />
-                                        </Button>
-                                        <Button onClick={() => handleDelete('driver', driver.id)}>
-                                            <DeleteIcon color='error'/>
-                                        </Button>
-                                    </ListItem>
-                                ))
-                            }
-                        </List>
-                        <Button variant="contained" color="primary" onClick={() => handleClickOpen('driver')}>
-                            Add Driver
+                    <List dense={false}>
+                        {
+                            vehicles.map((vehicle: Vehicle, index: number) => (
+                                <ListItem key={index}>
+                                    <ListItemIcon>
+                                        <DirectionsBusIcon
+                                            color={vehicle.status === 'active' ? 'primary' : 'error'}/>
+                                    </ListItemIcon>
+                                    <ListItemText
+                                        primary={vehicle.name}
+                                        secondary={`Capacity: ${vehicle.capacity}, Reserved Seats: ${vehicle.reservedSeats}`}
+                                    />
+                                    <Button onClick={() => handleEdit('vehicle', vehicle)}>
+                                        <EditIcon />
+                                    </Button>
+                                    <Button onClick={() => handleDelete('vehicle', vehicle.id)}>
+                                        <DeleteIcon color='error'/>
+                                    </Button>
+                                </ListItem>
+                            ))
+                        }
+                    </List>
+                    <Button variant="contained" color="primary" onClick={() => handleClickOpen('vehicle')}>
+                        Add Vehicle
+                    </Button>
+                </Box>
+                <Box className="p-4 border rounded shadow" sx={{ flex: 1, maxWidth: { md: '50%' } }}>
+                    <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
+                        <Typography variant="h5" gutterBottom>Drivers</Typography>
+                        <Button onClick={() => fetchDrivers()}>
+                            <RefreshIcon />
                         </Button>
                     </Box>
-                </Grid>
-            </Grid>
+                    <List dense={false}>
+                        {
+                            drivers.map((driver: Driver, index: number) => (
+                                <ListItem key={index}>
+                                    <ListItemIcon>
+                                        <Man3Icon color={driver.status === 'active' ? 'primary' : 'error'}/>
+                                    </ListItemIcon>
+                                    <ListItemText
+                                        primary={driver.name}
+                                        secondary={`Phone Number: ${driver.phoneNumber}`}
+                                    />
+                                    <Button onClick={() => handleEdit('driver', driver)}>
+                                        <EditIcon />
+                                    </Button>
+                                    <Button onClick={() => handleDelete('driver', driver.id)}>
+                                        <DeleteIcon color='error'/>
+                                    </Button>
+                                </ListItem>
+                            ))
+                        }
+                    </List>
+                    <Button variant="contained" color="primary" onClick={() => handleClickOpen('driver')}>
+                        Add Driver
+                    </Button>
+                </Box>
+            </Stack>
             <Dialog open={open} onClose={handleClose}>
                 <DialogTitle>{popupType === 'vehicle' ? 'Add Vehicle' : 'Add Driver'}</DialogTitle>
                 <DialogContent>

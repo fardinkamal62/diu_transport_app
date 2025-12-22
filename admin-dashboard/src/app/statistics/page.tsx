@@ -5,7 +5,6 @@ import withAdminAuth from "@/components/withAdmin";
 import {
     Box,
     Button,
-    Grid,
     List,
     TextField,
     Typography
@@ -80,7 +79,7 @@ function Home() {
         }
 
         if (selectedStartDate && selectedEndDate) {
-            fetchStats(date);
+            fetchStats();
         }
     };
 
@@ -112,27 +111,27 @@ function Home() {
     const navbarPages = [
         {title: 'Home', url: '/'},
         {title: 'Vehicle Reports', url: '/vehicle_report'},
+        {title: 'Settings', url: '/settings'},
     ];
 
     return (
         <LocalizationProvider dateAdapter={AdapterDateFns}>
             <NavBar pages={navbarPages} title={'Statistics'}/>
             <div className="p-4">
-                <Grid container spacing={2} justifyContent="center" className='mt-10'>
-                    <Grid item xs={12} md={6}>
-                        <Box display="flex" alignItems="center">
+                <Box sx={{ maxWidth: 800, mx: 'auto', mt: 5 }}>
+                    <Box display="flex" alignItems="center">
                             <DatePicker
                                 label="Start Date"
                                 value={selectedStartDate}
                                 onChange={(date) => handleDateChange(date, true)}
-                                renderInput={(params) => <TextField {...params} fullWidth />}
+                                slotProps={{ textField: { fullWidth: true } }}
                             />
                             <Box sx={{ mx: 2 }}>to</Box>
                             <DatePicker
                                 label="End Date"
                                 value={selectedEndDate}
                                 onChange={(date) => handleDateChange(date, false)}
-                                renderInput={(params) => <TextField {...params} fullWidth />}
+                                slotProps={{ textField: { fullWidth: true } }}
                             />
                         </Box>
 
@@ -166,8 +165,7 @@ function Home() {
                                 }
                             </List>
                         </Box>
-                    </Grid>
-                </Grid>
+                </Box>
 
             </div>
         </LocalizationProvider>

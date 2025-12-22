@@ -5,11 +5,11 @@ import withAdminAuth from "@/components/withAdmin";
 import {
     Box,
     Button,
-    Grid,
     List,
     ListItem,
     ListItemIcon,
     ListItemText,
+    Stack,
     TextField,
     Typography
 } from '@mui/material';
@@ -113,98 +113,101 @@ function Home() {
     const navbarPages = [
         {title: 'Home', url: '/'},
         {title: 'Statistics', url: '/statistics'},
+        {title: 'Settings', url: '/settings'},
     ];
 
     return (
         <LocalizationProvider dateAdapter={AdapterDateFns}>
             <NavBar pages={navbarPages} title={'Vehicle Reports'}/>
             <div className="p-4">
-                <Grid container spacing={2} justifyContent="center" className='mt-10'>
-                    <Grid item xs={12} md={6}>
-                        <Box className="p-4 border rounded shadow">
-                            <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
-                                <Typography variant="h5" gutterBottom>Vehicles</Typography>
-                                <Button onClick={() => fetchVehicleReports()}>
-                                    <RefreshIcon/>
-                                </Button>
-                            </Box>
-                            <Box mb={2}>
-                                <DatePicker
-                                    label="Select Date"
-                                    value={selectedDate}
-                                    onChange={handleDateChange}
-                                    renderInput={(params) => <TextField {...params} fullWidth />}
-                                />
-                            </Box>
-                            <List dense={false}>
-                                {
-                                    vehicleReports.map((vehicle: object, index: number) => (
-                                        <ListItem
-                                            key={index}
-                                            button
-                                            onClick={() => handleVehicleClick(vehicle)}
-                                            selected={selectedVehicle?.id === vehicle.id}
-                                        >
-                                            <ListItemIcon>
-                                                <DirectionsBusIcon
-                                                    color={'primary'}/>
-                                            </ListItemIcon>
-                                            <ListItemText
-                                                primary={vehicle.vehicle.name}
-                                                secondary={`Registration Number: ${vehicle.vehicle.registrationNumber}`}
-                                            />
-                                        </ListItem>
-                                    ))
-                                }
-                            </List>
+                <Stack direction={{ xs: 'column', md: 'row' }} spacing={2} justifyContent="center" className='mt-10'>
+                    <Box className="p-4 border rounded shadow" sx={{ flex: 1, maxWidth: { md: '50%' } }}>
+                        <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
+                            <Typography variant="h5" gutterBottom>Vehicles</Typography>
+                            <Button onClick={() => fetchVehicleReports()}>
+                                <RefreshIcon/>
+                            </Button>
                         </Box>
-                    </Grid>
-                    <Grid item xs={12} md={6}>
-                        <Box className="p-4 border rounded shadow">
-                            {selectedVehicle ? (
-                                <>
-                                    <Typography variant="h5" gutterBottom>Vehicle Details</Typography>
-                                    <Typography variant="body1"><strong>Name:</strong> {selectedVehicle.vehicle.name}
-                                    </Typography>
-                                    <Typography
-                                        variant="body1"><strong>Registration:</strong> {selectedVehicle.vehicle.registrationNumber}
-                                    </Typography>
-                                    <Typography variant="body1"><strong>Driver
-                                        Name:</strong> {selectedVehicle.driver?.name || 'N/A'}</Typography>
-                                    <Typography variant="body1"><strong>Phone
-                                        Number:</strong> {selectedVehicle.driver?.phoneNumber || 'N/A'}</Typography>
-                                    <br/>
-                                    <Typography variant="h6" className="mt-4">Report</Typography>
-
-                                    <List dense={false}>
-
-                                        <ListItem>
-                                            <ListItemText
-                                                primary={`Damage: ${selectedVehicle.damage}`}
-                                            />
-                                        </ListItem>
-
-                                        <ListItem>
-                                            <ListItemText
-                                                primary={`Refueling: ${selectedVehicle.refueling} times`}
-                                            />
-                                        </ListItem>
-
-                                        <ListItem>
-                                            <ListItemText
-                                                primary={`Servicing: ${selectedVehicle.servicing}`}
-                                            />
-                                        </ListItem>
-
-
-                                    </List>
-                                </>
-                            ) : (
-                                <Typography variant="body1">Select a vehicle to view details and reports.</Typography>
-                            )}
+                        <Box mb={2}>
+                            <DatePicker
+                                label="Select Date"
+                                value={selectedDate}
+                                onChange={handleDateChange}
+                                slots={{ textField: TextField }}
+                                slotProps={{ textField: { fullWidth: true } }}
+                            />
                         </Box>
-                    </Grid>
-                </Grid>
+                        <List dense={false}>
+                            {
+                                vehicleReports.map((vehicle: any, index: number) => (
+                                    <ListItem
+                                        key={index}
+                                        component="button"
+                                        onClick={() => handleVehicleClick(vehicle)}
+                                        sx={{ 
+                                            textAlign: 'left', 
+                                            width: '100%',
+                                            backgroundColor: selectedVehicle?.id === vehicle.id ? '#e3f2fd' : 'transparent',
+                                            '&:hover': { backgroundColor: '#f5f5f5' }
+                                        }}
+                                    >
+                                        <ListItemIcon>
+                                            <DirectionsBusIcon
+                                                color={'primary'}/>
+                                        </ListItemIcon>
+                                        <ListItemText
+                                            primary={vehicle.vehicle.name}
+                                            secondary={`Registration Number: ${vehicle.vehicle.registrationNumber}`}
+                                        />
+                                    </ListItem>
+                                ))
+                            }
+                        </List>
+                    </Box>
+                    <Box className="p-4 border rounded shadow" sx={{ flex: 1, maxWidth: { md: '50%' } }}>
+                        {selectedVehicle ? (
+                            <>
+                                <Typography variant="h5" gutterBottom>Vehicle Details</Typography>
+                                <Typography variant="body1"><strong>Name:</strong> {selectedVehicle.vehicle.name}
+                                </Typography>
+                                <Typography
+                                    variant="body1"><strong>Registration:</strong> {selectedVehicle.vehicle.registrationNumber}
+                                </Typography>
+                                <Typography variant="body1"><strong>Driver
+                                    Name:</strong> {selectedVehicle.driver?.name || 'N/A'}</Typography>
+                                <Typography variant="body1"><strong>Phone
+                                    Number:</strong> {selectedVehicle.driver?.phoneNumber || 'N/A'}</Typography>
+                                <br/>
+                                <Typography variant="h6" className="mt-4">Report</Typography>
+
+                                <List dense={false}>
+
+                                    <ListItem>
+                                        <ListItemText
+                                            primary={`Damage: ${selectedVehicle.damage}`}
+                                        />
+                                    </ListItem>
+
+                                    <ListItem>
+                                        <ListItemText
+                                            primary={`Refueling: ${selectedVehicle.refueling} times`}
+                                        />
+                                    </ListItem>
+
+                                    <ListItem>
+                                        <ListItemText
+                                            primary={`Servicing: ${selectedVehicle.servicing}`}
+                                        />
+                                    </ListItem>
+
+
+                                </List>
+                            </>
+                        ) : (
+                            <Typography variant="body1">Select a vehicle to view details and reports.</Typography>
+                        )}
+                    </Box>
+                </Stack>
 
             </div>
         </LocalizationProvider>
