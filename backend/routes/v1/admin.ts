@@ -327,6 +327,82 @@ router.get('/statistics', async (req: express.Request, res: express.Response) =>
 	}
 });
 
+/**
+ * @openapi
+ * /admin/system-settings:
+ *   get:
+ *     summary: Get system settings
+ *     tags:
+ *       - Admin
+ *     responses:
+ *       200:
+ *         description: System settings retrieved successfully
+ *       400:
+ *         description: Failed to retrieve system settings
+ */
+router.get('/system-settings', async (req: express.Request, res: express.Response) => {
+	try {
+		const result = await controllers.getSystemSettings(req);
+		res.status(200).json({ success: true, data: result });
+	} catch (error) {
+		res.status(400).json({ success: false, error: (error as Error).message || 'Failed to retrieve system settings' });
+	}
+});
+
+/**
+ * @openapi
+ * /admin/system-settings:
+ *   put:
+ *     summary: Update system settings
+ *     tags:
+ *       - Admin
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               reservationEnabled:
+ *                 type: boolean
+ *                 description: Whether the reservation system is enabled
+ *               maxAdvanceBookingDays:
+ *                 type: number
+ *                 description: Maximum days in advance users can book
+ *               reservationWindows:
+ *                 type: object
+ *                 description: Day-specific reservation windows (0=Sun, 6=Sat)
+ *                 additionalProperties:
+ *                   type: object
+ *                   properties:
+ *                     enabled:
+ *                       type: boolean
+ *                     windows:
+ *                       type: array
+ *                       items:
+ *                         type: object
+ *                         properties:
+ *                           start:
+ *                             type: string
+ *                             example: "09:00"
+ *                           end:
+ *                             type: string
+ *                             example: "14:00"
+ *     responses:
+ *       200:
+ *         description: System settings updated successfully
+ *       400:
+ *         description: Failed to update system settings
+ */
+router.put('/system-settings', async (req: express.Request, res: express.Response) => {
+	try {
+		const result = await controllers.updateSystemSettings(req);
+		res.status(200).json({ success: true, data: result });
+	} catch (error) {
+		res.status(400).json({ success: false, error: (error as Error).message || 'Failed to update system settings' });
+	}
+});
+
 const adminRoutes = {
 	router,
 };

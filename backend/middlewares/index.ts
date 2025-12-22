@@ -8,6 +8,7 @@ import https from 'https';
 
 import redisDatabase from '../db/redis_db';
 import logger from '../utils/logger';
+import { validateReservationTime } from '../utils/reservationValidator';
 
 
 /**
@@ -128,11 +129,41 @@ const isAuthenticated = (req: Request, res: Response, next: NextFunction): void 
 	}
 };
 
+/**
+ * Middleware to validate reservation time against system settings
+ */
+const validateReservationTimeWindow = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+	try {
+		const timeStr = req.body.time as string;
+		
+		if (!timeStr) {
+			res.status(400).json({
+				success: false,
+				error: 'Reservation time is required'
+			});
+			return;
+		}
+
+		const reservationTime = new Date(timeStr);
+		
+		// Validate against system settings (day/time windows)
+		await validateReservationTime(reservationTime);
+		
+		next();
+	} catch (error) {
+		res.status(400).json({
+			success: false,
+			error: (error as Error).message || 'Invalid reservation time'
+		});
+	}
+};
+
 const middlewares = {
 	validateRequest,
 	adminAuth,
 	userAuth,
-	isAuthenticated
+	isAuthenticated,
+	validateReservationTimeWindow
 };
 
 export default middlewares;

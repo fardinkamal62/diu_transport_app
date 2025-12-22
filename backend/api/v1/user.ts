@@ -122,5 +122,45 @@ const getReservations = async(req: express.Request): Promise<object> => {
 	}
 };
 
-const userApi = { addReservation, getReservations }
+const getReservationSettings = async(req: express.Request): Promise<object> => {
+	try {
+		const settingsSchema = await import('../../schemas/settings');
+		const { getReservationWindowMessage } = await import('../../utils/reservationValidator');
+		
+		const settings = await settingsSchema.default.getSettings();
+		const now = new Date();
+		const currentDayOfWeek = now.getDay();
+		
+		// Get current day settings
+		const daySettings = settings.reservationWindows.get(currentDayOfWeek.toString());
+		const message = await getReservationWindowMessage();
+		
+		// Build response with all weekly settings
+		const weeklyWindows: any = {};
+		const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+		
+		for (let i = 0; i < 7; i++) {
+			const daySetting = settings.reservationWindows.get(i.toString());
+			weeklyWindows[dayNames[i]] = {
+				enabled: daySetting?.enabled || false,
+				windows: daySetting?.windows || []
+			};
+		}
+		
+		return {
+			reservationEnabled: settings.reservationEnabled,
+			maxAdvanceBookingDays: settings.maxAdvanceBookingDays,
+			currentDay: dayNames[currentDayOfWeek],
+			currentDayEnabled: daySettings?.enabled || false,
+			currentDayWindows: daySettings?.windows || [],
+			message,
+			weeklyWindows
+		};
+	} catch (e) {
+		logger.error('Failed to get reservation settings', e);
+		throw new InternalServerError('Failed to get reservation settings');
+	}
+};
+
+const userApi = { addReservation, getReservations, getReservationSettings }
 export default userApi;

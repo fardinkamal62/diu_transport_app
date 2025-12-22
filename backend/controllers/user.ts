@@ -63,4 +63,8 @@ const getReservations = async (req: Request): Promise<object> => {
 	return await api.getReservations(req);
 };
 
-export default { login, addReservation, getReservations };
+const getReservationSettings = async (req: Request): Promise<object> => {
+	return await api.getReservationSettings(req);
+};
+
+export default { login, addReservation, getReservations, getReservationSettings };

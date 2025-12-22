@@ -34,6 +34,14 @@ const statistics = (req: Request) : Promise<object> => {
 	return api.statistics(req);
 };
 
+const getSystemSettings = (req: Request) : Promise<object> => {
+	return api.getSystemSettings(req);
+};
+
+const updateSystemSettings = (req: Request) : Promise<object> => {
+	return api.updateSystemSettings(req);
+};
+
 const controllers = {
 	login,
 	addVehicle,
@@ -42,7 +50,9 @@ const controllers = {
 	updateDriverData,
 	deleteVehicle,
 	deleteDriver,
-	statistics
+	statistics,
+	getSystemSettings,
+	updateSystemSettings,
 };
 
 export default controllers;

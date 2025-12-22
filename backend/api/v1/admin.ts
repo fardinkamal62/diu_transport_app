@@ -6,6 +6,7 @@ import utils from '../../utils';
 import userSchema from '../../schemas/user';
 import vehicleSchema from '../../schemas/vehicle';
 import tripSchema from '../../schemas/trip';
+import settingsSchema from '../../schemas/settings';
 
 import logger from '../../utils/logger';
 
@@ -342,6 +343,50 @@ const statistics = async (req: express.Request): Promise<object> => {
 	}
 };
 
+const getSystemSettings = async (req: express.Request): Promise<object> => {
+	try {
+		const settings = await settingsSchema.getSettings();
+		return settings;
+	} catch (e) {
+		logger.error('Failed to get system settings', e);
+		throw new InternalServerError('Failed to get system settings');
+	}
+};
+
+const updateSystemSettings = async (req: express.Request): Promise<object> => {
+	try {
+		const { reservationEnabled, maxAdvanceBookingDays, reservationWindows } = req.body;
+		const adminId = req.body.userId; // From auth middleware
+
+		const updates: any = {};
+		
+		if (reservationEnabled !== undefined) {
+			updates.reservationEnabled = reservationEnabled;
+		}
+		
+		if (maxAdvanceBookingDays !== undefined) {
+			if (maxAdvanceBookingDays < 1 || maxAdvanceBookingDays > 30) {
+				throw new BadRequest('Max advance booking days must be between 1 and 30');
+			}
+			updates.maxAdvanceBookingDays = maxAdvanceBookingDays;
+		}
+		
+		if (reservationWindows !== undefined) {
+			// Validate reservation windows format
+			if (typeof reservationWindows !== 'object') {
+				throw new BadRequest('Reservation windows must be an object');
+			}
+			updates.reservationWindows = reservationWindows;
+		}
+
+		const settings = await settingsSchema.updateSettings(updates, adminId);
+		return settings;
+	} catch (e) {
+		logger.error('Failed to update system settings', e);
+		throw e;
+	}
+};
+
 const adminApi = {
 	login,
 	addVehicle,
@@ -350,7 +395,9 @@ const adminApi = {
 	updateDriverData,
 	deleteVehicle,
 	deleteDriver,
-	statistics
+	statistics,
+	getSystemSettings,
+	updateSystemSettings,
 };
 
 export default adminApi;

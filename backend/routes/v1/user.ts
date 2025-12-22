@@ -200,7 +200,10 @@ router.use(middlewares.userAuth);
  *                 error:
  *                   type: string
  */
-router.post('/reservation', middlewares.validateRequest(validators.addReservationSchema), async (req: express.Request, res: express.Response) => {
+router.post('/reservation', 
+	middlewares.validateRequest(validators.addReservationSchema),
+	middlewares.validateReservationTimeWindow,
+	async (req: express.Request, res: express.Response) => {
 	try {
 		const result = await controllers.addReservation(req);
 		res.status(200).json({ success: true, data: result });
@@ -288,6 +291,59 @@ router.get('/reservation', async (req: express.Request, res: express.Response) =
 		res.status(400).json({ success: false, error: (error as Error).message || 'Failed to add reservation' });
 	}
 })
+
+
+/** @openapi
+ * /user/reservation-settings:
+ *   get:
+ *     summary: Get current reservation time window settings
+ *     tags:
+ *       - Reservation
+ *     responses:
+ *       200:
+ *         description: Reservation settings retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     reservationEnabled:
+ *                       type: boolean
+ *                     maxAdvanceBookingDays:
+ *                       type: number
+ *                     currentDay:
+ *                       type: string
+ *                     currentDayEnabled:
+ *                       type: boolean
+ *                     currentDayWindows:
+ *                       type: array
+ *                       items:
+ *                         type: object
+ *                         properties:
+ *                           start:
+ *                             type: string
+ *                           end:
+ *                             type: string
+ *                     message:
+ *                       type: string
+ *                     weeklyWindows:
+ *                       type: object
+ *       400:
+ *         description: Failed to retrieve settings
+ */
+router.get('/reservation-settings', async (req: express.Request, res: express.Response) => {
+	try {
+		const result = await controllers.getReservationSettings(req);
+		res.status(200).json({ success: true, data: result });
+	} catch (error) {
+		res.status(400).json({ success: false, error: (error as Error).message || 'Failed to get reservation settings' });
+	}
+});
 
 
 const userRoutes = {
